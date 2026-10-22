@@ -53,7 +53,7 @@ function sprFrame(S,u){const M=S.meta,t=u.anim||0;
   if(u.hitFl>.05&&!u.moving)return M.hurt[0];
   if(u.moving)return u.fly?M.fly[0]:M.run[Math.floor(t*10)%M.run.length];
   return M.idle[Math.floor(t*6)%M.idle.length];}
-{const _du=drawUnitBody;drawUnitBody=function(c,u,x,y,ghost){let S=u.ff3?SPR.freezer3:u.ff2?SPR.freezer2:SPR[u.key];if(S&&u.ui>0&&SPR[u.key+'_ui']&&SPR[u.key+'_ui'].img.complete)S=SPR[u.key+'_ui'];else if(S&&u.ssj&&!u.form){const V=SPR[u.key+(u.fblue||sides[u.side]&&sides[u.side].ups.includes('divine')?'_blue':'_ssj')];if(V&&V.img.complete&&V.img.naturalWidth)S=V;}
+{const _du=drawUnitBody;drawUnitBody=function(c,u,x,y,ghost){let S=u.ff3?SPR.freezer3:u.ff2?SPR.freezer2:SPR[u.key];if(S&&u.ui>0&&SPR[u.key+'_ui']&&SPR[u.key+'_ui'].img.complete)S=SPR[u.key+'_ui'];else if(S&&u.ssj&&!u.form){const V=SPR[u.key+(u.sblue?'_blue':'_ssj')];if(V&&V.img.complete&&V.img.naturalWidth)S=V;}
   if(!S||u.form||!S.img.complete||!S.img.naturalWidth||(u.D.fac!==(S.fac||'dbz')&&!S.neu))return _du(c,u,x,y,ghost);
   const lift=u.fly?(u.z+Math.sin(u.anim*3)*2):(u.z||0),ssj=!S.neu&&!!(u.ssj||u.buff>0),F=sprFrame(S,u),[fx,fy,w,h,ax,ay]=F,sc=S.sc,col=FAC[u.fac]&&FAC[u.fac].col||'#fff';
   if(!ghost&&!u.hid){const p=.5+.5*Math.sin((u.anim||0)*3);c.strokeStyle=col;c.globalAlpha=.35+.25*p;c.lineWidth=1.4;c.beginPath();c.ellipse(x,y+1,u.r+7,(u.r+7)*.42,0,0,PI2);c.stroke();c.globalAlpha=1;}
@@ -87,7 +87,3 @@ function sprFrame(S,u){const M=S.meta,t=u.anim||0;
   if(u.key==='freezer'&&u.ff2&&!u.ff3&&!u.dead&&u.hp<u.max*.25){u.ff3=true;u.hp=Math.min(u.max,u.hp+u.max*.15);u.buff=Math.max(u.buff||0,25);
     try{transformFx(u);}catch(_){}fxRing(u.x,u.y,'#ffd23a',110);part('flash',u.x,u.y-20,0,0,.6,150,'#ffd23a');shake(8);
     if(plSees(u)){msg('Frieza devient GOLDEN FRIEZA !','#ffd23a');try{cutin(u,'GOLDEN FRIEZA !!');}catch(_){}}}};}
-// fusions start in base form, go Super Saiyan below 60% (saiyan rule) and Super Saiyan Blue below 30%
-{const _uu=updUnit;updUnit=function(u,dt){_uu(u,dt);
-  if((u.key==='vegito'||u.key==='gogeta')&&u.ssj&&!u.fblue&&!u.dead&&u.hp<u.max*.3){u.fblue=true;u.buff=Math.max(u.buff||0,15);
-    fxRing(u.x,u.y,'#4ad8ff',110);part('flash',u.x,u.y-20,0,0,.6,150,'#4ad8ff');shake(8);if(plSees(u)){try{cutin(u,'SUPER SAIYAN BLUE !!');}catch(_){}}}};}

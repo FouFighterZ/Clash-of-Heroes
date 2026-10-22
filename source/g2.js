@@ -227,7 +227,7 @@ function updUnit(u,dt){updMotion(u,dt);updForms(u,dt);updPassives(u,dt);updPassi
     else if(s.fac==='mha'&&!(u.puT>0)){u.puT=45;u.buff=8;fxRing(u.x,u.y,'#ffd23a',70);if(plSees(u))cutin(u,'PLUS ULTRA !!');sfx('transform',u.x,u.y);}}
   if(u.puT>0)u.puT-=dt;u.anim+=dt;if(u.atk>0)u.atk-=dt;if(u.hitFl>0)u.hitFl-=dt;if(u.cd>0)u.cd-=dt;if(u.abCd>0)u.abCd-=dt;if(u.buff>0)u.buff-=dt;
   if(D.regen&&u.hp<u.max)u.hp=Math.min(u.max,u.hp+D.regen*dt);
-  if(D.saiyan&&!u.ssj&&u.hp<u.max*.6){u.ssj=true;transformFx(u);}
+  if(D.saiyan&&u.key==='broly'&&!u.ssj&&u.hp<u.max*.6){u.ssj=true;transformFx(u);}
   if(u.kx||u.ky){moveSafe(u,u.kx*dt,u.ky*dt);const f=Math.pow(.015,dt);u.kx*=f;u.ky*=f;if(Math.abs(u.kx)+Math.abs(u.ky)<8){u.kx=u.ky=0;}
     if(R()<.5&&!u.fly)part('dust',u.x,u.y,rr(-10,10),rr(-10,10),.6,rr(5,9));}
   if(u.lift>0){u.lift-=dt;const base=u.fly?16:0;u.z=lerp(u.z,base+38,Math.min(1,dt*3));u.moving=false;
@@ -307,7 +307,7 @@ function updFog(){vis.fill(0);
   for(const e of ents)if(e.isB&&!e.dead&&!ally(e.side,PL)&&!e.seen){for(let y=e.ty;y<e.ty+e.h&&!e.seen;y++)for(let x=e.tx;x<e.tx+e.w;x++)if(vis[ti(x,y)]){e.seen=true;break;}}}
 
 // ===== AI =====
-const AI_ORDER=['power','refinery','barracks','power','factory','refinery','turret','power','temple','turret','lab','power','radar','barracks','def2','power','turret','factory','def2','power','temple','market','hospital','training','power','temple2','unique','market','power'];
+const AI_ORDER=['power','refinery','barracks','power','factory','refinery','turret','power','temple','turret','lab','power','temple2','radar','barracks','def2','power','turret','factory','training','def2','power','temple','market','hospital','power','unique','market','power'];
 function aiInit(si,d){return{si,t:0,wave:d.wave0,attacking:false,d,lastWave:0,front:null};}
 function findSpot(si,key){const h2=myB(si,'hq2');const hq=(h2.length&&R()<.45&&key!=='turret'?pick(h2):null)||myB(si,'hq')[0]||myB(si)[0];if(!hq)return null;const D=BDEF[key],cx=hq.tx+1,cy=hq.ty+1;
   const enemy=enemyBase(si),fx=cx+(enemy.x-cx)*.12,fy=cy+(enemy.y-cy)*.12;let best=null,bs=1e9;
@@ -323,11 +323,10 @@ function aiUpdate(ai,dt){ai.t-=dt;if(ai.t>0)return;ai.t=ai.d.think||.5;const si=
       if(key&&reqOk(si,BDEF[key].req)&&s.credits>=BDEF[key].cost)startBuild(si,key);}
     else if(s.prodB.ready){const sp=findSpot(si,s.prodB.key);if(sp)placeBuilding(si,s.prodB.key,sp.x,sp.y);else cancelBuild(si);}}
   const units=ents.filter(e=>e.isU&&!e.dead&&e.side===si),harvs=units.filter(u=>u.D.harv),army=units.filter(u=>!u.D.harv);
-  const nref=myB(si,'refinery').length,reserve=s.prodB?0:300;
+  const nref=myB(si,'refinery').length,reserve=(s.prodB?0:Math.max(300,Math.min(3000,aiNextCost(si)+100)))+aiHeroReserve(si);
   if(has(si,'factory')&&harvs.length<Math.min(nref*2,5)&&!s.q.factory.some(i=>i.key==='harv'))queueUnit(si,'harv');
   if(has(si,'barracks')&&s.q.barracks.length<2&&s.credits>reserve+100)queueUnit(si,s.credits>700?pick(['inf2','inf2','inf3','inf4']):pick(['inf1','inf1','inf3']));
   if(has(si,'factory')&&s.q.factory.length<1&&s.credits>reserve+800)queueUnit(si,has(si,'factory+')&&R()<.35&&s.credits>reserve+1400?'mech':'tank');
-  if(has(si,'temple')&&!s.q.temple.length){const hs=FAC[fac].heroes.filter(k=>!heroBusy(si,k));if(hs.length){const k=pick(hs);if(s.credits>UDEF[fac][k].cost+200)queueUnit(si,k);}}
   if(has(si,'barracks')&&army.length>6&&R()<.15&&s.credits>reserve+400&&army.filter(u=>u.D.heal).length<army.length/6)queueUnit(si,'healer');
   if(has(si,'factory')&&R()<.08&&s.credits>reserve+700&&army.filter(u=>u.key==='jet').length<3)queueUnit(si,'jet');
   for(const b of bs)if(b.hp<b.max*.7&&s.credits>500&&b.rise>=1)b.repairing=true;
@@ -336,11 +335,10 @@ function aiUpdate(ai,dt){ai.t-=dt;if(ai.t>0)return;ai.t=ai.d.think||.5;const si=
   if(s.sp>=SUPER[fac].charge&&has(si,'temple+')&&!(ai.d.noSuper&&gtime<900)){let best=null,bn=0;for(const e of ents){if(e.dead||ally(e.side,si))continue;let n=0;
       for(const f of ents)if(!f.dead&&foe(f.side,si)&&hyp(f.x-e.x,f.y-e.y)<SUPER[fac].rad)n+=f.isB?2.5:f.D.hero?2:1;if(n>bn){bn=n;best=e;}}
     if(best&&bn>=4)launchSuper(si,best.x+rr(-20,20),best.y+rr(-20,20));}
-  ai.dbT=(ai.dbT||0)-.5;if(ai.dbT<=0&&(dballs.length||pickups.length)&&gtime>75){ai.dbT=6;const free=[...dballs.filter(b=>!b.carrier),...pickups];
+  ai.dbT=(ai.dbT||0)-.5;if(ai.dbT<=0&&(dballs.length||pickups.length)&&gtime>75){ai.dbT=12;const free=[...dballs.filter(b=>!b.carrier),...pickups].filter(b=>aiKnows(si,b));if(army.some(u=>u.hunt&&!u.hunt.carrier&&(dballs.includes(u.hunt)||pickups.includes(u.hunt))&&!u.dead))free.length=0;
     for(const b of free){if(dballs.some(o=>o!==b&&o.hunter&&o.hunter.side===si&&!o.hunter.dead&&o.hunter.hunt===b))continue;
       let hu=null,hd=1e9;for(const u of army){if(u.D.heal||u.hunt&&!u.hunt.carrier&&(dballs.includes(u.hunt)||pickups.includes(u.hunt))||u.order&&u.order.wave)continue;const d=hyp(u.x-b.x,u.y-b.y)/(u.D.speed||60);if(d<hd){hd=d;hu=u;}}
-      if(hu&&hd<90){hu.hunt=b;orderMove(hu,b.x,b.y,false);}}}
-  if(has(si,'temple2')&&!s.q.temple2.length){const hs=FAC[fac].legends.filter(k=>!heroBusy(si,k));if(hs.length){const k=pick(hs);if(s.credits>UDEF[fac][k].cost+200)queueUnit(si,k);}}
+      if(hu&&hd<90){hu.hunt=b;orderMove(hu,b.x,b.y,false);break;}}}
   aiFusion(si);
   // defend
   let threat=null;for(const e of ents){if(e.dead||ally(e.side,si)||!e.isU)continue;for(const b of bs){if(hyp(e.x-b.x,e.y-b.y)<11*TILE){threat=e;break;}}if(threat)break;}

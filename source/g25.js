@@ -56,7 +56,7 @@ function updUpgrades(dt){shieldT-=dt;if(shieldT<=0){shieldT=.5;shieldList=ents.f
       for(const e of ents)if(!e.dead&&e.isU&&e.side===si&&e.key===k){const nm=Math.round(e.max*1.3);e.hp+=nm-e.max;e.max=nm;fxRing(e.x,e.y,A.col,70);part('flash',e.x,e.y-20,0,0,.5,90,A.col);if(plSees(e))cutin(e,A.name.toUpperCase()+' !');}
       if(si===PL){banner(A.name.toUpperCase(),A.col);msg(UDEF[s.fac][k].name+' est éveillé : '+A.name+' !',A.col);announce(A.name,true);}}}}
   for(const ai of G.ai){const si=ai.si,s=sides[si];if(!s)continue;ai.upT=(ai.upT||0)-dt;if(ai.upT>0)continue;ai.upT=6;
-    if(s.credits>2400){const c=ents.filter(b=>b.isB&&!b.dead&&b.side===si&&b.rise>=1&&!b.upg&&lvlOf(b)<2&&['power','refinery','barracks','factory','turret','def2','temple','lab','temple2','hq'].includes(b.key));const pri=c.find(b=>b.key==='temple')||c.find(b=>b.key==='barracks')||c.find(b=>b.key==='factory');if(c.length)startBUp(si,pri&&R()<.7?pri:pick(c));}
+    if(s.credits>2400){const c=ents.filter(b=>b.isB&&!b.dead&&b.side===si&&b.rise>=1&&!b.upg&&lvlOf(b)<2&&['power','refinery','barracks','factory','turret','def2','temple','lab','temple2','hq'].includes(b.key));const pri=c.find(b=>b.key==='temple')||c.find(b=>b.key==='temple2')||c.find(b=>b.key==='barracks')||c.find(b=>b.key==='factory');if(c.length)startBUp(si,pri&&R()<.7?pri:pick(c));}
     if(has(si,'armory')&&!s.tres&&s.credits>2000){const k=pick(['inf1','inf2','inf3','inf4','tank']);startTUp(si,k);}
     if(has(si,'shrine')&&!s.ares&&s.credits>3000){const ks=Object.keys(AWK[s.fac]||{}).filter(k=>!(s.awk&&s.awk[k]));if(ks.length)startAwk(si,pick(ks));}}}
 {const _uf=updFusion;updFusion=function(dt){_uf(dt);updUpgrades(dt);};}

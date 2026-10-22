@@ -200,7 +200,7 @@ function netCreate(id,f){let e;if(f.isB){if(!BDEF[f.key]||!sides[f.side])return 
 function guestEvent(e){switch(e.t){
   case'start':break;
   case'sup':{const s=sides[e.si];if(s){s.sp=SUPER[s.fac].charge;launchSuper(e.si,e.x,e.y);}break;}
-  case'ev':{const ev=EVENTS.find(v=>v.id===e.id);if(!ev)break;if(e.x!=null){G.alertPos={x:e.x,y:e.y};G.pings.push({x:e.x,y:e.y,t:4});}banner(ev.name.toUpperCase(),ev.col);msg('Événement : '+ev.desc,ev.col);sfx('event');announce(ev.name);break;}
+  case'ev':{const ev=EVENTS.find(v=>v.id===e.id);if(!ev)break;if(e.x!=null){G.alertPos={x:e.x,y:e.y};G.pings.push({x:e.x,y:e.y,t:4});}banner(ev.name.toUpperCase(),ev.col);msg('Événement : '+ev.desc,ev.col);sfx('event');announce(ev.name);try{evCard(ev);}catch(_){}break;}
   case'shenron':{const si=e.si;G.shenron={t:0,dur:6,si};shake(8);sfx('shenron');setMusic('shenron');setTimeout(()=>{if(G.state==='play')setMusic('battle');},9000);banner('SHENRON APPARAÎT !','#7dff9a');announce('Shenron a été invoqué');
     msg(si===PL?'Shenron apparaît ! Fais un vœu.':'L’adversaire a invoqué Shenron !',si===PL?'#7dff9a':'#ff4d5e');if(si===PL){G.wishPending=true;setTimeout(()=>openWish(),1400);}break;}
   case'msg':if(e.si===PL)msg(e.text,e.col);break;}}
