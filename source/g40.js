@@ -9,8 +9,9 @@ const TRN={dbz:{n:'Nuage Magique (Kinto-un)',fly:true,cap:2,cost:500,hp:420,sp:1
 for(const f in TRN){const T=TRN[f];if(!UDEF[f])continue;UDEF[f].trans={key:'trans',fac:f,name:T.n,cost:T.cost,time:12,hp:T.hp,speed:T.sp,size:T.fly?12:14,sight:7,sightPx:7*TILE,at:'factory',req:['factory'],
   veh:true,fly:!!T.fly,trans:T.cap,tlook:T.look,rof:1,desc:T.d+' Sélectionne des personnages puis clic droit sur le transport pour les faire monter ; « Débarquer » pour les faire descendre.'};}
 {const _ti=tabItems;tabItems=function(t){const L=_ti(t);if(t==='v'&&UDEF[sides[PL].fac].trans)L.push({isB:false,key:'trans'});return L;};}
+const capOf=t=>t?(t.D&&t.D.trans)||(t.isB&&t.key==='hq'&&t.fac==='sds'&&t.rise>=1?6:0):0;
 const canRide=u=>u&&u.isU&&!u.dead&&!u.D.veh&&!u.D.harv&&!u.form;
-function tBoard(u,t){t.cargo=t.cargo||[];u.rideT=null;if(t.dead||t.cargo.length>=t.D.trans){if(u.side===PL)feedPush(t.D.name+' est plein ('+t.D.trans+' places)','#ffc53d');return;}
+function tBoard(u,t){t.cargo=t.cargo||[];u.rideT=null;const cap=capOf(t),nm=t.isB?BDEF.hq.names.sds:t.D.name;if(t.dead||t.cargo.length>=cap){if(u.side===PL)feedPush(nm+' est plein ('+cap+' places)','#ffc53d');return;}
   t.cargo.push(u);ents=ents.filter(e=>e!==u);sel=sel.filter(e=>e!==u);for(const d of dballs)if(d.carrier===u)d.carrier=t;u.order=null;u.target=null;u.path=null;u.moving=false;
   if(u.side===PL)sfx('click');}
 function tUnload(t,hurt){if(!t.cargo||!t.cargo.length)return 0;const L=t.cargo.splice(0);let k=0;
@@ -20,18 +21,18 @@ function tUnload(t,hurt){if(!t.cargo||!t.cargo.length)return 0;const L=t.cargo.s
   for(const d of dballs)if(d.carrier===t)d.carrier=L[0]||null;return L.length;}
 function tOrder(units,t){for(const u of units){if(!canRide(u))continue;orderMove(u,t.x,t.y,false);u.rideT=t.id;u.rideO=u.order;}}
 {const _uu=updUnit;updUnit=function(u,dt){_uu(u,dt);if(u.rideT&&!u.dead){const t=ents.find(e=>e.id===u.rideT&&!e.dead);if(!t||u.order!==u.rideO){u.rideT=null;return;}
-  if(hyp(u.x-t.x,u.y-t.y)<t.r+u.r+12)tBoard(u,t);else if(!u.moving&&hyp(u.order&&u.order.x-t.x||0,u.order&&u.order.y-t.y||0)>30){orderMove(u,t.x,t.y,false);u.rideO=u.order;}}};}
+  if(hyp(u.x-t.x,u.y-t.y)<(t.isB?t.w*TILE*.8:t.r+u.r+12))tBoard(u,t);else if(!u.moving&&hyp(u.order&&u.order.x-t.x||0,u.order&&u.order.y-t.y||0)>30){orderMove(u,t.x,t.y,false);u.rideO=u.order;}}};}
 {const _k=kill;kill=function(t,srcSide,src){const was=!t.dead;_k(t,srcSide,src);if(was&&t.dead&&t.cargo&&t.cargo.length){const n=tUnload(t,true);if(t.side===PL&&n)feedPush(t.D.name+' détruit : les passagers sautent !','#ff4d5e');}};}
-{const _hb=heroBusy;heroBusy=function(si,key){if(_hb(si,key))return true;return ents.some(e=>e.isU&&!e.dead&&e.side===si&&e.cargo&&e.cargo.some(u=>u.key===key));};}
+{const _hb=heroBusy;heroBusy=function(si,key){if(_hb(si,key))return true;return ents.some(e=>!e.dead&&e.side===si&&e.cargo&&e.cargo.some(u=>u.key===key));};}
 {const _rc=rightCommand;rightCommand=function(wx,wy){const t=pickAt(wx,wy),units=mySel().filter(canRide);
-  if(t&&t.isU&&t.side===PL&&t.D.trans&&units.length&&!units.includes(t)){if(NET.client&&!NET.applying)NET.cmd({c:'tb',u:units.map(u=>u.id),t:t.id});else tOrder(units,t);G.clicks.push({x:t.x,y:t.y,t:.6,col:'#ffd23a'});sfx('click');return;}
+  if(t&&t.side===PL&&capOf(t)&&units.length&&!units.includes(t)){if(NET.client&&!NET.applying)NET.cmd({c:'tb',u:units.map(u=>u.id),t:t.id});else tOrder(units,t);G.clicks.push({x:t.x,y:t.y,t:.6,col:'#ffd23a'});sfx('click');return;}
   _rc(wx,wy);};}
-function doUnload(L){for(const t of L)if(t.D.trans&&t.cargo&&t.cargo.length){if(NET.client&&!NET.applying)NET.cmd({c:'tu',t:t.id});else tUnload(t,false);}}
-{const _rc=runCmd;runCmd=function(c){const SI=NET.gs;if(c&&c.c==='tb'){const t=ents.find(e=>e.id===c.t&&!e.dead&&e.side===SI);if(t&&t.D.trans)tOrder(ents.filter(e=>c.u.includes(e.id)&&e.side===SI&&!e.dead),t);return;}
+function doUnload(L){for(const t of L)if(capOf(t)&&t.cargo&&t.cargo.length){if(NET.client&&!NET.applying)NET.cmd({c:'tu',t:t.id});else tUnload(t,false);}}
+{const _rc=runCmd;runCmd=function(c){const SI=NET.gs;if(c&&c.c==='tb'){const t=ents.find(e=>e.id===c.t&&!e.dead&&e.side===SI);if(t&&capOf(t))tOrder(ents.filter(e=>c.u.includes(e.id)&&e.side===SI&&!e.dead),t);return;}
   if(c&&c.c==='tu'){const t=ents.find(e=>e.id===c.t&&!e.dead&&e.side===SI);if(t)tUnload(t,false);return;}_rc(c);};}
-{const _ru=refreshUI;refreshUI=function(){_ru();const p=$('#selp');if(!p)return;const L=sel.filter(e=>!e.dead&&e.isU&&e.side===PL&&e.D.trans);let bx=p.querySelector('#xunl');const acts=p.querySelector('.acts');
-  if(!L.length||!acts){if(bx)bx.remove();return;}const n=L.reduce((a,t)=>a+((t.cargo||[]).length),0),cap=L.reduce((a,t)=>a+t.D.trans,0);
-  if(!bx){bx=document.createElement('button');bx.type='button';bx.id='xunl';bx.className='abil';bx.style.setProperty('--ac','#4fd17a');bx.onclick=()=>{doUnload(sel.filter(e=>!e.dead&&e.isU&&e.side===PL&&e.D.trans));sfx('click');refreshUI();};}
+{const _ru=refreshUI;refreshUI=function(){_ru();const p=$('#selp');if(!p)return;const L=sel.filter(e=>!e.dead&&e.isU&&e.side===PL&&capOf(e));let bx=p.querySelector('#xunl');const acts=p.querySelector('.acts');
+  if(!L.length||!acts){if(bx)bx.remove();return;}const n=L.reduce((a,t)=>a+((t.cargo||[]).length),0),cap=L.reduce((a,t)=>a+capOf(t),0);
+  if(!bx){bx=document.createElement('button');bx.type='button';bx.id='xunl';bx.className='abil';bx.style.setProperty('--ac','#4fd17a');bx.onclick=()=>{doUnload(sel.filter(e=>!e.dead&&e.isU&&e.side===PL&&capOf(e)));sfx('click');refreshUI();};}
   const h='<span class="ico"></span><span><b>Débarquer (touche G)</b><small>À bord : '+n+' / '+cap+(n?' — '+L.flatMap(t=>(t.cargo||[]).map(u=>u.D.name)).join(', '):'')+'</small></span>';if(bx._h!==h){bx._h=h;bx.innerHTML=h;}
   if(bx.parentNode!==acts)acts.prepend(bx);};}
 window.addEventListener('keydown',e=>{if(G.state!=='play'||e.ctrlKey||e.metaKey||G.paused)return;const t=e.target;if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'))return;if(e.key.toLowerCase()==='g'){doUnload(mySel());refreshUI();}});

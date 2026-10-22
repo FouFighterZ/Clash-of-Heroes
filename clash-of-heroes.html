@@ -277,7 +277,7 @@ svg.i{width:18px;height:18px;flex:none;fill:currentColor}
       <div class="opt"><span>Vitesse</span><div class="seg" id="speed"><button type="button" data-s="0.75">Lente</button><button type="button" data-s="1" class="on">Normale</button><button type="button" data-s="1.35">Rapide</button></div></div>
     </div>
     <button type="button" class="go" id="bgo">Combattre !</button>
-    <div class="snd">Jeu PC · souris et clavier · <b>version 53</b></div>
+    <div class="snd">Jeu PC · souris et clavier · <b>version 54</b></div>
   </div>
 </div>
 <div class="ovl" id="pausem" hidden><div class="box">
@@ -5280,8 +5280,9 @@ const TRN={dbz:{n:'Nuage Magique (Kinto-un)',fly:true,cap:2,cost:500,hp:420,sp:1
 for(const f in TRN){const T=TRN[f];if(!UDEF[f])continue;UDEF[f].trans={key:'trans',fac:f,name:T.n,cost:T.cost,time:12,hp:T.hp,speed:T.sp,size:T.fly?12:14,sight:7,sightPx:7*TILE,at:'factory',req:['factory'],
   veh:true,fly:!!T.fly,trans:T.cap,tlook:T.look,rof:1,desc:T.d+' Sélectionne des personnages puis clic droit sur le transport pour les faire monter ; « Débarquer » pour les faire descendre.'};}
 {const _ti=tabItems;tabItems=function(t){const L=_ti(t);if(t==='v'&&UDEF[sides[PL].fac].trans)L.push({isB:false,key:'trans'});return L;};}
+const capOf=t=>t?(t.D&&t.D.trans)||(t.isB&&t.key==='hq'&&t.fac==='sds'&&t.rise>=1?6:0):0;
 const canRide=u=>u&&u.isU&&!u.dead&&!u.D.veh&&!u.D.harv&&!u.form;
-function tBoard(u,t){t.cargo=t.cargo||[];u.rideT=null;if(t.dead||t.cargo.length>=t.D.trans){if(u.side===PL)feedPush(t.D.name+' est plein ('+t.D.trans+' places)','#ffc53d');return;}
+function tBoard(u,t){t.cargo=t.cargo||[];u.rideT=null;const cap=capOf(t),nm=t.isB?BDEF.hq.names.sds:t.D.name;if(t.dead||t.cargo.length>=cap){if(u.side===PL)feedPush(nm+' est plein ('+cap+' places)','#ffc53d');return;}
   t.cargo.push(u);ents=ents.filter(e=>e!==u);sel=sel.filter(e=>e!==u);for(const d of dballs)if(d.carrier===u)d.carrier=t;u.order=null;u.target=null;u.path=null;u.moving=false;
   if(u.side===PL)sfx('click');}
 function tUnload(t,hurt){if(!t.cargo||!t.cargo.length)return 0;const L=t.cargo.splice(0);let k=0;
@@ -5291,18 +5292,18 @@ function tUnload(t,hurt){if(!t.cargo||!t.cargo.length)return 0;const L=t.cargo.s
   for(const d of dballs)if(d.carrier===t)d.carrier=L[0]||null;return L.length;}
 function tOrder(units,t){for(const u of units){if(!canRide(u))continue;orderMove(u,t.x,t.y,false);u.rideT=t.id;u.rideO=u.order;}}
 {const _uu=updUnit;updUnit=function(u,dt){_uu(u,dt);if(u.rideT&&!u.dead){const t=ents.find(e=>e.id===u.rideT&&!e.dead);if(!t||u.order!==u.rideO){u.rideT=null;return;}
-  if(hyp(u.x-t.x,u.y-t.y)<t.r+u.r+12)tBoard(u,t);else if(!u.moving&&hyp(u.order&&u.order.x-t.x||0,u.order&&u.order.y-t.y||0)>30){orderMove(u,t.x,t.y,false);u.rideO=u.order;}}};}
+  if(hyp(u.x-t.x,u.y-t.y)<(t.isB?t.w*TILE*.8:t.r+u.r+12))tBoard(u,t);else if(!u.moving&&hyp(u.order&&u.order.x-t.x||0,u.order&&u.order.y-t.y||0)>30){orderMove(u,t.x,t.y,false);u.rideO=u.order;}}};}
 {const _k=kill;kill=function(t,srcSide,src){const was=!t.dead;_k(t,srcSide,src);if(was&&t.dead&&t.cargo&&t.cargo.length){const n=tUnload(t,true);if(t.side===PL&&n)feedPush(t.D.name+' détruit : les passagers sautent !','#ff4d5e');}};}
-{const _hb=heroBusy;heroBusy=function(si,key){if(_hb(si,key))return true;return ents.some(e=>e.isU&&!e.dead&&e.side===si&&e.cargo&&e.cargo.some(u=>u.key===key));};}
+{const _hb=heroBusy;heroBusy=function(si,key){if(_hb(si,key))return true;return ents.some(e=>!e.dead&&e.side===si&&e.cargo&&e.cargo.some(u=>u.key===key));};}
 {const _rc=rightCommand;rightCommand=function(wx,wy){const t=pickAt(wx,wy),units=mySel().filter(canRide);
-  if(t&&t.isU&&t.side===PL&&t.D.trans&&units.length&&!units.includes(t)){if(NET.client&&!NET.applying)NET.cmd({c:'tb',u:units.map(u=>u.id),t:t.id});else tOrder(units,t);G.clicks.push({x:t.x,y:t.y,t:.6,col:'#ffd23a'});sfx('click');return;}
+  if(t&&t.side===PL&&capOf(t)&&units.length&&!units.includes(t)){if(NET.client&&!NET.applying)NET.cmd({c:'tb',u:units.map(u=>u.id),t:t.id});else tOrder(units,t);G.clicks.push({x:t.x,y:t.y,t:.6,col:'#ffd23a'});sfx('click');return;}
   _rc(wx,wy);};}
-function doUnload(L){for(const t of L)if(t.D.trans&&t.cargo&&t.cargo.length){if(NET.client&&!NET.applying)NET.cmd({c:'tu',t:t.id});else tUnload(t,false);}}
-{const _rc=runCmd;runCmd=function(c){const SI=NET.gs;if(c&&c.c==='tb'){const t=ents.find(e=>e.id===c.t&&!e.dead&&e.side===SI);if(t&&t.D.trans)tOrder(ents.filter(e=>c.u.includes(e.id)&&e.side===SI&&!e.dead),t);return;}
+function doUnload(L){for(const t of L)if(capOf(t)&&t.cargo&&t.cargo.length){if(NET.client&&!NET.applying)NET.cmd({c:'tu',t:t.id});else tUnload(t,false);}}
+{const _rc=runCmd;runCmd=function(c){const SI=NET.gs;if(c&&c.c==='tb'){const t=ents.find(e=>e.id===c.t&&!e.dead&&e.side===SI);if(t&&capOf(t))tOrder(ents.filter(e=>c.u.includes(e.id)&&e.side===SI&&!e.dead),t);return;}
   if(c&&c.c==='tu'){const t=ents.find(e=>e.id===c.t&&!e.dead&&e.side===SI);if(t)tUnload(t,false);return;}_rc(c);};}
-{const _ru=refreshUI;refreshUI=function(){_ru();const p=$('#selp');if(!p)return;const L=sel.filter(e=>!e.dead&&e.isU&&e.side===PL&&e.D.trans);let bx=p.querySelector('#xunl');const acts=p.querySelector('.acts');
-  if(!L.length||!acts){if(bx)bx.remove();return;}const n=L.reduce((a,t)=>a+((t.cargo||[]).length),0),cap=L.reduce((a,t)=>a+t.D.trans,0);
-  if(!bx){bx=document.createElement('button');bx.type='button';bx.id='xunl';bx.className='abil';bx.style.setProperty('--ac','#4fd17a');bx.onclick=()=>{doUnload(sel.filter(e=>!e.dead&&e.isU&&e.side===PL&&e.D.trans));sfx('click');refreshUI();};}
+{const _ru=refreshUI;refreshUI=function(){_ru();const p=$('#selp');if(!p)return;const L=sel.filter(e=>!e.dead&&e.isU&&e.side===PL&&capOf(e));let bx=p.querySelector('#xunl');const acts=p.querySelector('.acts');
+  if(!L.length||!acts){if(bx)bx.remove();return;}const n=L.reduce((a,t)=>a+((t.cargo||[]).length),0),cap=L.reduce((a,t)=>a+capOf(t),0);
+  if(!bx){bx=document.createElement('button');bx.type='button';bx.id='xunl';bx.className='abil';bx.style.setProperty('--ac','#4fd17a');bx.onclick=()=>{doUnload(sel.filter(e=>!e.dead&&e.isU&&e.side===PL&&capOf(e)));sfx('click');refreshUI();};}
   const h='<span class="ico"></span><span><b>Débarquer (touche G)</b><small>À bord : '+n+' / '+cap+(n?' — '+L.flatMap(t=>(t.cargo||[]).map(u=>u.D.name)).join(', '):'')+'</small></span>';if(bx._h!==h){bx._h=h;bx.innerHTML=h;}
   if(bx.parentNode!==acts)acts.prepend(bx);};}
 window.addEventListener('keydown',e=>{if(G.state!=='play'||e.ctrlKey||e.metaKey||G.paused)return;const t=e.target;if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'))return;if(e.key.toLowerCase()==='g'){doUnload(mySel());refreshUI();}});
@@ -5326,7 +5327,7 @@ function drawTrans(c,u,x,y){const T=u.D.tlook,P=FPAL[u.fac]||FPAL.dbz,a=u.ang||0
 {const _dv=drawVehicle;drawVehicle=function(c,u,x,y,ghost){if(u.key==='trans')return drawTrans(c,u,x,y);return _dv(c,u,x,y,ghost);};}
 // ===== Seven Deadly Sins: the Boar Hat headquarters is Hawk Mama, who can get up, walk and settle down elsewhere =====
 const HAWK_CD=60;
-UDEF.sds.hawk={key:'hawk',fac:'sds',name:'Hawk Mama (en marche)',cost:0,time:1,hp:BDEF.hq.hp,speed:38,size:24,sight:9,sightPx:9*TILE,veh:true,hawk:true,rof:1,at:'none',req:['__never'],
+UDEF.sds.hawk={key:'hawk',fac:'sds',name:'Hawk Mama (en marche)',cost:0,time:1,hp:BDEF.hq.hp,speed:38,size:24,sight:9,sightPx:9*TILE,veh:true,hawk:true,trans:6,rof:1,at:'none',req:['__never'],
   desc:'Le Boar Hat sur le dos de Hawk Mama. En marche, aucune construction n’est possible ; « Se poser » (touche D) pour redevenir le quartier général, puis il faut attendre 1 minute avant de repartir.'};
 function hawkSpot(u){const tx=tileOf(u.x)-1,ty=tileOf(u.y)-1;for(let r=0;r<=4;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const x=tx+dx,y=ty+dy;
   if(x<1||y<1||x+3>MW-1||y+3>MH-1)continue;let ok=true;for(let yy=y;yy<y+3&&ok;yy++)for(let xx=x;xx<x+3;xx++){const i=ti(xx,yy);if(blocked[i]||ore[i]>0){ok=false;break;}}if(!ok)continue;
@@ -5335,17 +5336,17 @@ const hawkWait=b=>Math.max(0,HAWK_CD-(gtime-(b.landT??-1e9)));
 function hawkLift(b){if(!b||b.dead||b.key!=='hq'||b.fac!=='sds'||b.rise<1||b.upg)return false;if(hawkWait(b)>0){if(b.side===PL){feedPush('Hawk Mama se repose encore '+Math.ceil(hawkWait(b))+' s','#ffc53d');sfx('err');}return false;}
   if(NET.client&&!NET.applying){NET.cmd({c:'hlift',b:b.id});return true;}
   const si=b.side,f=b.hp/b.max,lvl=b.lvl||1,wasSel=sel.includes(b);removeBuilding(b);ents=ents.filter(e=>e!==b);sel=sel.filter(e=>e!==b);
-  const u=mkUnit(si,'hawk',b.x,b.y+10);u.max=Math.round(b.max);u.hp=Math.max(1,u.max*f);u.hlvl=lvl;u.gx=u.x;u.gy=u.y;for(let k=0;k<14;k++)part('dust',u.x+rr(-40,40),u.y+rr(-10,20),rr(-40,40),rr(-30,0),1.2,rr(8,14));
+  const u=mkUnit(si,'hawk',b.x,b.y+10);u.cargo=b.cargo||[];b.cargo=[];u.max=Math.round(b.max);u.hp=Math.max(1,u.max*f);u.hlvl=lvl;u.gx=u.x;u.gy=u.y;for(let k=0;k<14;k++)part('dust',u.x+rr(-40,40),u.y+rr(-10,20),rr(-40,40),rr(-30,0),1.2,rr(8,14));
   if(wasSel)setSel([u]);if(si===PL){msg('Hawk Mama se lève ! Plus de nouvelle construction tant qu’elle marche.','#ff9ab0');sfx('place');}return true;}
 function hawkLand(u){if(!u||u.dead||!u.D.hawk)return false;if(NET.client&&!NET.applying){NET.cmd({c:'hland',u:u.id});return true;}const p=hawkSpot(u);
   if(!p){if(u.side===PL){feedPush('Pas assez de place pour se poser ici (3 × 3 cases libres)','#ff4d5e');sfx('err');}return false;}
   const si=u.side,wasSel=sel.includes(u);u.dead=true;ents=ents.filter(e=>e!==u);sel=sel.filter(e=>e!==u);const b=mkBuilding(si,'hq',p[0],p[1],true);b.rise=1;b.lvl=u.hlvl||1;
-  if(b.lvl>=2){b.max=Math.round(BDEF.hq.hp*1.5);}b.hp=Math.max(1,b.max*(u.hp/u.max));b.landT=gtime;recalcPower(si);for(let k=0;k<20;k++)part('dust',b.x+rr(-40,40),b.y+rr(-20,20),rr(-40,40),rr(-30,0),1.2,rr(8,14));shake(4);
+  if(b.lvl>=2){b.max=Math.round(BDEF.hq.hp*1.5);}b.hp=Math.max(1,b.max*(u.hp/u.max));b.landT=gtime;b.cargo=u.cargo||[];u.cargo=[];recalcPower(si);for(let k=0;k<20;k++)part('dust',b.x+rr(-40,40),b.y+rr(-20,20),rr(-40,40),rr(-30,0),1.2,rr(8,14));shake(4);
   if(wasSel)setSel([b]);if(si===PL){msg('Hawk Mama se pose : le Boar Hat est de nouveau ton quartier général. Elle pourra repartir dans 1 minute.','#ff9ab0');sfx('place');}return true;}
 {const _rc=runCmd;runCmd=function(c){const SI=NET.gs;if(c&&c.c==='hlift'){const b=ents.find(e=>e.id===c.b&&!e.dead&&e.side===SI);if(b)hawkLift(b);return;}
   if(c&&c.c==='hland'){const u=ents.find(e=>e.id===c.u&&!e.dead&&e.side===SI);if(u)hawkLand(u);return;}_rc(c);};}
 // she still counts as the base: no defeat while she walks
-{const _cw=checkWin;checkWin=function(){if(G.over)return;const alive=t=>ents.some(e=>!e.dead&&isPl(e.side)&&(e.isB||e.D&&e.D.hawk)&&(t?TEAM[e.side]===TEAM[PL]:TEAM[e.side]!==TEAM[PL]));
+{const _cw=checkWin;checkWin=function(){if(G.over)return;const alive=t=>ents.some(e=>!e.dead&&isPl(e.side)&&(e.isB||e.D&&(e.D.hawk||e.D.mcv))&&(t?TEAM[e.side]===TEAM[PL]:TEAM[e.side]!==TEAM[PL]));
   if(alive(true)&&alive(false))return;_cw();};}
 {const _ib=typeof isBeaten==='function'?isBeaten:null;}
 // buttons: lift on the HQ, land on the walking pig; key D also lands
@@ -5446,6 +5447,20 @@ function drawHawkMama(c,x,y,t,moving,ghost,rise){c.save();if(rise<1)c.globalAlph
   drawHawkMama(c,x-4,y+16,u.anim||0,!!u.moving,false,1);c.restore();};}
 // ===== random portals never open near buildings =====
 {const _rs=randSpot;openGate=(function(_og){return function(){const save=randSpot;randSpot=function(m){for(let k=0;k<40;k++){const p=save(m);if(!p)return null;if(!ents.some(b=>b.isB&&!b.dead&&hyp(b.x-p.x,b.y-p.y)<10*TILE))return p;}return null;};try{return _og();}finally{randSpot=save;}};})(openGate);}
+// ===== Boar Hat: characters can stay inside the tavern (6 places), shown in the building panel =====
+{const _xh=xupgHTML;xupgHTML=function(e){let h=_xh(e);if(e.isB&&e.key==='hq'&&e.fac==='sds'&&e.side===PL&&e.rise>=1){const n=(e.cargo||[]).length;
+  h+='<div class="desc"><b>Dans la taverne : '+n+' / 6</b>'+(n?' — '+e.cargo.map(u=>u.D.name).join(', '):'')+'<br>Sélectionne des personnages puis clic droit sur le Boar Hat pour les faire entrer. Ils restent à bord quand Hawk Mama se déplace.</div>'+
+    (n?'<button type="button" class="bupb" data-bhout="'+e.id+'"><span>Faire sortir tout le monde</span></button>':'');}return h;};}
+document.addEventListener('click',ev=>{if(G.state!=='play')return;const t=ev.target.closest&&ev.target.closest('[data-bhout]');if(!t)return;const b=ents.find(x=>x.id==t.dataset.bhout);if(b){doUnload([b]);sfx('click');refreshUI();}});
+{const _dv=drawVehicle;drawVehicle=function(c,u,x,y,ghost){_dv(c,u,x,y,ghost);if(u.key==='hawk'){const n=(u.cargo||[]).length;if(n&&(u.side===PL||ally(u.side,PL))){c.fillStyle='#0b0f16';c.beginPath();c.arc(x+30,y-110,8,0,PI2);c.fill();c.fillStyle='#ffd23a';c.font='bold 10px sans-serif';c.textAlign='center';c.fillText(n,x+30,y-106);}}};}
+// ===== portal reward: a big card telling what was won =====
+{const _gr=gateReward;gateReward=function(g){const si=g.last,before=PSIDES.includes(si)?sides[si].credits:0,n0=ents.length;_gr(g);if(si!==PL)return;
+  const s=sides[si];let t;if(s.credits-before>=5000)t='5000 '+(FAC[s.fac].money||'')+' ajoutés à ton trésor.';else{const u=ents.slice(n0).find(e=>e.isU&&e.side===si);t=u?(u.D.mcv?'Un véhicule de base mobile ('+u.D.name+') t’attend devant le portail. Déploie-le (touche D) pour fonder une nouvelle base.':'Le héros '+u.D.name+' rejoint ton armée gratuitement !'):'';}
+  try{evCard({name:'Portail de rang '+g.rank+' nettoyé ! Récompense',col:'#ffd23a',desc:t});}catch(_){}};}
+// AI with no building left deploys its base vehicle (or settles Hawk Mama) right away
+{const _au=aiUpdate;aiUpdate=function(ai,dt){_au(ai,dt);const si=ai.si;if(NET.client||!sides[si]||ents.some(e=>e.isB&&!e.dead&&e.side===si))return;
+  for(const u of ents){if(u.dead||u.side!==si||!u.isU)continue;if(u.D.mcv){if(!deployMCV(u)&&!u.path){const a=R()*PI2;orderMove(u,u.x+Math.cos(a)*160,u.y+Math.sin(a)*160);}break;}
+    if(u.D.hawk){if(!hawkLand(u)&&!u.path){const a=R()*PI2;orderMove(u,u.x+Math.cos(a)*160,u.y+Math.sin(a)*160);}break;}}};}
 </script>
 
 </body></html>

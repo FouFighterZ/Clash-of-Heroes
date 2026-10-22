@@ -52,3 +52,17 @@ function drawHawkMama(c,x,y,t,moving,ghost,rise){c.save();if(rise<1)c.globalAlph
   drawHawkMama(c,x-4,y+16,u.anim||0,!!u.moving,false,1);c.restore();};}
 // ===== random portals never open near buildings =====
 {const _rs=randSpot;openGate=(function(_og){return function(){const save=randSpot;randSpot=function(m){for(let k=0;k<40;k++){const p=save(m);if(!p)return null;if(!ents.some(b=>b.isB&&!b.dead&&hyp(b.x-p.x,b.y-p.y)<10*TILE))return p;}return null;};try{return _og();}finally{randSpot=save;}};})(openGate);}
+// ===== Boar Hat: characters can stay inside the tavern (6 places), shown in the building panel =====
+{const _xh=xupgHTML;xupgHTML=function(e){let h=_xh(e);if(e.isB&&e.key==='hq'&&e.fac==='sds'&&e.side===PL&&e.rise>=1){const n=(e.cargo||[]).length;
+  h+='<div class="desc"><b>Dans la taverne : '+n+' / 6</b>'+(n?' — '+e.cargo.map(u=>u.D.name).join(', '):'')+'<br>Sélectionne des personnages puis clic droit sur le Boar Hat pour les faire entrer. Ils restent à bord quand Hawk Mama se déplace.</div>'+
+    (n?'<button type="button" class="bupb" data-bhout="'+e.id+'"><span>Faire sortir tout le monde</span></button>':'');}return h;};}
+document.addEventListener('click',ev=>{if(G.state!=='play')return;const t=ev.target.closest&&ev.target.closest('[data-bhout]');if(!t)return;const b=ents.find(x=>x.id==t.dataset.bhout);if(b){doUnload([b]);sfx('click');refreshUI();}});
+{const _dv=drawVehicle;drawVehicle=function(c,u,x,y,ghost){_dv(c,u,x,y,ghost);if(u.key==='hawk'){const n=(u.cargo||[]).length;if(n&&(u.side===PL||ally(u.side,PL))){c.fillStyle='#0b0f16';c.beginPath();c.arc(x+30,y-110,8,0,PI2);c.fill();c.fillStyle='#ffd23a';c.font='bold 10px sans-serif';c.textAlign='center';c.fillText(n,x+30,y-106);}}};}
+// ===== portal reward: a big card telling what was won =====
+{const _gr=gateReward;gateReward=function(g){const si=g.last,before=PSIDES.includes(si)?sides[si].credits:0,n0=ents.length;_gr(g);if(si!==PL)return;
+  const s=sides[si];let t;if(s.credits-before>=5000)t='5000 '+(FAC[s.fac].money||'')+' ajoutés à ton trésor.';else{const u=ents.slice(n0).find(e=>e.isU&&e.side===si);t=u?(u.D.mcv?'Un véhicule de base mobile ('+u.D.name+') t’attend devant le portail. Déploie-le (touche D) pour fonder une nouvelle base.':'Le héros '+u.D.name+' rejoint ton armée gratuitement !'):'';}
+  try{evCard({name:'Portail de rang '+g.rank+' nettoyé ! Récompense',col:'#ffd23a',desc:t});}catch(_){}};}
+// AI with no building left deploys its base vehicle (or settles Hawk Mama) right away
+{const _au=aiUpdate;aiUpdate=function(ai,dt){_au(ai,dt);const si=ai.si;if(NET.client||!sides[si]||ents.some(e=>e.isB&&!e.dead&&e.side===si))return;
+  for(const u of ents){if(u.dead||u.side!==si||!u.isU)continue;if(u.D.mcv){if(!deployMCV(u)&&!u.path){const a=R()*PI2;orderMove(u,u.x+Math.cos(a)*160,u.y+Math.sin(a)*160);}break;}
+    if(u.D.hawk){if(!hawkLand(u)&&!u.path){const a=R()*PI2;orderMove(u,u.x+Math.cos(a)*160,u.y+Math.sin(a)*160);}break;}}};}
