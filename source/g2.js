@@ -81,7 +81,7 @@ function orderStop(u){u.order=null;u.target=null;u.path=null;u.gx=u.x;u.gy=u.y;u
 function cmdMove(list,x,y,am){const L=list.filter(u=>u.isU&&!u.dead);if(!L.length)return;
   L.sort((a,b)=>hyp(a.x-x,a.y-y)-hyp(b.x-x,b.y-y));const offs=[[0,0]];
   for(let r=1;offs.length<L.length;r++){const n=6*r;for(let k=0;k<n;k++){const a=k/n*PI2+r*.5;offs.push([Math.cos(a)*r*24,Math.sin(a)*r*24]);}}
-  L.forEach((u,i)=>{let px=x+offs[i][0],py=y+offs[i][1];if(!u.fly&&blockedW(px,py)){const n=nearestFree(tileOf(px),tileOf(py),6,tileOf(x),tileOf(y));if(n){px=n[0]*TILE+16;py=n[1]*TILE+16;}}
+  L.forEach((u,i)=>{let px=x+offs[i][0],py=y+offs[i][1];if(!u.fly&&bw(u,px,py)){const n=nearestFree(tileOf(px),tileOf(py),6,tileOf(x),tileOf(y));if(n){px=n[0]*TILE+16;py=n[1]*TILE+16;}}
     if(u.D.harv){u.order={type:'move',x:px,y:py};moveTo(u,px,py);releaseClaim(u);}else orderMove(u,px,py,am);});}
 function cmdHarvest(list,i){for(const u of list)if(u.D.harv){u.order=null;releaseClaim(u);u.hx=(i%MW+.5)*TILE;u.hy=((i/MW|0)+.5)*TILE;u.hs='seek';u.ht=0;}}
 function canCast(u){return u.D.ab&&u.abCd<=0&&!u.casting&&!u.dash&&u.freeze<=0&&!u.dead&&!u.form&&!(u.lift>0)&&!(u.erased>0);}
@@ -106,7 +106,7 @@ function followPath(u,dt){
   u.moving=true;if(u.D.veh&&!u.fly){u.trk=(u.trk||0)+sp;if(u.trk>8){u.trk=0;track(u.x,u.y,u.ang);}}if(Math.abs(dx)>1)u.face=dx<0?-1:1;u.ang=turn(u.ang,Math.atan2(dy,dx),dt*(u.D.veh?4:9));return false;}
 function faceTo(u,x,y){if(Math.abs(x-u.x)>1)u.face=x<u.x?-1:1;u.tang=Math.atan2(y-u.y,x-u.x);}
 function moveSafe(u,dx,dy){const nx=u.x+dx,ny=u.y+dy;if(u.fly||!bw(u,nx,ny)){u.x=clamp(nx,4,WW-4);u.y=clamp(ny,4,WH-4);}
-  else if(!blockedW(nx,u.y))u.x=clamp(nx,4,WW-4);else if(!blockedW(u.x,ny))u.y=clamp(ny,4,WH-4);}
+  else if(!bw(u,nx,u.y))u.x=clamp(nx,4,WW-4);else if(!bw(u,u.x,ny))u.y=clamp(ny,4,WH-4);}
 function separate(){const cell=new Map();
   for(const u of ents){if(!u.isU||u.dead)continue;const k=(tileOf(u.x)+tileOf(u.y)*MW)*2+(u.fly?1:0);let a=cell.get(k);if(!a){a=[];cell.set(k,a);}a.push(u);}
   for(const u of ents){if(!u.isU||u.dead)continue;const tx=tileOf(u.x),ty=tileOf(u.y);
@@ -187,7 +187,7 @@ function execAbility(u,c){const ab=u.D.ab;let dx=c.x-u.x,dy=c.y-u.y;const L=hyp(
     fxBoom(x2,y2,46,ab.col);scorchLine(x1,y1,x2,y2,ab.w*.6);shake(9);sfx('beam',u.x,u.y);break;}
   case'blast':{const p=spawnProj(u,null,0,'bigball',ab.col,0,c.x,c.y);p.ab={...ab,dmg:ab.dmg*dmgMult(u)};p.z=(u.z||0)+16;sfx('ki',u.x,u.y);break;}
   case'dash_blast':{let tx=c.x,ty=c.y;const dd=hyp(tx-u.x,ty-u.y);if(dd>ab.range){tx=u.x+dx*ab.range;ty=u.y+dy*ab.range;}
-    if(!u.fly&&blockedW(tx,ty)){const n=nearestFree(tileOf(tx),tileOf(ty),5,tileOf(u.x),tileOf(u.y));if(n){tx=n[0]*TILE+16;ty=n[1]*TILE+16;}else{tx=u.x;ty=u.y;}}
+    if(!u.fly&&bw(u,tx,ty)){const n=nearestFree(tileOf(tx),tileOf(ty),5,tileOf(u.x),tileOf(u.y));if(n){tx=n[0]*TILE+16;ty=n[1]*TILE+16;}else{tx=u.x;ty=u.y;}}
     u.dash={sx:u.x,sy:u.y,tx,ty,t:0,T:.38};sfx('whoosh',u.x,u.y);break;}
   case'cone':{const cx=u.x,cy=u.y;for(const e of ents){if(e.dead||ally(e.side,u.side))continue;const ex=e.x-cx,ey=e.y-cy,d=hyp(ex,ey)-(e.isB?e.w*14:e.r);if(d>ab.len)continue;
       const a=Math.acos(clamp((ex*dx+ey*dy)/(hyp(ex,ey)||1),-1,1));if(a>ab.ang&&d>20)continue;damage(e,ab.dmg*dmgMult(u)*(e.isB?.6:1),u.side,u);

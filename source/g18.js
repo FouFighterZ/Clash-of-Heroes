@@ -130,7 +130,7 @@ function hostTick(){const now=performance.now();for(const g of Object.values(NET
   const LIM=NET.lan?60000:3300,iv=NET.lan?.08:.25;if(NET.nextSnap!=null&&gtime<NET.nextSnap)return;NET.nextSnap=gtime+iv*(G.speed||1);NET.snapN++;
   const P=[],ackm={};for(const g of Object.values(NET.guests))ackm[g.cid]=g.lastCmd;P.push(['a',ackm]);if(NET.evQ.length)P.push(['ev',NET.evQ.slice(0,8)]);
   const sd={};for(let i=0;i<sides.length;i++){if(!sides[i])continue;const s=JSON.stringify(encSide(sides[i]));if(s!==NET.sideC[i]){NET.sideC[i]=s;sd[i]=JSON.parse(s);}}if(Object.keys(sd).length)P.push(['sd',sd]);
-  const gl={db:dballs,pk:pickups,zn:zones,gt:gates,hz:hzones,ec:G.eclipse>0?Math.ceil(G.eclipse):0,rn:G.rain>0?Math.ceil(G.rain):0,dbr:G.dbRespawn>0?1:0,pc:PEACE.join('')},go={};for(const k in gl){const s=JSON.stringify(nEnc(gl[k],0));if(s!==NET.globC[k]){NET.globC[k]=s;go[k]=JSON.parse(s);}}if(Object.keys(go).length)P.push(['gl',go]);
+  const gl={db:dballs,pk:pickups,zn:zones,gt:gates,sg:sgates,hz:hzones,ec:G.eclipse>0?Math.ceil(G.eclipse):0,rn:G.rain>0?Math.ceil(G.rain):0,dbr:G.dbRespawn>0?1:0,pc:PEACE.join('')},go={};for(const k in gl){const s=JSON.stringify(nEnc(gl[k],0));if(s!==NET.globC[k]){NET.globC[k]=s;go[k]=JSON.parse(s);}}if(Object.keys(go).length)P.push(['gl',go]);
   if(gtime>NET.oreT){NET.oreT=gtime+1;const od=[];for(let i=0;i<NT;i++)if(ore[i]!==NET.oreSent[i]){od.push(i,ore[i]);NET.oreSent[i]=ore[i];if(od.length>=400)break;}if(od.length)P.push(['or',od]);}
   const ids=new Set();for(const e of ents)if(!e.dead)ids.add(e.id);const kd=new Set(NET.killQ.map(k=>k.i));
   for(const id of NET.prevIds)if(!ids.has(id)){if(!kd.has(id))NET.goneQ.push({i:id,r:3});NET.cache.delete(id);}NET.prevIds=ids;
@@ -186,7 +186,7 @@ function applySnap(d){if(!NET.on&&d.ev){for(const[s,e]of d.ev)if(s===NET.lastEv+
       e[k]=v;}
     if(e.isU){if(e.form&&(!e.FD||e.form!==form0))e.FD=Object.assign({},e.D,FORMS[e.form]);if(!e.form)e.FD=null;if(e.form&&!form0&&plSees(e))fxRing(e.x,e.y,'#ffffff',90);}}}
   if(d.sd)for(const i in d.sd){const s=sides[i];if(!s)continue;const v=nDec(d.sd[i],M);delete v.fac;Object.assign(s,v);}
-  if(d.gl){const g=d.gl;if(g.db)dballs=nDec(g.db,M);if(g.pk)pickups=nDec(g.pk,M);if(g.zn)zones=nDec(g.zn,M);if(g.gt)gates=nDec(g.gt,M);if(g.hz)hzones=nDec(g.hz,M);if(g.ec!=null)G.eclipse=g.ec;if(g.rn!=null)G.rain=g.rn;if(g.dbr!=null)G.dbRespawn=g.dbr?99:0;if(typeof g.pc==='string')peaceSet(g.pc.split('').map(Number));}
+  if(d.gl){const g=d.gl;if(g.db)dballs=nDec(g.db,M);if(g.pk)pickups=nDec(g.pk,M);if(g.zn)zones=nDec(g.zn,M);if(g.gt)gates=nDec(g.gt,M);if(g.sg)sgates=nDec(g.sg,M);if(g.hz)hzones=nDec(g.hz,M);if(g.ec!=null)G.eclipse=g.ec;if(g.rn!=null)G.rain=g.rn;if(g.dbr!=null)G.dbRespawn=g.dbr?99:0;if(typeof g.pc==='string')peaceSet(g.pc.split('').map(Number));}
   if(d.or)for(let j=0;j<d.or.length;j+=2){const i=d.or[j],v=d.or[j+1];if(v>0&&!(ore[i]>0)&&!oreCells.includes(i)){oreCells.push(i);oreFx[i]=[0,1,2].map(k=>({dx:R()*20-10,dy:R()*18-9,s:.7+R()*.5,f:R()<.5?-1:1,k}));}ore[i]=v;}
   if(d.k)for(const[id,s]of d.k){const t=M.get(id);if(t&&!t.dead)kill(t,s<0?undefined:s,null);}
   if(d.x)for(const id of d.x){const t=M.get(id);if(t&&!t.dead){if(t.isB)removeBuilding(t);else t.dead=true;}}

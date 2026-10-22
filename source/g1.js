@@ -104,6 +104,7 @@ const MAPS={
   fronts:{name:'Deux Fronts',size:112,lay:'twin4',cat:'Grande',desc:'Chaque équipe démarre côte à côte avec son partenaire, face à l’autre équipe.'},
   plaines:{name:'Grandes plaines',size:112,lay:'diag2',cat:'Grande',desc:'Grande carte 1v1 : plus de ressources et d’expansions, parties plus longues.'},
   royaumes:{name:'Les Quatre Royaumes',size:128,lay:'corners4',sym:'quad',cat:'Grande',desc:'Grande carte à 4 bases dans les coins : 2v2, ou 1v1 en diagonale.'},
+  forteresses:{name:'Les Forteresses',size:112,lay:'corners4',sym:'quad',cat:'Grande',fort:true,desc:'Chaque base est protégée par un rempart de roche : une seule grande entrée, et deux passages étroits où seuls les personnages passent (pas les véhicules).'},
   archipel:{name:'Archipel',size:128,lay:'corners4',sym:'quad',cat:'Grande',terr:{w:.43,s:.46},desc:'4 bases sur des îles séparées par l’eau : les volants et les chaussées sont précieux.'},
   bataille:{name:'Champ de bataille',size:144,lay:'cols6',cat:'Très grande',desc:'6 bases sur deux lignes : chaque équipe est alignée, côte à côte, face à l’autre. Idéal en 3v3.'},
   desert:{name:'Anneau du désert',size:144,lay:'ring6',cat:'Très grande',terr:{w:.28,s:.5,f:.82,d:.55},desc:'6 bases en cercle dans le désert : les alliés sont dispersés, entourés d’ennemis.'},
