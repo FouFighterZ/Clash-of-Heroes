@@ -277,7 +277,7 @@ svg.i{width:18px;height:18px;flex:none;fill:currentColor}
       <div class="opt"><span>Vitesse</span><div class="seg" id="speed"><button type="button" data-s="0.75">Lente</button><button type="button" data-s="1" class="on">Normale</button><button type="button" data-s="1.35">Rapide</button></div></div>
     </div>
     <button type="button" class="go" id="bgo">Combattre !</button>
-    <div class="snd">Jeu PC · souris et clavier · <b>version 47</b></div>
+    <div class="snd">Jeu PC · souris et clavier · <b>version 48</b></div>
   </div>
 </div>
 <div class="ovl" id="pausem" hidden><div class="box">
@@ -5196,6 +5196,15 @@ let passMemo={k:''};
 // placement preview: tell the player why the spot is refused
 {const _ht=typeof hintText==='function'?hintText:null;if(_ht)hintText=function(){if(mode&&mode.type==='place'&&mode.key!=='wall'){const D=BDEF[mode.key],p=placeTile();
   if(p&&!keepsPassage(mode.key,p.x,p.y))return'Impossible ici : ce bâtiment bloquerait un passage';}return _ht();};}
+// training room: a button in the unit panel sends the selected units into the nearest room with free places
+function nearestTrainB(L){let best=null,bd=1e9;const c=L[0];for(const b of ents)if(b.isB&&!b.dead&&b.side===PL&&b.key==='training'&&b.rise>=1&&(b.inside||[]).length<trCap(b)){const d=hyp(b.x-c.x,b.y-c.y);if(d<bd){bd=d;best=b;}}return best;}
+{const _ru=refreshUI;refreshUI=function(){_ru();const p=$('#selp');if(!p)return;const L=sel.filter(e=>!e.dead&&e.isU&&e.side===PL&&!e.D.harv&&!e.D.veh);let bx=p.querySelector('#xtrain');
+  const has_=L.length&&ents.some(b=>b.isB&&!b.dead&&b.side===PL&&b.key==='training'&&b.rise>=1);const acts=p.querySelector('.acts');
+  if(!has_||!acts){if(bx)bx.remove();return;}if(!bx){bx=document.createElement('button');bx.type='button';bx.id='xtrain';bx.className='abil';bx.style.setProperty('--ac','#ffd23a');
+    bx.innerHTML='<span class="ico"></span><span><b>S’entraîner</b><small>Entrer dans '+BDEF.training.names[sides[PL].fac]+'</small></span>';
+    bx.onclick=()=>{const U=sel.filter(e=>!e.dead&&e.isU&&e.side===PL&&!e.D.harv&&!e.D.veh);const b=U.length&&nearestTrainB(U);if(!b){feedPush('Aucune salle d’entraînement libre','#ffc53d');sfx('err');return;}
+      if(NET.client&&!NET.applying)NET.cmd({c:'tin',u:U.map(u=>u.id),b:b.id});else trainOrder(U,b);sfx('click');};}
+  if(bx.parentNode!==acts)acts.prepend(bx);};}
 </script>
 
 </body></html>
