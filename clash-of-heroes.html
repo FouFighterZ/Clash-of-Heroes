@@ -277,7 +277,7 @@ svg.i{width:18px;height:18px;flex:none;fill:currentColor}
       <div class="opt"><span>Vitesse</span><div class="seg" id="speed"><button type="button" data-s="0.75">Lente</button><button type="button" data-s="1" class="on">Normale</button><button type="button" data-s="1.35">Rapide</button></div></div>
     </div>
     <button type="button" class="go" id="bgo">Combattre !</button>
-    <div class="snd">Jeu PC · souris et clavier · <b>version 34</b></div>
+    <div class="snd">Jeu PC · souris et clavier · <b>version 35</b></div>
   </div>
 </div>
 <div class="ovl" id="pausem" hidden><div class="box">
@@ -4687,6 +4687,7 @@ window.addEventListener('keydown',e=>{if(G.state!=='play'||e.ctrlKey||e.metaKey|
 {const _ru=refreshUI;refreshUI=function(){_ru();for(const b of document.querySelectorAll('.abil2')){const h=ents.find(x=>x.id==b.dataset.ab2);if(!h)continue;b.classList.toggle('cool',!canCast2(h));const v=b.querySelector('.cdv');if(v)v.textContent=h.abCd2>0?Math.ceil(h.abCd2)+' s':'…';}};}
 // ===== Real soundtrack files per anime (falls back to the generated score when an anime has none) =====
 const TRACKS={dbz:['dbz_battle_01.ogg','dbz_battle_02.ogg','dbz_battle_03.ogg','dbz_battle_04.ogg','dbz_battle_26.ogg'],mha:['you_say_run.ogg'],aot:[],sl:['arise.mp3','beru_theme.mp3','dark_aria.mp3','opening_level.mp3','statue_of_god.mp3'],opm:['the_hero_opening.ogg','seigi_shikkou.ogg'],
+  sds:['sds_demon_meliodas.mp3','sds_escanor.mp3','sds_hendrickson.mp3','sds_dora.mp3'],
   hxh:['hxh_boys_be_courageous.ogg','hxh_legend_of_martial_artist.ogg','hxh_marionette_life.ogg','hxh_mosa_domo_no_heigei.ogg','hxh_opening.ogg']};
 const FMUS={el:null,fac:null,list:[],i:0,fadeT:null,failed:new Set()};
 const fmVol=()=>muted?0:VOL.master*VOL.music;
