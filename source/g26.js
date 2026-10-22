@@ -65,7 +65,7 @@ function xactHTML(L){const s=sides[PL];if(!L.length||L.some(e=>e.side!==PL))retu
   if(!h){if(box)box.remove();return;}if(!box||box.parentNode!==acts){if(box)box.remove();box=document.createElement('div');box.id='xact';acts.appendChild(box);}if(box._h!==h){box._h=h;box.innerHTML=h;}};}
 document.addEventListener('click',ev=>{if(G.state!=='play')return;const t=ev.target.closest&&ev.target.closest('[data-dep],[data-tup2]');if(!t)return;
   if(t.dataset.dep){for(const u of mySel().filter(u=>u.isU&&u.D.mcv))deployMCV(u);}else tryTup(t.dataset.tup2);});
-FTIPS.dbz=(FTIPS.dbz||[]).concat(['Sélectionne un bâtiment et appuie sur <b>U</b> pour l’<b>améliorer</b> (jusqu’à ★★★).']);
+FTIPS.dbz=(FTIPS.dbz||[]).concat(['Sélectionne un bâtiment et appuie sur <b>U</b> pour l’<b>améliorer</b> (une fois, avec un bonus spécial).']);
 for(const f of['mha','aot','sl','opm','hxh'])FTIPS[f]=(FTIPS[f]||[]).concat(['Sélectionne un bâtiment et appuie sur <b>U</b> pour l’<b>améliorer</b>. Avec un Arsenal, sélectionne des troupes et appuie sur <b>U</b> pour les entraîner.']);
 FTIPS.sds=['Le <b>soleil</b> règle la force d’<b>Escanor</b> (indicateur en haut) : sors-le à midi, cache-le la nuit.','<b>Meliodas</b> renvoie les dégâts pendant <b>Full Counter</b> (Q). <b>Ban</b> se relève une fois après sa mort.'];
 FTIPS.dbz.push('Le <b>véhicule de déploiement</b> (usine) devient un QG avancé n’importe où : touche <b>D</b>.');
@@ -99,7 +99,7 @@ let menuF3='rand',menuF4='rand',menuADiff=1,menuSpawn=0,menuAllyPos='cote',menuC
 const ALLF6=['dbz','mha','aot','sl','opm','hxh','sds'],FSHORT={rand:'Aléatoire',dbz:'DBZ',mha:'MHA',aot:'Titans',sl:'Solo Lev.',opm:'OPM',hxh:'HxH',sds:'7 Péchés'};
 function menuSetup(fmt){const duo=fmt==='2v2',rf=(c,not)=>c&&c!=='rand'?c:pick(ALLF6.filter(f=>!not.includes(f)));
   const opp=rf(menuOpp!=='rand'&&menuOpp===menuFac?'rand':menuOpp,[menuFac]);let map=menuMap;if(duo&&MAPS[map].players<4)map='royaumes';
-  const setup={map,mode:duo?'2v2':'1v1',cash:menuCash,adiff:menuADiff,pos:Object.assign({},posOk(menuPos,map,spSides(fmt))?menuPos:defaultPos(map,fmt))};
+  const setup={map,seed:seedFor(map),mode:duo?'2v2':'1v1',cash:menuCash,adiff:menuADiff,pos:Object.assign({},posOk(menuPos,map,spSides(fmt))?menuPos:defaultPos(map,fmt))};
   if(duo){setup.f3=rf(menuF3,[menuFac]);setup.f4=rf(menuF4,[opp]);}return{opp,setup};}
 {const box=document.querySelector('.menu .opts');if(box){const row=document.createElement('div');row.className='opts';row.id='opts2';box.after(row);
   const seg=(id,label,items,get,set,cls)=>{const o=document.createElement('div');o.className='opt'+(cls?' '+cls:'');o.innerHTML='<span>'+label+'</span><div class="seg" id="'+id+'"></div>';row.appendChild(o);
@@ -109,7 +109,7 @@ function menuSetup(fmt){const duo=fmt==='2v2',rf=(c,not)=>c&&c!=='rand'?c:pick(A
   seg('f3sel','Allié',facItems,()=>menuF3,v=>menuF3=v,'only2');
   seg('f4sel','Adversaire 2',facItems,()=>menuF4,v=>menuF4=v,'only2');
   seg('adsel','Ordi allié',[[0,'Facile'],[1,'Normal'],[2,'Difficile']],()=>menuADiff,v=>menuADiff=v,'only2');
-  const pk=document.createElement('div');pk.className='opt';pk.innerHTML='<span>Départs</span><div class="sppick" id="menupick"><canvas class="spmap" width="220" height="220"></canvas><div class="note">Choisis un joueur, puis clique sur la carte pour placer sa base.</div><div class="spchips"></div></div>';row.appendChild(pk);
+  const pk=document.createElement('div');pk.className='opt';pk.innerHTML='<span>Départs</span><div class="sppick" id="menupick"><canvas class="spmap" width="420" height="420"></canvas><div class="note">Voici la carte vue du dessus : choisis un joueur, puis clique sur un emplacement pour placer sa base.</div><div class="spchips"></div></div>';row.appendChild(pk);
   seg('cashsel','Argent de départ',[[1500,'1 500'],[3000,'3 000'],[6000,'6 000'],[10000,'10 000']],()=>menuCash,v=>menuCash=v);
   const st=document.createElement('style');st.textContent='#opts2[data-m="1v1"] .only2{display:none}#opts2{margin-top:-6px}.opt>span.lb2{display:none}';document.head.appendChild(st);
   const _sm=syncMapUI;syncMapUI=function(){_sm();row.dataset.m=menuMode;if(!posOk(menuPos,menuMap,spSides(menuMode)))menuPos=defaultPos(menuMap,menuMode);if(!spSides(menuMode).includes(menuSel))menuSel=0;menuPickDraw();
@@ -123,10 +123,18 @@ function menuSetup(fmt){const duo=fmt==='2v2',rf=(c,not)=>c&&c!=='rand'?c:pick(A
 function spSides(fmt){return fmt==='2v2'?[0,3,1,4]:[0,1];}
 function defaultPos(map,fmt){if(MAPS[map].players===4)return fmt==='2v2'?{0:0,3:1,1:2,4:3}:{0:0,1:2};return{0:0,1:1};}
 function spCol(s){return({0:'#4fd17a',3:'#5aa8ff',1:'#ff4d5e',4:'#ff9a3a'})[s];}
-function spDraw(cv,map,pos,sids,label,sel){const c=cv.getContext('2d'),W=cv.width,M=MAPS[map],S=M.size,P=mapPts(map),k=(W-20)/S;c.clearRect(0,0,W,W);
-  const g=c.createLinearGradient(0,0,W,W);g.addColorStop(0,'#2f5a2a');g.addColorStop(1,'#3d6b2c');c.fillStyle=g;c.fillRect(10,10,W-20,W-20);c.strokeStyle='#0008';c.lineWidth=2;c.strokeRect(10,10,W-20,W-20);
-  c.strokeStyle='rgba(200,170,110,.5)';c.lineWidth=3;const C=10+S*k/2;for(const p of P){c.beginPath();c.moveTo(10+p.x*k,10+p.y*k);c.lineTo(C,C);c.stroke();}
-  c.fillStyle='rgba(255,210,58,.6)';c.beginPath();c.arc(C,C,6,0,PI2);c.fill();
+// real top-down preview of a map (same seed as the game that will be played)
+// (stores live on the functions so they work even when called before this line runs)
+function seedFor(map){const m=seedFor.m||(seedFor.m={});return m[map]||(m[map]=1+((Math.random()*1e6)|0));}
+function mapPreview(map,seed){const MPREV=mapPreview.c||(mapPreview.c={}),key=map+':'+seed;if(MPREV[key])return MPREV[key];if(G.state==='play')return null;
+  setMap(map,MAPS[map].players===4);genMap(seed);const S=MW,cv=document.createElement('canvas');cv.width=cv.height=S;const x=cv.getContext('2d'),img=x.createImageData(S,S),d=img.data;
+  const COL=[[84,140,62],[138,106,66],[216,196,138],[47,106,168],[122,118,112],[38,82,40]];
+  for(let i=0;i<NT;i++){let c=ore[i]>0?[232,192,64]:COL[ter[i]]||COL[0];const sh=ter[i]===3?1:.78+.5*clamp(elev[i]-.35,0,.45);d[i*4]=Math.min(255,c[0]*sh);d[i*4+1]=Math.min(255,c[1]*sh);d[i*4+2]=Math.min(255,c[2]*sh);d[i*4+3]=255;}
+  x.putImageData(img,0,0);return MPREV[key]=cv;}
+function spDraw(cv,map,pos,sids,label,sel,seed){const c=cv.getContext('2d'),W=cv.width,M=MAPS[map],S=M.size,P=mapPts(map),k=(W-20)/S;c.clearRect(0,0,W,W);
+  const pv=seed?mapPreview(map,seed):null;c.imageSmoothingEnabled=false;
+  if(pv)c.drawImage(pv,10,10,W-20,W-20);else{const g=c.createLinearGradient(0,0,W,W);g.addColorStop(0,'#2f5a2a');g.addColorStop(1,'#3d6b2c');c.fillStyle=g;c.fillRect(10,10,W-20,W-20);}
+  c.strokeStyle='#000a';c.lineWidth=2;c.strokeRect(10,10,W-20,W-20);const C=10+S*k/2;c.fillStyle='rgba(255,210,58,.8)';c.beginPath();c.arc(C,C,5,0,PI2);c.fill();
   P.forEach((p,i)=>{const x=10+p.x*k,y=10+p.y*k,who=sids.find(s=>pos[s]===i);c.beginPath();c.arc(x,y,18,0,PI2);c.fillStyle=who!=null?spCol(who):'rgba(255,255,255,.18)';c.fill();
     c.lineWidth=who!=null&&who===sel?3:1.5;c.strokeStyle=who!=null&&who===sel?'#fff':'#000a';c.stroke();
     c.font='bold 12px Chakra Petch, sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillStyle='#111';const tx=who!=null?label(who):'libre';c.fillText(tx.length>6?(/\d$/.test(tx)?tx[0]+tx.slice(-1):tx.slice(0,6)):tx,x,y);});
@@ -136,7 +144,7 @@ function spHit(cv,ev,map){const r=cv.getBoundingClientRect(),W=cv.width,mx=(ev.c
 function spMove(pos,side,slot,locked){const o=Object.keys(pos).map(Number).find(s=>pos[s]===slot);if(o!=null&&o!==side){if(locked&&locked(o))return false;pos[o]=pos[side];}pos[side]=slot;return true;}
 function spChips(box,sids,label,canSel,sel,onSel){box.innerHTML='';for(const s of sids){const b=document.createElement('button');b.type='button';b.className='spchip'+(s===sel?' on':'');b.style.setProperty('--c',spCol(s));b.textContent=label(s);b.disabled=!canSel(s);b.onclick=()=>onSel(s);box.appendChild(b);}}
 function menuPickDraw(){const pk=document.getElementById('menupick');if(!pk)return;const cv=pk.querySelector('canvas'),sids=spSides(menuMode),L=s=>({0:'Toi',3:'Allié',1:menuMode==='2v2'?'Ennemi 1':'Ennemi',4:'Ennemi 2'})[s];
-  spDraw(cv,menuMap,menuPos,sids,L,menuSel);spChips(pk.querySelector('.spchips'),sids,L,()=>true,menuSel,s=>{menuSel=s;menuPickDraw();sfx('click');});
+  spDraw(cv,menuMap,menuPos,sids,L,menuSel,seedFor(menuMap));spChips(pk.querySelector('.spchips'),sids,L,()=>true,menuSel,s=>{menuSel=s;menuPickDraw();sfx('click');});
   cv.onclick=ev=>{const i=spHit(cv,ev,menuMap);if(i<0)return;spMove(menuPos,menuSel,i);menuPickDraw();sfx('click');};}
 function lobFmt(){return NET.role==='host'?NET.fmtC:NET.lfmt||'1v1';}
 function lobMap(){if(NET.role!=='host')return NET.lmap||'vallee';return NET.fmtC==='2v2'&&MAPS[menuMap].players<4?'royaumes':menuMap;}
@@ -147,10 +155,10 @@ function spLobDraw(){const lb=document.getElementById('mplob');const cv=lb&&lb.q
   const slots=host?hostSlots():(NET.lslots||{}),pos=host?lobPos():(NET.lpos||defaultPos(map,fmt));if(!posOk(pos,map,sids))return;
   const mySide=host?0:+Object.keys(slots).find(s=>slots[s]&&slots[s].cid===NET.cid);
   const L=s=>s===0?(host?'Toi':(NET.hostName||'Hôte')):slots[s]?(slots[s].cid===NET.cid?'Toi':slots[s].name):'Ordi';
-  if(host&&!sids.includes(NET.spSel))NET.spSel=0;const sel=host?NET.spSel:mySide;spDraw(cv,map,pos,sids,L,sel);
+  if(host&&!sids.includes(NET.spSel))NET.spSel=0;const sel=host?NET.spSel:mySide;spDraw(cv,map,pos,sids,L,sel,host?seedFor(map):NET.lseed);
   const ch=lb.querySelector('.spchips');if(ch)if(host)spChips(ch,sids,L,s=>s===0||!lobHuman(s),sel,s=>{NET.spSel=s;spLobDraw();sfx('click');});else ch.innerHTML='';
   cv.onclick=ev=>{const i=spHit(cv,ev,map);if(i<0)return;sfx('click');if(host){lobMove(NET.spSel||0,i,false);spLobDraw();}else if(mySide>=0){netSend({t:'pos',cid:NET.cid,slot:i});if(NET.lpos){spMove(NET.lpos,mySide,i);spLobDraw();}}};}
-{const st=document.createElement('style');st.textContent='.sppick{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:8px}.sppick canvas{width:180px;height:180px;cursor:pointer;border-radius:8px}.sppick .note{text-align:center;max-width:260px}.spchips{display:flex;gap:5px;flex-wrap:wrap;justify-content:center}.spchip{font-weight:700;font-size:12px;padding:4px 9px;border-radius:5px;border:2px solid var(--c);background:#0b1017;cursor:pointer}.spchip.on{background:var(--c);color:#111}.spchip:disabled{opacity:.45;cursor:default}#opts2 .opt:has(#menupick){align-items:flex-start}#menupick{margin-top:0;flex-direction:row;align-items:center}#menupick canvas{width:165px;height:165px}#menupick .note{max-width:150px;font-size:11px;color:var(--muted)}#menupick .spchips{flex-direction:column}';document.head.appendChild(st);}
+{const st=document.createElement('style');st.textContent='.sppick{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:8px}.sppick canvas{width:180px;height:180px;cursor:pointer;border-radius:8px}.sppick .note{text-align:center;max-width:260px}.spchips{display:flex;gap:5px;flex-wrap:wrap;justify-content:center}.spchip{font-weight:700;font-size:12px;padding:4px 9px;border-radius:5px;border:2px solid var(--c);background:#0b1017;cursor:pointer}.spchip.on{background:var(--c);color:#111}.spchip:disabled{opacity:.45;cursor:default}#opts2 .opt:has(#menupick){align-items:flex-start}#menupick{margin-top:0;flex-direction:row;align-items:center}#menupick .note{max-width:150px;font-size:11px;color:var(--muted)}#menupick .spchips{flex-direction:column}';document.head.appendChild(st);}
 syncMapUI();
 // ===== Temporary truce: press T; it starts when an enemy presses T too, and either can break it =====
 const sideName=s=>(NET.names&&NET.names[s])||(sides[s]&&FAC[sides[s].fac]?FAC[sides[s].fac].name:'L’ennemi');

@@ -226,7 +226,7 @@ function syncMapUI(){document.querySelectorAll('#mapsel button').forEach(x=>{x.h
 document.querySelectorAll('#mapsel button').forEach(b=>b.addEventListener('click',()=>{menuMap=b.dataset.m;syncMapUI();sfx('click');}));
 document.querySelectorAll('#modesel button').forEach(b=>b.addEventListener('click',()=>{menuMode=b.dataset.g;if(menuMode==='2v2'&&MAPS[menuMap].players<4)menuMap='royaumes';syncMapUI();sfx('click');}));
 $('#bgo').addEventListener('click',()=>{const MS=menuSetup(menuMode);G.setup=MS.setup;G.menuOpp=MS.opp;});
-$('#bgo').addEventListener('click',()=>{audioInit();sfx('rankup');$('#menu').hidden=true;G.opp=G.menuOpp;newGame(menuFac,menuDiff);});
+$('#bgo').addEventListener('click',()=>{audioInit();sfx('rankup');$('#menu').hidden=true;G.opp=G.menuOpp;newGame(menuFac,menuDiff,G.setup&&G.setup.seed);});
 window.addEventListener('pointerdown',()=>audioInit(),{once:true});
 drawPortraits();if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{for(const k in iconCache)delete iconCache[k];drawPortraits();});
 startMenuBg();
