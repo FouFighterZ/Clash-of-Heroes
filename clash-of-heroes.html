@@ -277,7 +277,7 @@ svg.i{width:18px;height:18px;flex:none;fill:currentColor}
       <div class="opt"><span>Vitesse</span><div class="seg" id="speed"><button type="button" data-s="0.75">Lente</button><button type="button" data-s="1" class="on">Normale</button><button type="button" data-s="1.35">Rapide</button></div></div>
     </div>
     <button type="button" class="go" id="bgo">Combattre !</button>
-    <div class="snd">Jeu PC · souris et clavier · <b>version 51</b></div>
+    <div class="snd">Jeu PC · souris et clavier · <b>version 52</b></div>
   </div>
 </div>
 <div class="ovl" id="pausem" hidden><div class="box">
@@ -4962,7 +4962,7 @@ function wrapText(c,text,x,y,maxW,lh){const words=text.split(' ');let line='',n=
   c.strokeStyle='rgba(255,240,180,.6)';c.lineWidth=2;for(let k=0;k<10;k++){const a=k/10*PI2+f.t*2;c.beginPath();c.moveTo(f.x+Math.cos(a)*r*1.1,f.y-h+Math.sin(a)*r*1.1);c.lineTo(f.x+Math.cos(a)*r*1.5,f.y-h+Math.sin(a)*r*1.5);c.stroke();}}};}
 // ---- wording: "attaque ultime", with the description on the button ----
 {const b=$('#superb');if(b)b.title='Attaque ultime : se débloque en améliorant le bâtiment des héros.';
-  setInterval(()=>{if(G.state!=='play'||!sides[PL]||!b)return;const SP=SUPER[sides[PL].fac];b.title='Attaque ultime · '+SP.name+'\n'+(SP.desc||'')+'\nSe débloque en améliorant '+BDEF.temple.names[sides[PL].fac]+'.';},1000);}
+  setInterval(()=>{if(1||G.state!=='play'||!sides[PL]||!b)return;const SP=SUPER[sides[PL].fac];b.title='Attaque ultime · '+SP.name+'\n'+(SP.desc||'')+'\nSe débloque en améliorant '+BDEF.temple.names[sides[PL].fac]+'.';},1000);}
 BFEAT.temple='Débloque l’attaque ultime : {super}.';BFEAT.relay='L’attaque ultime se charge deux fois plus vite.';
 BDEF.relay.desc='Concentre l’énergie : ton attaque ultime se charge 60 % plus vite.';
 
@@ -5380,6 +5380,14 @@ for(const f in FAC){const F_=FAC[f];if(!F_.heroes||!F_.legends||!UDEF[f])continu
   if(si===PL||ally(si,PL)||x>cam.x&&x<cam.x+vw&&y>cam.y&&y<cam.y+vh)G.ultCam={x,y,t:hold};return ok;};}
 {const _u=update;update=function(dt){if(G.ultCam&&!G.cut){const z=cam.z||1;cam.x=G.ultCam.x-cam.vw()/2;cam.y=G.ultCam.y-cam.vh()/2;if(typeof clampCam==='function')clampCam();G.ultCam=null;}return _u(dt);};}
 if(window.__game)window.__game.update=dt=>update(dt);
+// ===== ultimate descriptions: a real tooltip on the ultimate button, and a line on each faction card =====
+{const b=$('#superb');if(b){b.addEventListener('mouseenter',()=>{if(G.state!=='play'||!sides[PL])return;const f=sides[PL].fac,SP=SUPER[f],tip=$('#tip');if(!tip||!SP)return;
+    tip.innerHTML='<div class="h"><b>Attaque ultime · '+SP.name+'</b></div><div>'+(SP.desc||'')+'</div><div class="m">Rayon d’effet '+SP.rad+' · se débloque en améliorant '+BDEF.temple.names[f]+' (★), puis se recharge avec le temps.</div>';
+    tip.style.display='block';const r=b.getBoundingClientRect();tip.style.left=Math.max(8,Math.min(innerWidth-tip.offsetWidth-8,r.left))+'px';tip.style.top=(r.bottom+8)+'px';tip.style.bottom='auto';});
+  b.addEventListener('mouseleave',()=>{const tip=$('#tip');if(tip){tip.style.display='none';tip.style.top='';tip.style.bottom='';}});b.title='';}}
+setTimeout(()=>{const b=$('#superb');if(b)b.title='';},1500);
+for(const card of document.querySelectorAll('.fac[data-fac]')){const f=card.dataset.fac,SP=SUPER[f];if(!SP||card.querySelector('.ultd'))continue;const p=card.querySelector('p');if(!p)continue;
+  p.insertAdjacentHTML('beforeend','<span class="ultd" style="display:block;margin-top:6px;color:'+(FAC[f].col||'#ffd23a')+'"><b>Attaque ultime · '+SP.name+'</b> '+(SP.desc||'')+'</span>');}
 </script>
 
 </body></html>

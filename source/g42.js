@@ -19,3 +19,11 @@ for(const f in FAC){const F_=FAC[f];if(!F_.heroes||!F_.legends||!UDEF[f])continu
   if(si===PL||ally(si,PL)||x>cam.x&&x<cam.x+vw&&y>cam.y&&y<cam.y+vh)G.ultCam={x,y,t:hold};return ok;};}
 {const _u=update;update=function(dt){if(G.ultCam&&!G.cut){const z=cam.z||1;cam.x=G.ultCam.x-cam.vw()/2;cam.y=G.ultCam.y-cam.vh()/2;if(typeof clampCam==='function')clampCam();G.ultCam=null;}return _u(dt);};}
 if(window.__game)window.__game.update=dt=>update(dt);
+// ===== ultimate descriptions: a real tooltip on the ultimate button, and a line on each faction card =====
+{const b=$('#superb');if(b){b.addEventListener('mouseenter',()=>{if(G.state!=='play'||!sides[PL])return;const f=sides[PL].fac,SP=SUPER[f],tip=$('#tip');if(!tip||!SP)return;
+    tip.innerHTML='<div class="h"><b>Attaque ultime · '+SP.name+'</b></div><div>'+(SP.desc||'')+'</div><div class="m">Rayon d’effet '+SP.rad+' · se débloque en améliorant '+BDEF.temple.names[f]+' (★), puis se recharge avec le temps.</div>';
+    tip.style.display='block';const r=b.getBoundingClientRect();tip.style.left=Math.max(8,Math.min(innerWidth-tip.offsetWidth-8,r.left))+'px';tip.style.top=(r.bottom+8)+'px';tip.style.bottom='auto';});
+  b.addEventListener('mouseleave',()=>{const tip=$('#tip');if(tip){tip.style.display='none';tip.style.top='';tip.style.bottom='';}});b.title='';}}
+setTimeout(()=>{const b=$('#superb');if(b)b.title='';},1500);
+for(const card of document.querySelectorAll('.fac[data-fac]')){const f=card.dataset.fac,SP=SUPER[f];if(!SP||card.querySelector('.ultd'))continue;const p=card.querySelector('p');if(!p)continue;
+  p.insertAdjacentHTML('beforeend','<span class="ultd" style="display:block;margin-top:6px;color:'+(FAC[f].col||'#ffd23a')+'"><b>Attaque ultime · '+SP.name+'</b> '+(SP.desc||'')+'</span>');}

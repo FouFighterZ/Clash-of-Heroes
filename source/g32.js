@@ -64,7 +64,7 @@ function wrapText(c,text,x,y,maxW,lh){const words=text.split(' ');let line='',n=
   c.strokeStyle='rgba(255,240,180,.6)';c.lineWidth=2;for(let k=0;k<10;k++){const a=k/10*PI2+f.t*2;c.beginPath();c.moveTo(f.x+Math.cos(a)*r*1.1,f.y-h+Math.sin(a)*r*1.1);c.lineTo(f.x+Math.cos(a)*r*1.5,f.y-h+Math.sin(a)*r*1.5);c.stroke();}}};}
 // ---- wording: "attaque ultime", with the description on the button ----
 {const b=$('#superb');if(b)b.title='Attaque ultime : se débloque en améliorant le bâtiment des héros.';
-  setInterval(()=>{if(G.state!=='play'||!sides[PL]||!b)return;const SP=SUPER[sides[PL].fac];b.title='Attaque ultime · '+SP.name+'\n'+(SP.desc||'')+'\nSe débloque en améliorant '+BDEF.temple.names[sides[PL].fac]+'.';},1000);}
+  setInterval(()=>{if(1||G.state!=='play'||!sides[PL]||!b)return;const SP=SUPER[sides[PL].fac];b.title='Attaque ultime · '+SP.name+'\n'+(SP.desc||'')+'\nSe débloque en améliorant '+BDEF.temple.names[sides[PL].fac]+'.';},1000);}
 BFEAT.temple='Débloque l’attaque ultime : {super}.';BFEAT.relay='L’attaque ultime se charge deux fois plus vite.';
 BDEF.relay.desc='Concentre l’énergie : ton attaque ultime se charge 60 % plus vite.';
 
