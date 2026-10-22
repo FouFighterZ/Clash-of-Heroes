@@ -7,7 +7,7 @@
   const sMode=sec('secmode','Mode de jeu'),sSet=sec('secset','Réglages'),sTeams=sec('secteams','Équipes','solo-only wide'),sMap=sec('secmap','Carte','wide');
   const mv=(id,box)=>{const o=optOf(id);if(o)box.appendChild(o);};
   mv('modesel',sMode);mv('speed',sSet);mv('cashsel',sSet);mv('diff',sSet);mv('adsel',sSet);mv('mapsel',sMap);mv('menupick',sMap);
-  for(const id of['diff','adsel']){const o=optOf(id);if(o)o.classList.add('multi-only');}
+  for(const id of['diff','adsel']){const o=optOf(id);if(o)o.style.display='none';}// solo: in the teams panel; online: in the lobby, only if seats stay free
   for(const id of['opp','f3sel','f4sel']){const o=optOf(id);if(o)o.style.display='none';}
   setup.insertBefore(document.getElementById('secteams'),document.getElementById('secmap'));
   {const o=optOf('menupick');if(o)o.classList.remove('solo-only');const rb=document.createElement('button');rb.type='button';rb.className='mbtn';rb.id='mapreroll';rb.textContent='🎲 Générer une autre carte';rb.style.width='auto';

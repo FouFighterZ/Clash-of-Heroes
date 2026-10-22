@@ -9,7 +9,7 @@ let menuPlay='home';
   for(const id of['opp','f3sel','f4sel','menupick']){const o=optOf(id);if(o)o.classList.add('solo-only');}
   const go=$('#bgo'),mp=$('#bmp');go.classList.add('solo-only');if(mp){mp.classList.add('multi-only');mp.textContent='Créer ou rejoindre une partie';mp.style.marginLeft='0';}
   const note=document.createElement('div');note.className='snd multi-only';note.style.maxWidth='720px';note.style.textAlign='center';
-  note.innerHTML='Règle le format, la carte et l’argent de départ, puis ouvre le salon. Tes amis rejoignent ta partie depuis le même jeu ; les places libres sont jouées par l’ordinateur. Chacun choisit son point de départ dans le salon.';
+  note.innerHTML='Règle le format, la carte et l’argent de départ, puis ouvre le salon. Tes amis rejoignent ta partie depuis le même jeu. S’il reste des places libres, l’ordinateur les joue : tu régleras alors son niveau dans le salon. Chacun choisit son point de départ dans le salon.';
   (go.closest('.gorow')||go).after(note);
   const st=document.createElement('style');st.textContent=`.playtabs{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
 .playtabs button{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:240px;padding:8px 20px;border-radius:10px;border:2px solid var(--line);background:#0b1017d8;cursor:pointer;color:var(--muted)}

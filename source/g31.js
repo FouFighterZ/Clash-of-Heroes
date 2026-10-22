@@ -27,3 +27,13 @@ function sprFrame(S,u){const M=S.meta,t=u.anim||0;
 {const _dp=drawPortraits;drawPortraits=function(){_dp();const A=SPR.goku.imgA,cv=document.getElementById('pdbz');if(!cv||!A.complete||!A.naturalWidth)return;const c=cv.getContext('2d');
   c.clearRect(0,0,300,300);const g=c.createRadialGradient(150,170,10,150,170,150);g.addColorStop(0,'#ffd23a55');g.addColorStop(1,'#ffd23a00');c.fillStyle=g;c.fillRect(0,0,300,300);
   const s=292/A.naturalHeight;c.drawImage(A,150-A.naturalWidth*s/2,4,A.naturalWidth*s,A.naturalHeight*s);};}
+// ===== Interface pictures (production cards, rosters, teams, selection, cut-ins) use the sprites too =====
+{const _df=drawFighter;drawFighter=function(c,x,y,L,dir,t,mv,sc,st){const S=L&&!L.umbra&&!L.titan&&SPR[L.k];
+  if(!S||!S.img.complete||!S.img.naturalWidth)return _df.apply(this,arguments);st=st||{};
+  const M=S.meta,F=st.cast?M.charge[0]:st.atk>0?M.atk[0]:mv?M.run[Math.floor((t||0)*10)%M.run.length]:M.idle[Math.floor((t||0)*6)%M.idle.length],[fx,fy,w,h,ax,ay]=F;
+  const k=36*sc/M.idle[0][3],ssj=!!(st.ssj||st.blue);
+  if(st.aura){c.save();c.globalCompositeOperation='lighter';drawGlow(c,x,y-h*k*.5,h*k*.6,st.aura,.35);c.restore();}
+  c.save();c.imageSmoothingEnabled=false;c.translate(x,y);c.scale((dir||1)*k,k);c.drawImage(ssj&&S.imgS?S.imgS:S.img,fx,fy,w,h,-ax,-ay,w,h);c.restore();};}
+// once the sprite sheets are decoded, redraw the cached pictures
+{let left=0;const done=()=>{if(--left>0)return;for(const k in iconCache)delete iconCache[k];try{drawPortraits();}catch(_){}try{if(window.renderTeams)renderTeams();}catch(_){}try{if(typeof buildGrid==='function')buildGrid();}catch(_){}};
+  for(const k in SPR){const im=SPR[k].img;if(im.complete&&im.naturalWidth)continue;left++;im.addEventListener('load',done);}if(!left)setTimeout(()=>{left=1;done();},0);}

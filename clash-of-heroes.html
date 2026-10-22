@@ -277,7 +277,7 @@ svg.i{width:18px;height:18px;flex:none;fill:currentColor}
       <div class="opt"><span>Vitesse</span><div class="seg" id="speed"><button type="button" data-s="0.75">Lente</button><button type="button" data-s="1" class="on">Normale</button><button type="button" data-s="1.35">Rapide</button></div></div>
     </div>
     <button type="button" class="go" id="bgo">Combattre !</button>
-    <div class="snd">Jeu PC · souris et clavier · <b>version 29</b></div>
+    <div class="snd">Jeu PC · souris et clavier · <b>version 31</b></div>
   </div>
 </div>
 <div class="ovl" id="pausem" hidden><div class="box">
@@ -4435,7 +4435,8 @@ function renderMPList(){const r=NET.room;if(!r)return;const L=r.peers().filter(p
 function lobHTML(slots,fmt,me){const _pk='<div class="sppick"><canvas class="spmap" width="420" height="420"></canvas><div class="note">Clique sur la carte pour choisir où tu commences'+(NET.role==='host'?' (choisis d’abord un joueur ci-dessous pour placer les ordis)':'')+'.</div><div class="spchips"></div></div>';const S=SLOTS[fmt]||SLOTS['1v1'],nm=s=>slots[s]?escH(slots[s].name)+' <span class="note">('+(FAC[slots[s].fac]?FAC[slots[s].fac].name:'')+')</span>'+(slots[s].cid===me?' ← toi':''):'<span class="note">Ordinateur</span>';
   return `<div class="tm"><div><h4>Équipe 1</h4>${escH(NET.role==='host'?NET.name:(NET.hostName||'Hôte'))} <span class="note">(hôte)</span>${S.A.map(s=>'<br>'+nm(s)).join('')}</div><div><h4>Équipe 2</h4>${S.B.map(s=>nm(s)).join('<br>')}</div></div>`+_pk+(NET.role==='host'?lobOpts(fmt):'');}
 function lobOpts(fmt){const D=['Facile','Normal','Difficile'],sg=(k,v)=>'<span class="seg" style="display:inline-flex">'+D.map((t,i)=>'<button type="button" data-'+k+'="'+i+'" class="'+(i===v?'on':'')+'">'+t+'</button>').join('')+'</span>';
-  return '<div class="note" style="margin-top:10px;display:flex;flex-direction:column;gap:6px"><div>Ordis adverses : '+sg('ldiff',menuDiff)+'</div>'+(fmt!=='1v1'?'<div>Ordi allié : '+sg('ladiff',menuADiff)+'</div>':'')+'<div>Carte : <b>'+escH(MAPS[lobMap()].name)+'</b> · argent : <b>'+menuCash+'</b>. La carte, le format et l’argent se règlent dans l’onglet Multijoueur du menu.</div></div>';}
+  const S=SLOTS[fmt]||SLOTS['1v1'],sl=hostSlots(),fA=S.A.filter(x=>!sl[x]).length,fB=S.B.filter(x=>!sl[x]).length;// AI settings only for seats the computer will really play
+  return '<div class="note" style="margin-top:10px;display:flex;flex-direction:column;gap:6px">'+(fB?'<div>'+(fB>1?'Ordis adverses':'Ordi adverse')+' (places libres) : '+sg('ldiff',menuDiff)+'</div>':'')+(fA?'<div>'+(fA>1?'Ordis alliés':'Ordi allié')+' (places libres) : '+sg('ladiff',menuADiff)+'</div>':'')+(!fA&&!fB?'<div>Toutes les places sont prises par des joueurs : aucun ordinateur dans cette partie.</div>':'')+'<div>Carte : <b>'+escH(MAPS[lobMap()].name)+'</b> · argent : <b>'+menuCash+'</b>. La carte, le format et l’argent se règlent dans l’onglet Multijoueur du menu.</div></div>';}
 document.addEventListener('click',ev=>{const t=ev.target.closest&&ev.target.closest('[data-ldiff],[data-ladiff]');if(!t)return;if(t.dataset.ldiff!=null){menuDiff=+t.dataset.ldiff;document.querySelectorAll('#diff button').forEach(x=>x.classList.toggle('on',+x.dataset.d===menuDiff));}else menuADiff=+t.dataset.ladiff;
   t.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===t));sfx('click');});
 async function createMP(){const r=NET.room;if(!r||NET.code)return;NET.name=mpName();NET.code=Math.random().toString(36).slice(2,8).replace(/[^a-z0-9]/g,'x');NET.guests={};NET.fmtC=NET.fmt||'1v1';
@@ -4705,7 +4706,7 @@ let menuPlay='home';
   for(const id of['opp','f3sel','f4sel','menupick']){const o=optOf(id);if(o)o.classList.add('solo-only');}
   const go=$('#bgo'),mp=$('#bmp');go.classList.add('solo-only');if(mp){mp.classList.add('multi-only');mp.textContent='Créer ou rejoindre une partie';mp.style.marginLeft='0';}
   const note=document.createElement('div');note.className='snd multi-only';note.style.maxWidth='720px';note.style.textAlign='center';
-  note.innerHTML='Règle le format, la carte et l’argent de départ, puis ouvre le salon. Tes amis rejoignent ta partie depuis le même jeu ; les places libres sont jouées par l’ordinateur. Chacun choisit son point de départ dans le salon.';
+  note.innerHTML='Règle le format, la carte et l’argent de départ, puis ouvre le salon. Tes amis rejoignent ta partie depuis le même jeu. S’il reste des places libres, l’ordinateur les joue : tu régleras alors son niveau dans le salon. Chacun choisit son point de départ dans le salon.';
   (go.closest('.gorow')||go).after(note);
   const st=document.createElement('style');st.textContent=`.playtabs{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
 .playtabs button{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:240px;padding:8px 20px;border-radius:10px;border:2px solid var(--line);background:#0b1017d8;cursor:pointer;color:var(--muted)}
@@ -4737,7 +4738,7 @@ let menuPlay='home';
   const sMode=sec('secmode','Mode de jeu'),sSet=sec('secset','Réglages'),sTeams=sec('secteams','Équipes','solo-only wide'),sMap=sec('secmap','Carte','wide');
   const mv=(id,box)=>{const o=optOf(id);if(o)box.appendChild(o);};
   mv('modesel',sMode);mv('speed',sSet);mv('cashsel',sSet);mv('diff',sSet);mv('adsel',sSet);mv('mapsel',sMap);mv('menupick',sMap);
-  for(const id of['diff','adsel']){const o=optOf(id);if(o)o.classList.add('multi-only');}
+  for(const id of['diff','adsel']){const o=optOf(id);if(o)o.style.display='none';}// solo: in the teams panel; online: in the lobby, only if seats stay free
   for(const id of['opp','f3sel','f4sel']){const o=optOf(id);if(o)o.style.display='none';}
   setup.insertBefore(document.getElementById('secteams'),document.getElementById('secmap'));
   {const o=optOf('menupick');if(o)o.classList.remove('solo-only');const rb=document.createElement('button');rb.type='button';rb.className='mbtn';rb.id='mapreroll';rb.textContent='🎲 Générer une autre carte';rb.style.width='auto';
@@ -4822,6 +4823,16 @@ function sprFrame(S,u){const M=S.meta,t=u.anim||0;
 {const _dp=drawPortraits;drawPortraits=function(){_dp();const A=SPR.goku.imgA,cv=document.getElementById('pdbz');if(!cv||!A.complete||!A.naturalWidth)return;const c=cv.getContext('2d');
   c.clearRect(0,0,300,300);const g=c.createRadialGradient(150,170,10,150,170,150);g.addColorStop(0,'#ffd23a55');g.addColorStop(1,'#ffd23a00');c.fillStyle=g;c.fillRect(0,0,300,300);
   const s=292/A.naturalHeight;c.drawImage(A,150-A.naturalWidth*s/2,4,A.naturalWidth*s,A.naturalHeight*s);};}
+// ===== Interface pictures (production cards, rosters, teams, selection, cut-ins) use the sprites too =====
+{const _df=drawFighter;drawFighter=function(c,x,y,L,dir,t,mv,sc,st){const S=L&&!L.umbra&&!L.titan&&SPR[L.k];
+  if(!S||!S.img.complete||!S.img.naturalWidth)return _df.apply(this,arguments);st=st||{};
+  const M=S.meta,F=st.cast?M.charge[0]:st.atk>0?M.atk[0]:mv?M.run[Math.floor((t||0)*10)%M.run.length]:M.idle[Math.floor((t||0)*6)%M.idle.length],[fx,fy,w,h,ax,ay]=F;
+  const k=36*sc/M.idle[0][3],ssj=!!(st.ssj||st.blue);
+  if(st.aura){c.save();c.globalCompositeOperation='lighter';drawGlow(c,x,y-h*k*.5,h*k*.6,st.aura,.35);c.restore();}
+  c.save();c.imageSmoothingEnabled=false;c.translate(x,y);c.scale((dir||1)*k,k);c.drawImage(ssj&&S.imgS?S.imgS:S.img,fx,fy,w,h,-ax,-ay,w,h);c.restore();};}
+// once the sprite sheets are decoded, redraw the cached pictures
+{let left=0;const done=()=>{if(--left>0)return;for(const k in iconCache)delete iconCache[k];try{drawPortraits();}catch(_){}try{if(window.renderTeams)renderTeams();}catch(_){}try{if(typeof buildGrid==='function')buildGrid();}catch(_){}};
+  for(const k in SPR){const im=SPR[k].img;if(im.complete&&im.naturalWidth)continue;left++;im.addEventListener('load',done);}if(!left)setTimeout(()=>{left=1;done();},0);}
 // ===== Ultimate attacks ("attaques ultimes"): description, full-screen cinematic per faction, Escanor's sun =====
 const ULT_DESC={
   dbz:'Goku lève les bras et rassemble l’énergie de tous les êtres vivants en une sphère bleue géante, puis la lance sur la zone ciblée.',
