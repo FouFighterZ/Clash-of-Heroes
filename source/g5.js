@@ -29,7 +29,7 @@ function launchSuper(si,x,y){const s=sides[si],SP=SUPER[s.fac];if(!s||s.sp<SP.ch
   let rdx=1,rdy=0;{const hq=myB(si,'hq')[0]||myB(si)[0];if(hq){const l=hyp(x-hq.x,y-hq.y)||1;rdx=(x-hq.x)/l;rdy=(y-hq.y)/l;}}
   fxs.push({type:SP.fx||(s.fac==='dbz'?'genki':s.fac==='mha'?'prom':'rumble'),rdx,rdy,step:0,x,y,t:0,dur:SP.delay+.8,delay:SP.delay,col:SP.col,rad:SP.rad,side:si,done:false,dmg:SP.dmg});
   G.pings.push({x,y,t:SP.delay+1});sfx('super');
-  if(foe(si,PL)){G.alertPos={x,y};msg('ALERTE : '+SP.name+' ennemie ! Éloigne tes unités du cercle','#ff4d5e');banner(SP.name.toUpperCase()+' ENNEMIE !','#ff4d5e');sfx('alert');announce('Alerte ! Super pouvoir ennemi');}
+  if(foe(si,PL)){G.alertPos={x,y};msg('ALERTE : attaque ultime ennemie ('+SP.name+') ! Éloigne tes unités du cercle','#ff4d5e');banner('ATTAQUE ULTIME ENNEMIE !','#ff4d5e');sfx('alert');announce('Alerte ! Attaque ultime ennemie');}
   return true;}
 function drawSpecial(c){for(const f of fxs){
   if(f.type==='disc'){c.save();c.translate(f.x,f.y-f.z);c.globalCompositeOperation='lighter';drawGlow(c,0,0,26,'#ffe95a',.8);c.rotate(f.t*40);

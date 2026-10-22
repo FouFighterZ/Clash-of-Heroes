@@ -20,12 +20,14 @@
     const k=FAC[f].heroes[0];x.fillStyle=FAC[f].col+'40';x.beginPath();x.arc(48,48,44,0,PI2);x.fill();try{drawFighter(x,48,92,LOOK[k],1,1,false,2.7,{});}catch(_){}return c;};
   const row=(who,f,ctrl,col)=>{const r=document.createElement('div');r.className='trow';r.style.setProperty('--c',col);r.appendChild(mini(f));const t=document.createElement('div');t.className='tinfo';
     t.innerHTML='<b>'+who+'</b>';if(ctrl)for(const c of[].concat(ctrl))t.appendChild(c);else{const s=document.createElement('span');s.className='tfac';s.textContent=FAC[f].name;t.appendChild(s);}r.appendChild(t);return r;};
-  window.renderTeams=function(){const two=menuMode==='2v2';sTeams.innerHTML='';const A=document.createElement('div'),V=document.createElement('div'),B=document.createElement('div');A.className='team ta';B.className='team tb';V.className='vs';V.textContent='VS';
-    A.innerHTML='<h5>Ton équipe</h5>';B.innerHTML='<h5>Équipe adverse</h5>';
-    A.appendChild(row('Toi',menuFac,null,'#4fd17a'));
-    if(two)A.appendChild(row('Allié · ordinateur',menuF3,[sel(menuF3,FL.map(f=>[f,fname(f)]),v=>menuF3=v),sel(menuADiff,DN.map((t,i)=>[i,'Niveau : '+t]),v=>menuADiff=+v)],'#5aa8ff'));
-    B.appendChild(row(two?'Ennemi 1 · ordinateur':'Ennemi · ordinateur',menuOpp,[sel(menuOpp,FL.map(f=>[f,fname(f)]),v=>menuOpp=v),sel(menuDiff,DN.map((t,i)=>[i,'Niveau : '+t]),v=>{menuDiff=+v;$$('#diff button').forEach(x=>x.classList.toggle('on',+x.dataset.d===menuDiff));})],'#ff4d5e'));
-    if(two)B.appendChild(row('Ennemi 2 · ordinateur',menuF4,[sel(menuF4,FL.map(f=>[f,fname(f)]),v=>menuF4=v),Object.assign(document.createElement('span'),{className:'tfac',textContent:'Même niveau que l’ennemi 1'})],'#ff9a3a'));
+  const FV={3:()=>menuF3,5:()=>menuF5,1:()=>menuOpp,4:()=>menuF4,6:()=>menuF6},FS={3:v=>menuF3=v,5:v=>menuF5=v,1:v=>menuOpp=v,4:v=>menuF4=v,6:v=>menuF6=v};
+  window.renderTeams=function(){const fmt=menuMode,two=fmt!=='1v1';sTeams.innerHTML='';const A=document.createElement('div'),V=document.createElement('div'),B=document.createElement('div');A.className='team ta';B.className='team tb';V.className='vs';V.textContent='VS';
+    A.innerHTML='<h5>Ton équipe</h5>';B.innerHTML='<h5>Équipe adverse</h5>';A.appendChild(row('Toi',menuFac,null,'#4fd17a'));
+    const sd=spSides(fmt),allies=sd.filter(s=>s===3||s===5),enemies=sd.filter(s=>s===1||s===4||s===6);
+    allies.forEach((s,i)=>{const ctr=[sel(FV[s](),FL.map(f=>[f,fname(f)]),v=>FS[s](v))];if(i===0)ctr.push(sel(menuADiff,DN.map((t,k)=>[k,'Niveau : '+t]),v=>menuADiff=+v));else ctr.push(Object.assign(document.createElement('span'),{className:'tfac',textContent:'Même niveau que le premier allié'}));
+      A.appendChild(row((allies.length>1?'Allié '+(i+1):'Allié')+' · ordinateur',FV[s](),ctr,spCol(s)));});
+    enemies.forEach((s,i)=>{const ctr=[sel(FV[s](),FL.map(f=>[f,fname(f)]),v=>FS[s](v))];if(i===0)ctr.push(sel(menuDiff,DN.map((t,k)=>[k,'Niveau : '+t]),v=>{menuDiff=+v;$$('#diff button').forEach(x=>x.classList.toggle('on',+x.dataset.d===menuDiff));}));else ctr.push(Object.assign(document.createElement('span'),{className:'tfac',textContent:'Même niveau que l’ennemi 1'}));
+      B.appendChild(row((enemies.length>1?'Ennemi '+(i+1):'Ennemi')+' · ordinateur',FV[s](),ctr,spCol(s)));});
     sTeams.append(A,V,B);};
   $$('.fac').forEach(b=>b.addEventListener('click',()=>setTimeout(renderTeams,0)));
   {const _sm=syncMapUI;syncMapUI=function(){_sm();renderTeams();};}

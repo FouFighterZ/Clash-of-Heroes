@@ -1,13 +1,13 @@
 // ===== One upgrade per building: +50 % health and a feature of its own =====
 const BFEAT={hq:'Construction des bâtiments 40 % plus rapide.',hq2:'Construction des bâtiments 40 % plus rapide.',power:'Produit 50 % d’énergie en plus.',
   refinery:'Les camions rapportent 25 % de plus, et un camion gratuit est livré.',barracks:'Débloque une nouvelle unité : {elite}.',factory:'Débloque une nouvelle unité : {mech}.',
-  turret:'+35 % de dégâts et +10 % de portée.',def2:'+35 % de dégâts et +10 % de portée.',temple:'Débloque le super pouvoir : {super}.',temple2:'Les légendes sont recrutées deux fois plus vite.',
+  turret:'+35 % de dégâts et +10 % de portée.',def2:'+35 % de dégâts et +10 % de portée.',temple:'Débloque l’attaque ultime : {super}.',temple2:'Les légendes sont recrutées deux fois plus vite.',
   lab:'Les recherches vont deux fois plus vite.',radar:'Vision très étendue (×1,8).',market:'Revenus passifs +60 %.',hospital:'Soins 40 % plus puissants.',training:'Expérience gagnée +40 %.',
   unique:'Son effet spécial arrive deux fois plus souvent.',wall:'Mur renforcé : deux fois plus de vie.',armory:'Entraînements des troupes deux fois plus rapides et 30 % moins chers.',
   shrine:'Éveils des héros deux fois plus rapides.',outpost:'Vision doublée et réparation automatique.',drill:'Extraction +30 %.',shieldgen:'Protection portée à 45 % de dégâts en moins.',
-  relay:'Le super pouvoir se charge deux fois plus vite.'};
+  relay:'L’attaque ultime se charge deux fois plus vite.'};
 function featText(b){const f=b.fac,t=BFEAT[b.key];if(!t)return'';return t.replace('{elite}',UDEF[f]&&UDEF[f].elite?UDEF[f].elite.name:'unité d’élite')
-  .replace('{mech}',UDEF[f]&&UDEF[f].mech?UDEF[f].mech.name:'blindé lourd').replace('{super}',SUPER[f]?SUPER[f].name:'super pouvoir');}
+  .replace('{mech}',UDEF[f]&&UDEF[f].mech?UDEF[f].mech.name:'blindé lourd').replace('{super}',SUPER[f]?SUPER[f].name:'attaque ultime');}
 // heavy vehicles now come from the upgraded factory instead of the lab
 for(const f in UDEF)if(UDEF[f].mech&&!UDEF[f].mech.hero)UDEF[f].mech.req=['factory+'];
 // ---- elite infantry unlocked by the upgraded barracks ----

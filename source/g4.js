@@ -196,19 +196,19 @@ function drawMini(){const hasRadar=has(PL,'radar');const MM=mini.width,MT=MM/MW;
   m.strokeStyle='#ffffff';m.lineWidth=2;m.strokeRect(cam.x*s,cam.y*s,cam.vw()*s,cam.vh()*s);}
 
 // ===== Game flow =====
-function newGame(fac,diff,seed){seed=seed||((Math.random()*1e6)|0);const ST=G.setup||{};const mapId=MAPS[ST.map]?ST.map:'vallee',duo=ST.mode==='2v2'&&MAPS[mapId].players===4;setMap(mapId,duo);mapBuffers();
+function newGame(fac,diff,seed){seed=seed||((Math.random()*1e6)|0);const ST=G.setup||{};const mapId=MAPS[ST.map]?ST.map:'vallee',fmt=(ST.mode==='2v2'||ST.mode==='3v3')&&fmtFits(mapId,ST.mode)?ST.mode:'1v1',duo=fmt!=='1v1';setMap(mapId,fmt);mapBuffers();
   ents=[];projs=[];parts=[];fxs=[];sel=[];groups={};gtime=0;nextId=1;timers=[];mode=null;vis.fill(0);expl.fill(0);
   Object.assign(G,{state:'play',diff,shake:0,slow:0,msgs:[],cut:null,lastAlert:-99,alertPos:null,pings:[],clicks:[],over:false,paused:false,selSig:'',fogT:0,aiT:0,winT:0});
-  genMap(seed);applySpawn(ST,duo);renderTerrain(seed);placeDragonBalls();initAmbience();corpses=[];Object.assign(G,{dbRespawn:0,dbT:0,shenron:null,wishPending:false});$('#wish').hidden=true;
+  genMap(seed);applySpawn(ST);renderTerrain(seed);placeDragonBalls();initAmbience();corpses=[];Object.assign(G,{dbRespawn:0,dbT:0,shenron:null,wishPending:false});$('#wish').hidden=true;
   const ALLF=['dbz','mha','aot','sl','opm','hxh','sds'];const efac=G.opp&&(G.opp!==fac||G.mirror)?G.opp:pick(ALLF.filter(f=>f!==fac));sides=[mkSide(fac,false),mkSide(efac,true),mkSide('neu',true)];
-  if(duo){sides[3]=mkSide(ST.f3||pick(ALLF.filter(f=>f!==fac)),true);sides[4]=mkSide(ST.f4||pick(ALLF.filter(f=>f!==efac)),true);}
+  for(const s of PSIDES)if(s>=3)sides[s]=mkSide(ST['f'+s]||pick(ALLF.filter(f=>f!==(s===3||s===5?fac:efac))),true);
   initEvents();const dOf=si=>ally(si,0)?DIFF[ST.adiff==null?1:ST.adiff]:DIFF[diff];for(const si of PSIDES){if(ST.cash)sides[si].credits=ST.cash;if(si!==0){const d=dOf(si);sides[si].mult=d.mult;sides[si].dmgM=d.dmg;sides[si].hpM=d.hp;}}PL=0;
   G.ai=PSIDES.filter(si=>si!==0).map(si=>aiInit(si,dOf(si)));if(G.auto)G.ai.push(aiInit(0,DIFF[1]));
   const C=MW/2;for(const si of PSIDES){const B=BASES[si];const hq=mkBuilding(si,'hq',B.x-1,B.y-1,true);hq.seen=ally(si,PL);
     const dx=Math.sign(C-B.x)||1,dy=Math.sign(C-B.y)||-1;['inf1','inf1','inf2','inf2'].forEach((k,j)=>{const u=mkUnit(si,k,hq.x+dx*(40+j*20),hq.y+dy*(50+(j%2)*20));u.gx=u.x;u.gy=u.y;});}
   resize();cam.z=1;const hq=myB(PL,'hq')[0];centerOn(hq.x+Math.sign(C*TILE-hq.x)*160,hq.y+Math.sign(C*TILE-hq.y)*60);updFog();uiNewGame(fac);
   feedPush('Suis les objectifs en haut à gauche : commence par un '+BDEF.power.names[fac]+' (touche W).',FAC[fac].col);
-  if(duo)feedPush('2 contre 2 : ton allié est '+FAC[sides[3].fac].name+' (en bleu sur la carte). Vous gagnez ensemble !','#5aa8ff');setTimeout(()=>announce('Déploiement terminé. Que la bataille commence.'),600);}
+  if(duo){const al=PSIDES.filter(s=>s!==0&&TEAM[s]===TEAM[0]);feedPush((fmt==='3v3'?'3 contre 3':'2 contre 2')+' : '+(al.length>1?'tes alliés sont ':'ton allié est ')+al.map(s=>FAC[sides[s].fac].name).join(' et ')+' (en bleu sur la carte). Vous gagnez ensemble !','#5aa8ff');}setTimeout(()=>announce('Déploiement terminé. Que la bataille commence.'),600);}
 function update(dt){gtime+=dt;
   for(let i=timers.length-1;i>=0;i--){timers[i].t-=dt;if(timers[i].t<=0){const f=timers[i].fn;timers.splice(i,1);f();}}
   for(const si of PSIDES)updProd(si,dt);

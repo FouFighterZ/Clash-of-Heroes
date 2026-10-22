@@ -14,7 +14,7 @@ Object.assign(BDEF,{
   outpost:{key:'outpost',w:1,h:1,hp:650,cost:350,time:8,pow:-5,sight:9,req:['barracks'],desc:'Petit poste avancé : peut être construit jusqu’à 10 cases de ta base et permet ensuite de bâtir autour de lui. Grande vision.'},
   drill:{key:'drill',w:2,h:2,hp:900,cost:1100,time:16,pow:-20,sight:5,req:['refinery'],desc:'À placer près d’un gisement : extrait lui-même les cristaux proches (4 cases) et les transforme en argent, sans camion.'},
   shieldgen:{key:'shieldgen',w:2,h:2,hp:1000,cost:1000,time:15,pow:-40,sight:6,req:['lab'],desc:'Les bâtiments alliés dans un large rayon subissent 30 % de dégâts en moins.'},
-  relay:{key:'relay',w:2,h:2,hp:900,cost:1300,time:18,pow:-50,sight:6,req:['temple'],desc:'Concentre l’énergie : ton super-pouvoir se charge 60 % plus vite.'}});
+  relay:{key:'relay',w:2,h:2,hp:900,cost:1300,time:18,pow:-50,sight:6,req:['temple'],desc:'Concentre l’énergie : ton attaque ultime se charge 60 % plus vite.'}});
 for(const k in NB_NAMES){BDEF[k].names=Object.assign({},NB_NAMES[k],{neu:k});}
 B_MAIN2.push('drill','outpost');B_SPEC.push('armory','shrine','relay');B_DEF2.push('shieldgen');
 AI_ORDER.push('armory','outpost','shrine','shieldgen','drill','relay','power');

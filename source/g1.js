@@ -81,36 +81,44 @@ const PSPD={spearb:420,bullet:760,ki:430,shell:390,missile:300,quirk:470,fire:36
 // ===== Map =====
 let ter,ore,elev,blocked,bAt,oreCells,oreClaim,oreFx,N1;
 let B0={x:11,y:68},B1={x:68,y:11},BASES=[B0,B1,null],PSIDES=[0,1],TEAM=[0,1,9,0,1],MAPID='vallee';
-let PEACE=[0,0,0,0,0];// temporary truce: two enemy sides are allied while both have their flag up
-const ally=(a,b)=>a===b||(a!==2&&b!==2&&a!=null&&b!=null&&(TEAM[a]===TEAM[b]||PEACE[a]===1&&PEACE[b]===1)),foe=(a,b)=>!ally(a,b),isPl=s=>s!=null&&s>=0&&s!==2&&s<5;
-const MAPS={arene:{name:'Arène',size:64,players:2,cat:'Petite',desc:'Petite carte 1v1 : bases proches, combats immédiats.'},
-  vallee:{name:'Vallée des héros',size:80,players:2,cat:'Moyenne',desc:'Carte classique 1v1, combats rapides.'},
-  carrefour:{name:'Carrefour',size:96,players:4,cat:'Moyenne',desc:'Carte moyenne à 4 bases : 2v2 serré, ou 1v1 en diagonale.'},
-  fronts:{name:'Deux Fronts',size:112,players:4,cat:'Grande',twin:true,desc:'4 bases : chaque équipe démarre côte à côte avec son partenaire, face à l’autre équipe.'},
-  plaines:{name:'Grandes plaines',size:112,players:2,cat:'Grande',desc:'Grande carte 1v1 : plus de ressources et d’expansions, parties plus longues.'},
-  royaumes:{name:'Les Quatre Royaumes',size:128,players:4,cat:'Grande',desc:'Grande carte à 4 bases : 2v2, ou 1v1 en diagonale.'},
-  continent:{name:'Continent sombre',size:160,players:4,cat:'Immense',desc:'Immense carte à 4 bases : très longues parties, beaucoup d’expansions.'}};
-function setMap(id,duo){const M=MAPS[id]||MAPS.vallee;MAPID=MAPS[id]?id:'vallee';MW=MH=M.size;WW=MW*TILE;WH=MH*TILE;NT=MW*MH;
-  if(MAPID==='vallee'){B0={x:11,y:68};B1={x:68,y:11};BASES=[B0,B1,null];}
-  else if(M.twin){const m=12,S=M.size,h=S/2;B0={x:m,y:h+14};B1={x:S-1-m,y:S-1-(h+14)};BASES=[B0,B1,null,{x:m,y:h-14},{x:S-1-m,y:S-1-(h-14)}];}
-  else{const m=Math.round(M.size*(M.players===4?.1:.12)),S=M.size;B0={x:m,y:S-1-m};B1={x:S-1-m,y:m};BASES=[B0,B1,null,{x:m,y:m},{x:S-1-m,y:S-1-m}];}
-  PSIDES=duo?[0,1,3,4]:[0,1];TEAM=[0,1,9,0,1];
+let PEACE=[0,0,0,0,0,0,0];// temporary truce: two enemy sides are allied while both have their flag up
+const ally=(a,b)=>a===b||(a!==2&&b!==2&&a!=null&&b!=null&&(TEAM[a]===TEAM[b]||PEACE[a]===1&&PEACE[b]===1)),foe=(a,b)=>!ally(a,b),isPl=s=>s!=null&&s>=0&&s!==2&&s<7;
+// ===== Maps: each one lists its start points, which ones a team gets for each mode, its symmetry and terrain =====
+const MODE_N={'1v1':2,'2v2':4,'3v3':6};
+function spSides(fmt){return fmt==='3v3'?[0,3,5,1,4,6]:fmt==='2v2'?[0,3,1,4]:[0,1];}// team A first, then team B
+const LAYOUTS={
+  diag2:S=>{const m=Math.round(S*.12);return{pts:[{x:m,y:S-1-m},{x:S-1-m,y:m}],def:{2:[0,1]}};},
+  vallee:S=>({pts:[{x:11,y:68},{x:68,y:11}],def:{2:[0,1]}}),
+  corners4:S=>{const m=Math.round(S*.1);return{pts:[{x:m,y:S-1-m},{x:m,y:m},{x:S-1-m,y:m},{x:S-1-m,y:S-1-m}],def:{2:[0,2],4:[0,1,2,3]}};},
+  twin4:S=>{const m=12,h=S/2;return{pts:[{x:m,y:h+14},{x:m,y:h-14},{x:S-1-m,y:S-1-(h+14)},{x:S-1-m,y:S-1-(h-14)}],def:{2:[0,2],4:[0,1,2,3]}};},
+  cross4:S=>{const m=Math.round(S*.1),c=Math.round(S/2);return{pts:[{x:m,y:c},{x:c,y:m},{x:S-1-m,y:S-1-c},{x:S-1-c,y:S-1-m}],def:{2:[0,2],4:[0,1,2,3]}};},
+  cols6:S=>{const m=Math.round(S*.09),c=S/2,d=Math.round(S*.3),A=[{x:m,y:c-d},{x:m,y:c},{x:m,y:c+d}];return{pts:[...A,...A.map(p=>({x:S-1-p.x,y:S-1-p.y}))],def:{2:[1,4],4:[0,2,3,5],6:[0,1,2,3,4,5]}};},
+  ring6:S=>{const R=S*.38,c=(S-1)/2,at=k=>({x:Math.round(c+Math.cos(PI/2+k*PI/3)*R),y:Math.round(c+Math.sin(PI/2+k*PI/3)*R)});return{pts:[at(0),at(2),at(4),at(3),at(5),at(1)],def:{2:[0,3],4:[0,1,3,4],6:[0,1,2,3,4,5]}};},
+  mix6:S=>{const m=Math.round(S*.09),c=Math.round(S/2),A=[{x:m,y:m},{x:m,y:S-1-m},{x:c,y:S-1-m}];return{pts:[...A,...A.map(p=>({x:S-1-p.x,y:S-1-p.y}))],def:{2:[2,5],4:[0,1,3,4],6:[0,1,2,3,4,5]}};}};
+const MAPS={
+  arene:{name:'Arène',size:64,lay:'diag2',cat:'Petite',desc:'Petite carte 1v1 : bases proches, combats immédiats.'},
+  vallee:{name:'Vallée des héros',size:80,lay:'vallee',cat:'Moyenne',desc:'Carte classique 1v1, combats rapides.'},
+  gorge:{name:'Gorges rocheuses',size:88,lay:'diag2',cat:'Moyenne',terr:{r:.6,f:.7},desc:'1v1 dans un relief accidenté : beaucoup de rochers et de passages étroits.'},
+  carrefour:{name:'Carrefour',size:96,lay:'corners4',sym:'quad',cat:'Moyenne',desc:'4 bases dans les coins : en 2v2, les alliés sont voisins.'},
+  lac:{name:'Lac central',size:104,lay:'cross4',sym:'quad',cat:'Moyenne',lake:true,desc:'4 bases au milieu des bords, un lac au centre avec une île de cristaux reliée par des chaussées.'},
+  fronts:{name:'Deux Fronts',size:112,lay:'twin4',cat:'Grande',desc:'Chaque équipe démarre côte à côte avec son partenaire, face à l’autre équipe.'},
+  plaines:{name:'Grandes plaines',size:112,lay:'diag2',cat:'Grande',desc:'Grande carte 1v1 : plus de ressources et d’expansions, parties plus longues.'},
+  royaumes:{name:'Les Quatre Royaumes',size:128,lay:'corners4',sym:'quad',cat:'Grande',desc:'Grande carte à 4 bases dans les coins : 2v2, ou 1v1 en diagonale.'},
+  archipel:{name:'Archipel',size:128,lay:'corners4',sym:'quad',cat:'Grande',terr:{w:.43,s:.46},desc:'4 bases sur des îles séparées par l’eau : les volants et les chaussées sont précieux.'},
+  bataille:{name:'Champ de bataille',size:144,lay:'cols6',cat:'Très grande',desc:'6 bases sur deux lignes : chaque équipe est alignée, côte à côte, face à l’autre. Idéal en 3v3.'},
+  desert:{name:'Anneau du désert',size:144,lay:'ring6',cat:'Très grande',terr:{w:.28,s:.5,f:.82,d:.55},desc:'6 bases en cercle dans le désert : les alliés sont dispersés, entourés d’ennemis.'},
+  continent:{name:'Continent sombre',size:160,lay:'corners4',sym:'quad',cat:'Immense',desc:'Immense carte à 4 bases : très longues parties, beaucoup d’expansions.'},
+  terres:{name:'Terres immenses',size:176,lay:'mix6',cat:'Immense',desc:'La plus grande carte : 6 bases, certaines voisines, d’autres isolées. Pour de très longues parties en 3v3.'}};
+for(const k in MAPS){const M=MAPS[k];M.players=LAYOUTS[M.lay](M.size).pts.length;}
+function mapPts(id){const M=MAPS[id]||MAPS.vallee;return LAYOUTS[M.lay](M.size).pts;}
+function mapDef(id,fmt){const M=MAPS[id]||MAPS.vallee,L=LAYOUTS[M.lay](M.size),n=MODE_N[fmt]||2,d=L.def[n]||L.def[2],o={};spSides(fmt).forEach((s,i)=>o[s]=d[i]);return o;}
+const fmtFits=(id,fmt)=>MAPS[id]&&MAPS[id].players>=(MODE_N[fmt]||2);
+function setMap(id,mode){if(mode===true)mode='2v2';else if(!mode)mode='1v1';const M=MAPS[id]||MAPS.vallee;MAPID=MAPS[id]?id:'vallee';if(!fmtFits(MAPID,mode))mode='1v1';
+  MW=MH=M.size;WW=MW*TILE;WH=MH*TILE;NT=MW*MH;const P=mapPts(MAPID),D=mapDef(MAPID,mode);BASES=[];for(const s in D)BASES[s]=P[D[s]];B0=BASES[0];B1=BASES[1];
+  PSIDES=[0,1,3,4,5,6].filter(s=>BASES[s]);TEAM=[0,1,9,0,1,0,1];
   if(PF.g.length!==NT){PF.g=new Float32Array(NT);PF.from=new Int32Array(NT);PF.open=new Uint32Array(NT);PF.closed=new Uint32Array(NT);PF.gen=0;}}
-// Starting positions: 4-base maps list their corners as [bottom-left, top-left, top-right, bottom-right]
-const SPAWN4=['Bas gauche','Haut gauche','Haut droite','Bas droite'],SPAWN2=['Bas gauche','Haut droite'];
-// Start points of a map in the same order as above, without touching the game state (menu and lobby preview)
-function mapPts(id){const M=MAPS[id]||MAPS.vallee,S=M.size;if(id==='vallee')return[{x:11,y:68},{x:68,y:11}];
-  if(M.twin){const m=12,h=S/2;return[{x:m,y:h+14},{x:m,y:h-14},{x:S-1-m,y:S-1-(h+14)},{x:S-1-m,y:S-1-(h-14)}];}
-  const m=Math.round(S*(M.players===4?.1:.12));return M.players===4?[{x:m,y:S-1-m},{x:m,y:m},{x:S-1-m,y:m},{x:S-1-m,y:S-1-m}]:[{x:m,y:S-1-m},{x:S-1-m,y:m}];}
 function posOk(pos,id,sides_){const n=mapPts(id).length,u=new Set();for(const s of sides_){const v=pos&&pos[s];if(!(v>=0&&v<n)||u.has(v))return false;u.add(v);}return true;}
-function applySpawn(ST,duo){const h=ST.spawn|0;
-  if(ST.pos&&posOk(ST.pos,MAPID,PSIDES)){const P=MAPS[MAPID].players===4?[BASES[0],BASES[3],BASES[1],BASES[4]]:[BASES[0],BASES[1]],used=new Set(PSIDES.map(s=>ST.pos[s])),rest=P.map((_,i)=>i).filter(i=>!used.has(i));
-    const nb=BASES.slice();for(const s of PSIDES)nb[s]=P[ST.pos[s]];for(const s of[3,4])if(!PSIDES.includes(s)&&P.length===4)nb[s]=P[rest.shift()];BASES=nb;B0=BASES[0];B1=BASES[1];return;}
-  if(MAPS[MAPID].players===4){const P=[BASES[0],BASES[3],BASES[1],BASES[4]],me=h&3,al=ST.ally==='diag'?(me+2)&3:me^1;
-    if(!duo){BASES[0]=P[me];BASES[1]=P[(me+2)&3];BASES[3]=P[me^1];BASES[4]=P[(me+2)&3^1];}
-    else{const rest=[0,1,2,3].filter(i=>i!==me&&i!==al);BASES[0]=P[me];BASES[3]=P[al];BASES[1]=P[rest[0]];BASES[4]=P[rest[1]];}}
-  else if(h===1){const t=BASES[0];BASES[0]=BASES[1];BASES[1]=t;}
-  B0=BASES[0];B1=BASES[1];}
+function applySpawn(ST){if(ST.pos&&posOk(ST.pos,MAPID,PSIDES)){const P=mapPts(MAPID);for(const s of PSIDES)BASES[s]=P[ST.pos[s]];B0=BASES[0];B1=BASES[1];}}
 const enemyBase=si=>{let best=null,bd=1e9;const me=BASES[si]||B0;for(const s of PSIDES){if(!foe(s,si)||!BASES[s])continue;const d=hyp(BASES[s].x-me.x,BASES[s].y-me.y);if(d<bd){bd=d;best=BASES[s];}}return best||B1;};
 const nearBase=(x,y,r)=>BASES.some(b=>b&&hyp(x-b.x,y-b.y)<r);
 function walk(x,y){return x>=0&&y>=0&&x<MW&&y<MH&&blocked[y*MW+x]===0;}
@@ -150,19 +158,21 @@ function genMap(seed){if(MAPID!=='vallee')return genMapBig(seed);
     oreFx[i]=[0,1,2].map(k=>({dx:rng()*20-10,dy:rng()*18-9,s:.7+rng()*.5,f:rng()<.5?-1:1,k}));}
 }
 
-function genMapBig(seed){const S=MW,quad=MAPS[MAPID].players===4&&!MAPS[MAPID].twin,rng=mulberry(seed*7+3);N1=makeNoise(seed);const N2=makeNoise(seed+101);
+function genMapBig(seed){const S=MW,M=MAPS[MAPID],quad=M.sym==='quad',T=Object.assign({w:.35,s:.38,r:.655,f:.62,d:.4},M.terr||{}),rng=mulberry(seed*7+3);N1=makeNoise(seed);const N2=makeNoise(seed+101);
   ter=new Uint8Array(NT);ore=new Float32Array(NT);elev=new Float32Array(NT);blocked=new Uint8Array(NT);bAt=new Array(NT).fill(null);oreClaim=new Uint8Array(NT);
   const canon=(x,y)=>{if(quad){for(let k=0;k<4;k++){if(x<S/2&&y>=S/2)return[x,y];const nx=S-1-y,ny=x;x=nx;y=ny;}return[x,y];}return y*S+x<NT/2?[x,y]:[S-1-x,S-1-y];};
   for(let y=0;y<S;y++)for(let x=0;x<S;x++){const[cx,cy]=canon(x,y),i=ti(x,y),e=N1.fbm(cx/16,cy/16,4),m=N2.fbm(cx/11+30,cy/11+30,3);elev[i]=e;let t=T_GRASS;
-    if(e<.35)t=T_WATER;else if(e<.38)t=T_SAND;else if(e>.655)t=T_ROCK;else if(m>.62)t=T_FOREST;else if(m<.4)t=T_DIRT;ter[i]=t;}
+    if(e<T.w)t=T_WATER;else if(e<T.s)t=T_SAND;else if(e>T.r)t=T_ROCK;else if(m>T.f)t=T_FOREST;else if(m<T.d)t=T_DIRT;ter[i]=t;}
+  if(M.lake){const C=(S-1)/2,R=S*.17;for(let y=0;y<S;y++)for(let x=0;x<S;x++){const d=hyp(x-C,y-C);if(d<R+N2.n(x*.3,y*.3)*3){const i=ti(x,y);ter[i]=T_WATER;elev[i]=.3;}}}
   const setT=(x,y,t,force)=>{x=Math.round(x);y=Math.round(y);if(x<0||y<0||x>=S||y>=S)return;const i=ti(x,y);if(force||ter[i]>=T_WATER){ter[i]=t;if(t<T_WATER&&elev[i]<.39)elev[i]=.42;}};
   const disc=(cx,cy,r,t,force)=>{for(let y=Math.floor(cy-r);y<=cy+r;y++)for(let x=Math.floor(cx-r);x<=cx+r;x++)if(hyp(x-cx,y-cy)<=r)setT(x,y,t,force);};
   const road=pts=>{for(let k=0;k<pts.length-1;k++){const[ax,ay]=pts[k],[bx,by]=pts[k+1];const L=hyp(bx-ax,by-ay)||1,n=Math.ceil(L*2);
     for(let s=0;s<=n;s++){const t=s/n;let x=lerp(ax,bx,t),y=lerp(ay,by,t);const w=(N2.n(x/6,y/6)-.5)*6*Math.sin(t*PI);x+=-(by-ay)/L*w;y+=(bx-ax)/L*w;disc(x,y,2.6,T_GRASS,false);disc(x,y,1,T_DIRT,true);}}};
-  const C=S/2-.5,bases=BASES.filter(Boolean),fields=[];
-  for(const B of bases){const dx=Math.sign(C-B.x),dy=Math.sign(C-B.y);road([[B.x,B.y],[lerp(B.x,C,.5)+dy*4,lerp(B.y,C,.5)-dx*4],[C,C]]);disc(B.x,B.y,10,T_GRASS,true);
+  const C=S/2-.5,bases=mapPts(MAPID),fields=[];
+  for(const B of bases){const dx=Math.sign(C-B.x)||1,dy=Math.sign(C-B.y)||1;road([[B.x,B.y],[lerp(B.x,C,.5)+dy*4,lerp(B.y,C,.5)-dx*4],[C,C]]);disc(B.x,B.y,10,T_GRASS,true);
     fields.push([B.x+dx*11,B.y-dy*3,4.2],[B.x-dx*2,B.y+dy*12,3.8],[lerp(B.x,C,.42)-dy*7,lerp(B.y,C,.42)+dx*7,4.6]);}
-  for(let a=0;a<bases.length;a++)for(let b=a+1;b<bases.length;b++){const A=bases[a],B=bases[b];if(quad&&(A.x!==B.x&&A.y!==B.y))continue;const mx=(A.x+B.x)/2,my=(A.y+B.y)/2;road([[A.x,A.y],[lerp(mx,C,.25),lerp(my,C,.25)],[B.x,B.y]]);fields.push([lerp(mx,C,.18),lerp(my,C,.18),5]);}
+  const nearPair=(a,b)=>{const d=hyp(bases[a].x-bases[b].x,bases[a].y-bases[b].y);return bases.filter((_,k)=>k!==a&&hyp(bases[a].x-bases[k].x,bases[a].y-bases[k].y)<d-.5).length<2;};
+  for(let a=0;a<bases.length;a++)for(let b=a+1;b<bases.length;b++){const A=bases[a],B=bases[b];if(!nearPair(a,b)&&!nearPair(b,a))continue;const mx=(A.x+B.x)/2,my=(A.y+B.y)/2;road([[A.x,A.y],[lerp(mx,C,.25),lerp(my,C,.25)],[B.x,B.y]]);fields.push([lerp(mx,C,.18),lerp(my,C,.18),5]);}
   fields.push([C,C,6.5]);for(const[fx,fy,fr]of fields)disc(fx,fy,fr+1.6,T_GRASS,true);
   for(const[fx,fy,fr]of fields)for(let y=Math.floor(fy-fr);y<=fy+fr;y++)for(let x=Math.floor(fx-fr);x<=fx+fr;x++){const d=hyp(x-fx,y-fy);if(x<1||y<1||x>=S-1||y>=S-1)continue;
     if(d<=fr&&(d<fr*.55||N2.n(x*.7+9,y*.7+9)>.35)){const i=ti(x,y);ore[i]=Math.round(300+(1-d/fr)*500);ter[i]=T_DIRT;}}

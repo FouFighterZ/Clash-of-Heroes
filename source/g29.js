@@ -24,7 +24,7 @@ let menuPlay='home';
 .menu:not([data-play="home"]) .logo{font-size:clamp(40px,5vw,64px)}.menu:not([data-play="home"]) .logo small{display:none}`;document.head.appendChild(st);
   const lab=(id,t)=>{const o=optOf(id);const s=o&&o.querySelector(':scope>span');if(s)s.textContent=t;};
   const _sm=syncMapUI;syncMapUI=function(){_sm();const m=menuPlay==='multi';
-    lab('diff',m?'Ordis (places libres)':menuMode==='2v2'?'Ordis adverses':'Difficulté');lab('adsel',m?'Ordi allié (place libre)':'Ordi allié');lab('modesel',m?'Format':'Mode');};
+    lab('diff',m?'Ordis (places libres)':menuMode!=='1v1'?'Ordis adverses':'Difficulté');lab('adsel',m?'Ordi allié (place libre)':'Ordi allié');lab('modesel',m?'Format':'Mode');};
   const set=m=>{menuPlay=m;menu.dataset.play=m;$('#mtitle').textContent=m==='solo'?'⚔ Solo · contre l’ordinateur':m==='multi'?'🌐 Multijoueur · entre amis':'';syncMapUI();const ov=$('#menu');if(ov)ov.scrollTop=0;};
   tabs.querySelectorAll('button').forEach(b=>b.onclick=()=>{audioInit();set(b.dataset.pt);sfx('click');});set('home');}
 // the lobby takes its format from the menu

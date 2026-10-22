@@ -94,13 +94,13 @@ cv.addEventListener('pointerup',e=>{if(!(mode&&mode.type==='place'&&mode.key==='
 {const _ht=hintText;hintText=function(){if(mode&&mode.type==='place'&&mode.key==='wall'){if(mode.drag){const p=placeTile(),w=wallPreview(PL,mode.drag.x,mode.drag.y,p.x,p.y);return'Relâche pour poser '+w.n+' bloc'+(w.n>1?'s':'')+' de mur'+(w.cost?' · '+w.cost+' '+FAC[sides[PL].fac].money:'');}
   return'Mur : maintiens le clic et glisse pour tracer une ligne ('+BDEF.wall.cost+' par bloc supplémentaire) · clic droit : annuler';}return _ht();};}
 // ===== Game setup options: ally/enemy factions, start position, starting money, ally AI level =====
-let menuPos={0:0,1:1},menuSel=0;
+let menuPos={0:0,1:1},menuSel=0,menuF5='rand',menuF6='rand';
 let menuF3='rand',menuF4='rand',menuADiff=1,menuSpawn=0,menuAllyPos='cote',menuCash=3000;
 const ALLF6=['dbz','mha','aot','sl','opm','hxh','sds'],FSHORT={rand:'Aléatoire',dbz:'DBZ',mha:'MHA',aot:'Titans',sl:'Solo Lev.',opm:'OPM',hxh:'HxH',sds:'7 Péchés'};
-function menuSetup(fmt){const duo=fmt==='2v2',rf=(c,not)=>c&&c!=='rand'?c:pick(ALLF6.filter(f=>!not.includes(f)));
-  const opp=rf(menuOpp!=='rand'&&menuOpp===menuFac?'rand':menuOpp,[menuFac]);let map=menuMap;if(duo&&MAPS[map].players<4)map='royaumes';
-  const setup={map,seed:seedFor(map),mode:duo?'2v2':'1v1',cash:menuCash,adiff:menuADiff,pos:Object.assign({},posOk(menuPos,map,spSides(fmt))?menuPos:defaultPos(map,fmt))};
-  if(duo){setup.f3=rf(menuF3,[menuFac]);setup.f4=rf(menuF4,[opp]);}return{opp,setup};}
+function menuSetup(fmt){const duo=fmt==='2v2'||fmt==='3v3',rf=(c,not)=>c&&c!=='rand'?c:pick(ALLF6.filter(f=>!not.includes(f)));
+  const opp=rf(menuOpp!=='rand'&&menuOpp===menuFac?'rand':menuOpp,[menuFac]);let map=menuMap;if(!fmtFits(map,fmt))map=Object.keys(MAPS).find(k=>fmtFits(k,fmt));
+  const setup={map,seed:seedFor(map),mode:duo?fmt:'1v1',cash:menuCash,adiff:menuADiff,pos:Object.assign({},posOk(menuPos,map,spSides(fmt))?menuPos:defaultPos(map,fmt))};
+  if(duo){setup.f3=rf(menuF3,[menuFac]);setup.f4=rf(menuF4,[opp]);if(fmt==='3v3'){setup.f5=rf(menuF5,[menuFac]);setup.f6=rf(menuF6,[opp]);}}return{opp,setup};}
 {const box=document.querySelector('.menu .opts');if(box){const row=document.createElement('div');row.className='opts';row.id='opts2';box.after(row);
   const seg=(id,label,items,get,set,cls)=>{const o=document.createElement('div');o.className='opt'+(cls?' '+cls:'');o.innerHTML='<span>'+label+'</span><div class="seg" id="'+id+'"></div>';row.appendChild(o);
     const fill=list=>{const sg=o.querySelector('.seg');sg.innerHTML='';for(const[v,t]of list){const b=document.createElement('button');b.type='button';b.textContent=t;b.classList.toggle('on',String(get())===String(v));
@@ -113,21 +113,20 @@ function menuSetup(fmt){const duo=fmt==='2v2',rf=(c,not)=>c&&c!=='rand'?c:pick(A
   seg('cashsel','Argent de départ',[[1500,'1 500'],[3000,'3 000'],[6000,'6 000'],[10000,'10 000']],()=>menuCash,v=>menuCash=v);
   const st=document.createElement('style');st.textContent='#opts2[data-m="1v1"] .only2{display:none}#opts2{margin-top:-6px}.opt>span.lb2{display:none}';document.head.appendChild(st);
   const _sm=syncMapUI;syncMapUI=function(){_sm();row.dataset.m=menuMode;if(!posOk(menuPos,menuMap,spSides(menuMode)))menuPos=defaultPos(menuMap,menuMode);if(!spSides(menuMode).includes(menuSel))menuSel=0;menuPickDraw();
-    const lbl=document.querySelector('#diff')&&document.querySelector('#diff').parentNode.querySelector('span');if(lbl)lbl.textContent=menuMode==='2v2'?'Ordis adverses':'Difficulté';};syncMapUI();}}
+    const lbl=document.querySelector('#diff')&&document.querySelector('#diff').parentNode.querySelector('span');if(lbl)lbl.textContent=menuMode!=='1v1'?'Ordis adverses':'Difficulté';};syncMapUI();}}
 // own harvesters work on their own and can't be selected
 {const _ss=setSel;setSel=function(list){return _ss((list||[]).filter(e=>!(e&&e.isU&&e.D&&e.D.harv&&e.side===PL)));};}
 // AI difficulty: damage and health multipliers
 {const _dm=damage;damage=function(t,amt,srcSide,src){const S=srcSide!=null&&sides[srcSide];if(S&&S.dmgM&&S.dmgM!==1)amt*=S.dmgM;return _dm(t,amt,srcSide,src);};}
 {const _mu=mkUnit;mkUnit=function(side,key,x,y){const u=_mu(side,key,x,y);const S=sides[side];if(u&&S&&S.hpM&&S.hpM!==1){u.max=Math.round(u.max*S.hpM);u.hp=Math.min(u.hp,u.max);}return u;};}
 // ===== Start position picker (menu and multiplayer lobby) =====
-function spSides(fmt){return fmt==='2v2'?[0,3,1,4]:[0,1];}
-function defaultPos(map,fmt){if(MAPS[map].players===4)return fmt==='2v2'?{0:0,3:1,1:2,4:3}:{0:0,1:2};return{0:0,1:1};}
-function spCol(s){return({0:'#4fd17a',3:'#5aa8ff',1:'#ff4d5e',4:'#ff9a3a'})[s];}
+function defaultPos(map,fmt){return mapDef(map,fmt);}
+function spCol(s){return({0:'#4fd17a',3:'#5aa8ff',5:'#7ad8ff',1:'#ff4d5e',4:'#ff9a3a',6:'#ff6ab0'})[s];}
 // real top-down preview of a map (same seed as the game that will be played)
 // (stores live on the functions so they work even when called before this line runs)
 function seedFor(map){const m=seedFor.m||(seedFor.m={});return m[map]||(m[map]=1+((Math.random()*1e6)|0));}
 function mapPreview(map,seed){const MPREV=mapPreview.c||(mapPreview.c={}),key=map+':'+seed;if(MPREV[key])return MPREV[key];if(G.state==='play')return null;
-  setMap(map,MAPS[map].players===4);genMap(seed);const S=MW,cv=document.createElement('canvas');cv.width=cv.height=S;const x=cv.getContext('2d'),img=x.createImageData(S,S),d=img.data;
+  setMap(map,'1v1');genMap(seed);const S=MW,cv=document.createElement('canvas');cv.width=cv.height=S;const x=cv.getContext('2d'),img=x.createImageData(S,S),d=img.data;
   const COL=[[84,140,62],[138,106,66],[216,196,138],[47,106,168],[122,118,112],[38,82,40]];
   for(let i=0;i<NT;i++){let c=ore[i]>0?[232,192,64]:COL[ter[i]]||COL[0];const sh=ter[i]===3?1:.78+.5*clamp(elev[i]-.35,0,.45);d[i*4]=Math.min(255,c[0]*sh);d[i*4+1]=Math.min(255,c[1]*sh);d[i*4+2]=Math.min(255,c[2]*sh);d[i*4+3]=255;}
   x.putImageData(img,0,0);return MPREV[key]=cv;}
@@ -143,11 +142,11 @@ function spHit(cv,ev,map){const r=cv.getBoundingClientRect(),W=cv.width,mx=(ev.c
   let best=-1,bd=24;P.forEach((p,i)=>{const d=hyp(10+p.x*k-mx,10+p.y*k-my);if(d<bd){bd=d;best=i;}});return best;}
 function spMove(pos,side,slot,locked){const o=Object.keys(pos).map(Number).find(s=>pos[s]===slot);if(o!=null&&o!==side){if(locked&&locked(o))return false;pos[o]=pos[side];}pos[side]=slot;return true;}
 function spChips(box,sids,label,canSel,sel,onSel){box.innerHTML='';for(const s of sids){const b=document.createElement('button');b.type='button';b.className='spchip'+(s===sel?' on':'');b.style.setProperty('--c',spCol(s));b.textContent=label(s);b.disabled=!canSel(s);b.onclick=()=>onSel(s);box.appendChild(b);}}
-function menuPickDraw(){const pk=document.getElementById('menupick');if(!pk)return;const cv=pk.querySelector('canvas'),sids=spSides(menuMode),L=s=>({0:'Toi',3:'Allié',1:menuMode==='2v2'?'Ennemi 1':'Ennemi',4:'Ennemi 2'})[s];
+function menuPickDraw(){const pk=document.getElementById('menupick');if(!pk)return;const cv=pk.querySelector('canvas'),sids=spSides(menuMode),L=s=>({0:'Toi',3:menuMode==='3v3'?'Allié 1':'Allié',5:'Allié 2',1:menuMode==='1v1'?'Ennemi':'Ennemi 1',4:'Ennemi 2',6:'Ennemi 3'})[s];
   spDraw(cv,menuMap,menuPos,sids,L,menuSel,seedFor(menuMap));spChips(pk.querySelector('.spchips'),sids,L,()=>true,menuSel,s=>{menuSel=s;menuPickDraw();sfx('click');});
   cv.onclick=ev=>{const i=spHit(cv,ev,menuMap);if(i<0)return;spMove(menuPos,menuSel,i);menuPickDraw();sfx('click');};}
 function lobFmt(){return NET.role==='host'?NET.fmtC:NET.lfmt||'1v1';}
-function lobMap(){if(NET.role!=='host')return NET.lmap||'vallee';return NET.fmtC==='2v2'&&MAPS[menuMap].players<4?'royaumes':menuMap;}
+function lobMap(){if(NET.role!=='host')return NET.lmap||'vallee';return fmtFits(menuMap,NET.fmtC)?menuMap:Object.keys(MAPS).find(k=>fmtFits(k,NET.fmtC));}
 function lobPos(){const m=lobMap(),sids=spSides(NET.fmtC);if(!posOk(NET.pos,m,sids))NET.pos=posOk(menuPos,m,sids)?Object.assign({},menuPos):defaultPos(m,NET.fmtC);return NET.pos;}
 function lobHuman(s){return s===0||Object.values(NET.guests||{}).some(g=>g.side===s);}
 function lobMove(side,slot,fromGuest){if(NET.role!=='host'||NET.on)return;const pos=lobPos();if(slot<0||slot>=mapPts(lobMap()).length)return;spMove(pos,side,slot,o=>lobHuman(o)&&o!==side&&(fromGuest||o!==0));}
@@ -162,7 +161,7 @@ function spLobDraw(){const lb=document.getElementById('mplob');const cv=lb&&lb.q
 syncMapUI();
 // ===== Temporary truce: press T; it starts when an enemy presses T too, and either can break it =====
 const sideName=s=>(NET.names&&NET.names[s])||(sides[s]&&FAC[sides[s].fac]?FAC[sides[s].fac].name:'L’ennemi');
-function peaceSet(arr){const old=PEACE.slice();let ch=false;for(let i=0;i<5;i++){const v=arr[i]?1:0;if(PEACE[i]!==v){PEACE[i]=v;ch=true;}}if(ch)peaceChanged(old);}
+function peaceSet(arr){const old=PEACE.slice();let ch=false;for(let i=0;i<7;i++){const v=arr[i]?1:0;if(PEACE[i]!==v){PEACE[i]=v;ch=true;}}if(ch)peaceChanged(old);}
 function togglePeace(si){if(G.state!=='play'||!isPl(si))return;if(NET.client&&!NET.applying){NET.cmd({c:'peace'});return;}const a=PEACE.slice();a[si]=a[si]?0:1;peaceSet(a);}
 function peaceChanged(old){for(const u of ents){if(!u.isU||u.dead)continue;if(u.target&&ally(u.side,u.target.side))u.target=null;if(u.order&&u.order.type==='attack'&&u.order.target&&ally(u.side,u.order.target.side))u.order=null;}
   if(!sides[PL])return;const was=(a,b)=>old[a]===1&&old[b]===1;
@@ -173,7 +172,7 @@ function peaceChanged(old){for(const u of ents){if(!u.isU||u.dead)continue;if(u.
   if(old[PL]!==PEACE[PL]&&!PSIDES.some(s=>TEAM[s]!==TEAM[PL]&&PEACE[s]===1))feedPush(PEACE[PL]?'Tu proposes une trêve à tes ennemis… (T pour annuler)':'Tu retires ta proposition de trêve.','#ffd23a');
   peaceUI();}
 {const _rc=runCmd;runCmd=function(c){if(c&&c.c==='peace'){togglePeace(NET.gs);return;}_rc(c);};}
-{const _ng=newGame;newGame=function(...a){PEACE=[0,0,0,0,0];const r=_ng(...a);peaceUI();return r;};}
+{const _ng=newGame;newGame=function(...a){PEACE=[0,0,0,0,0,0,0];const r=_ng(...a);peaceUI();return r;};}
 document.addEventListener('keydown',e=>{if(G.state!=='play'||e.ctrlKey||e.metaKey||e.altKey)return;const t=e.target;if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'))return;if(e.key==='t'||e.key==='T'){togglePeace(PL);sfx('click');}});
 {const b=document.createElement('button');b.type='button';b.className='ib';b.id='bpeace';b.title='Trêve temporaire (touche T) : active quand un ennemi l’accepte aussi. Recliquer pour la rompre.';b.onclick=()=>togglePeace(PL);const ck=$('#clock');if(ck)ck.before(b);}
 function peaceUI(){const b=$('#bpeace');if(!b||!sides[PL])return;const with_=PSIDES.filter(s=>TEAM[s]!==TEAM[PL]&&PEACE[s]===1&&PEACE[PL]===1),offer=PSIDES.filter(s=>TEAM[s]!==TEAM[PL]&&PEACE[s]===1);
