@@ -117,7 +117,7 @@ function render(){const W=cv.width,H=cv.height;ctx.setTransform(1,0,0,1,0,0);ctx
   let sx=0,sy=0;if(G.shake>.3){sx=rr(-G.shake,G.shake);sy=rr(-G.shake,G.shake);}
   const z=cam.z*dpr;ctx.setTransform(z,0,0,z,(-cam.x+sx)*z,(-cam.y+sy)*z);ctx.imageSmoothingEnabled=true;
   const vw=cam.vw(),vh=cam.vh(),X0=Math.max(0,cam.x-2),Y0=Math.max(0,cam.y-2),X1=Math.min(WW,cam.x+vw+2),Y1=Math.min(WH,cam.y+vh+2);
-  ctx.drawImage(terr,X0,Y0,X1-X0,Y1-Y0,X0,Y0,X1-X0,Y1-Y0);
+  drawTerrainChunks(ctx,X0,Y0,X1,Y1);
   const tx0=Math.floor(cam.x/TILE)-1,ty0=Math.floor(cam.y/TILE)-1,tx1=Math.ceil((cam.x+vw)/TILE)+1,ty1=Math.ceil((cam.y+vh)/TILE)+3;
   drawWater(ctx,tx0,ty0,tx1,ty1);drawOre(ctx,tx0,ty0,tx1,ty1);drawDragonBalls(ctx);drawZones(ctx);drawPickups(ctx);
   // dock markers & rally
