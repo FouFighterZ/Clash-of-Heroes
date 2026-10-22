@@ -4,7 +4,7 @@ set -e
 cd "$(dirname "$0")"
 R=/home/user/clash-of-heroes
 S=..
-cp $S/update-feed/clash-of-heroes.html $S/update-feed/version.json $R/
+cp $S/update-feed/clash-of-heroes.html $S/update-feed/server.js $S/update-feed/version.json $R/
 rm -rf $R/music && mkdir -p $R/music && cp $S/update-feed/music/* $R/music/
 mkdir -p $R/source/lan $R/source/app
 cp g*.js head.html build.sh pack.sh pack-app.sh release.sh $R/source/

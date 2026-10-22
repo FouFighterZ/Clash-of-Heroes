@@ -1,7 +1,7 @@
 // Clash of Heroes — desktop app: runs the local-network server and shows the game in its own window
 const {app,BrowserWindow,Menu,shell,net}=require('electron');
 const path=require('path'),os=require('os'),dgram=require('dgram'),fs=require('fs');
-const server=require('./server.js');
+let server=null;// loaded after the update check, so a newer downloaded server can be used
 
 app.commandLine.appendSwitch('autoplay-policy','no-user-gesture-required');
 // Friends' PCs are on the local network: never send that traffic through a proxy
@@ -33,8 +33,8 @@ async function checkUpdate(status){const cfg=readJSON(path.join(__dirname,'updat
   const dir=updDir(),have=Math.max(verOf(dir),verOf(__dirname));
   const r=await fetchT(cfg.base+'version.json?t='+Date.now(),6000);if(!r.ok)return;const remote=await r.json();if(!(remote.version>have)||!Array.isArray(remote.files))return;
   status('Mise à jour vers la version '+remote.version+'…');const tmp=dir+'.tmp';fs.rmSync(tmp,{recursive:true,force:true});fs.mkdirSync(path.join(tmp,'music'),{recursive:true});
-  let n=0;for(const f of remote.files){if(typeof f.path!=='string'||!/^(clash-of-heroes\.html|music\/[\w.-]+\.(ogg|mp3|wav))$/.test(f.path))continue;const dst=path.join(tmp,f.path);n++;
-    if(f.path!=='clash-of-heroes.html'){const old=[path.join(dir,f.path),path.join(__dirname,f.path)].find(p=>{try{return fs.statSync(p).size===f.size;}catch(_){return false;}});
+  let n=0;for(const f of remote.files){if(typeof f.path!=='string'||!/^(clash-of-heroes\.html|server\.js|music\/[\w.-]+\.(ogg|mp3|wav))$/.test(f.path))continue;const dst=path.join(tmp,f.path);n++;
+    if(f.path!=='clash-of-heroes.html'&&f.path!=='server.js'){const old=[path.join(dir,f.path),path.join(__dirname,f.path)].find(p=>{try{return fs.statSync(p).size===f.size;}catch(_){return false;}});
       if(old){if(old.startsWith(dir))fs.copyFileSync(old,dst);continue;}}
     status('Mise à jour vers la version '+remote.version+'… ('+n+'/'+remote.files.length+')');
     const rr=await fetchT(cfg.base+f.path.split('/').map(encodeURIComponent).join('/')+'?v='+remote.version,120000);if(!rr.ok)throw new Error(f.path);fs.writeFileSync(dst,Buffer.from(await rr.arrayBuffer()));}
@@ -57,6 +57,7 @@ else{app.on('second-instance',()=>{if(win){if(win.isMinimized())win.restore();wi
   app.whenReady().then(async()=>{createWindow();
     try{await checkUpdate(t=>{if(win)win.loadURL(loadingPage(t));});}catch(_){}
     const dir=updDir(),dirs=verOf(dir)>verOf(__dirname)?[dir]:[];
+    try{server=require(dirs.length&&fs.existsSync(path.join(dir,'server.js'))?path.join(dir,'server.js'):'./server.js');}catch(_){server=require('./server.js');}
     try{port=await server.start(8080,{hosts:freshHosts,retry:true,dirs});}catch(e){port=0;}
     discovery();if(win)win.loadURL('http://localhost:'+port+'/');});
   app.on('window-all-closed',()=>app.quit());}

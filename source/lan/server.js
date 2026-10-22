@@ -7,6 +7,11 @@ const srv=http.createServer((req,res)=>{const u=req.url.split('?')[0];
   if(u==='/'||u==='/index.html'||u==='/clash-of-heroes.html'){res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'});res.end(page());}
   else if(/^\/music\/[\w.-]+\.(ogg|mp3|wav)$/.test(u)&&find(u.slice(1))){const ext=u.split('.').pop();
     res.writeHead(200,{'Content-Type':{ogg:'audio/ogg',mp3:'audio/mpeg',wav:'audio/wav'}[ext],'Cache-Control':'max-age=3600'});fs.createReadStream(find(u.slice(1))).pipe(res);}
+  else if(u==='/lan-games'){// open games on this PC, readable from the other PCs of the network
+    const L=[...clients.values()].map(c=>c.pres&&c.pres.cdh).filter(g=>g&&g.open&&typeof g.code==='string').map(g=>({code:g.code,name:String(g.name||'').slice(0,24),fac:g.fac,fmt:g.fmt,free:g.free}));
+    res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store','Access-Control-Allow-Origin':'*'});res.end(JSON.stringify(L));}
+  else if(u==='/lan-info'){const ips=[];for(const l of Object.values(os.networkInterfaces()))for(const a of l||[])if(a.family==='IPv4'&&!a.internal)ips.push(a.address);
+    res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store','Access-Control-Allow-Origin':'*'});res.end(JSON.stringify({name:os.hostname(),ips,port:PORT}));}
   else if(u==='/lan-hosts'&&hostsFn){res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(hostsFn()));}
   else{res.writeHead(404,{'Content-Type':'text/plain; charset=utf-8'});res.end('Introuvable');}});
 const clients=new Map();let nid=1;

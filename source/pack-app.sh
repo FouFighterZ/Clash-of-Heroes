@@ -12,11 +12,11 @@ cp music/* $A/src/music/
 VER=$(grep -o 'version [0-9]*' head.html | head -1 | grep -o '[0-9]*')
 python3 - "$VER" <<'P'
 import json,os,sys
-v=int(sys.argv[1]);src='../app/src';files=[{'path':'clash-of-heroes.html','size':os.path.getsize(os.path.join(src,'clash-of-heroes.html'))}]
+v=int(sys.argv[1]);src='../app/src';files=[{'path':'clash-of-heroes.html','size':os.path.getsize(os.path.join(src,'clash-of-heroes.html'))}]+[{'path':'server.js','size':os.path.getsize(os.path.join(src,'server.js'))}]
 for f in sorted(os.listdir(os.path.join(src,'music'))):files.append({'path':'music/'+f,'size':os.path.getsize(os.path.join(src,'music',f))})
 man={'version':v,'files':files};open(os.path.join(src,'version.json'),'w').write(json.dumps(man))
 P
-rm -rf ../update-feed && mkdir -p ../update-feed/music && cp $A/src/clash-of-heroes.html $A/src/version.json ../update-feed/ && cp $A/src/music/* ../update-feed/music/
+rm -rf ../update-feed && mkdir -p ../update-feed/music && cp $A/src/clash-of-heroes.html $A/src/server.js $A/src/version.json ../update-feed/ && cp $A/src/music/* ../update-feed/music/
 if [ -n "$UPDATE_BASE" ]; then printf '{"base":"%s"}' "$UPDATE_BASE" > $A/src/update.json; else rm -f $A/src/update.json; fi
 cd $A
 rm -rf out && npx --no-install electron-packager src "Clash of Heroes" --platform=win32 --arch=x64 --electron-version=44.5.1 --icon=icon.ico --out=out --overwrite --no-prune \

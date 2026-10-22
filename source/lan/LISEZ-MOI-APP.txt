@@ -8,16 +8,18 @@ Lancer le jeu
   3. Au premier lancement, Windows peut afficher « Windows a protégé votre ordinateur » :
      clique sur « Informations complémentaires » puis « Exécuter quand même ».
      (Le jeu n'est pas signé par un éditeur, c'est normal.)
-  4. Si Windows demande l'accès au réseau (pare-feu), coche « Réseaux privés » et clique sur « Autoriser ».
-     C'est nécessaire pour jouer avec ton ami.
+  4. Si Windows demande l'accès au réseau (pare-feu), coche « Réseaux privés » ET « Réseaux publics »
+     puis clique sur « Autoriser ». C'est nécessaire pour jouer avec ton ami (beaucoup de box Wi-Fi
+     sont classées « réseau public » par Windows).
 
 Touches utiles : F11 = plein écran, F5 = recharger le jeu.
 
 Jouer à plusieurs sur le même Wi-Fi (rien à installer en plus)
   1. Chacun lance « Clash of Heroes.exe » sur son PC.
   2. Celui qui héberge : « Multijoueur » > « Créer une partie ».
-  3. Les autres : « Multijoueur » > dans « Ordinateurs trouvés sur ton Wi-Fi », clique sur
-     « Se connecter à ce PC » à côté du PC de l'hôte, puis « Rejoindre » sa partie.
+  3. Les autres : « Multijoueur » > « Créer ou rejoindre une partie ». La partie de l'hôte apparaît dans
+     « Parties sur les autres PC de ton Wi-Fi » : clique sur « Rejoindre ».
+     Sinon, tape l'adresse affichée chez l'hôte (« Ton adresse ») et clique sur « Se connecter ».
   4. Si le PC de l'hôte n'apparaît pas : vérifie que vous êtes sur le même Wi-Fi et que
      le pare-feu a bien été autorisé (réseau privé). Sinon, tu peux aussi taper dans un
      navigateur l'adresse http://ADRESSE-IP-DE-L-HÔTE:8080

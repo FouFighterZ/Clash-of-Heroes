@@ -126,15 +126,44 @@ function spCol(s){return({0:'#4fd17a',3:'#5aa8ff',5:'#7ad8ff',1:'#ff4d5e',4:'#ff
 // (stores live on the functions so they work even when called before this line runs)
 function seedFor(map){const m=seedFor.m||(seedFor.m={});return m[map]||(m[map]=1+((Math.random()*1e6)|0));}
 function mapPreview(map,seed){const MPREV=mapPreview.c||(mapPreview.c={}),key=map+':'+seed;if(MPREV[key])return MPREV[key];if(G.state==='play')return null;
-  setMap(map,'1v1');genMap(seed);const S=MW,cv=document.createElement('canvas');cv.width=cv.height=S;const x=cv.getContext('2d'),img=x.createImageData(S,S),d=img.data;
-  const COL=[[84,140,62],[138,106,66],[216,196,138],[47,106,168],[122,118,112],[38,82,40]];
-  for(let i=0;i<NT;i++){let c=ore[i]>0?[232,192,64]:COL[ter[i]]||COL[0];const sh=ter[i]===3?1:.78+.5*clamp(elev[i]-.35,0,.45);d[i*4]=Math.min(255,c[0]*sh);d[i*4+1]=Math.min(255,c[1]*sh);d[i*4+2]=Math.min(255,c[2]*sh);d[i*4+3]=255;}
-  x.putImageData(img,0,0);return MPREV[key]=cv;}
+  setMap(map,'1v1');genMap(seed);const S=MW,O=400,k=O/S,h=(x,y)=>{const n=Math.sin(x*12.9898+y*78.233)*43758.5453;return n-Math.floor(n);};
+  const COL=[[92,148,64],[146,112,70],[222,202,146],[56,118,176],[128,124,118],[42,92,44]];
+  // base layer: one pixel per tile, with relief light from the top-left, then smoothed when scaled up
+  const base=document.createElement('canvas');base.width=base.height=S;const bx=base.getContext('2d'),img=bx.createImageData(S,S),d=img.data;
+  const E=(x,y)=>elev[ti(clamp(x,0,S-1),clamp(y,0,S-1))];
+  for(let y=0;y<S;y++)for(let x=0;x<S;x++){const i=ti(x,y),t=ter[i],c=COL[t]||COL[0],rel=t===3?0:clamp((E(x-1,y-1)-E(x+1,y+1))*6,-.25,.25),v=.92+h(x,y)*.12+rel;
+    d[i*4]=Math.min(255,c[0]*v);d[i*4+1]=Math.min(255,c[1]*v);d[i*4+2]=Math.min(255,c[2]*v);d[i*4+3]=255;}
+  bx.putImageData(img,0,0);
+  const mask=(test,col)=>{const m=document.createElement('canvas');m.width=m.height=S;const mx=m.getContext('2d'),mi=mx.createImageData(S,S),md=mi.data;
+    for(let i=0;i<NT;i++)if(test(i)){md[i*4]=col[0];md[i*4+1]=col[1];md[i*4+2]=col[2];md[i*4+3]=255;}mx.putImageData(mi,0,0);return m;};
+  const cv=document.createElement('canvas');cv.width=cv.height=O;const c=cv.getContext('2d');c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';
+  c.drawImage(base,0,0,O,O);
+  // shores and water with ripples
+  const wm=mask(i=>ter[i]===3,[56,118,176]);c.save();c.filter='blur('+(k*1.2).toFixed(1)+'px)';c.globalAlpha=.75;c.drawImage(mask(i=>ter[i]===3,[236,220,164]),-k*.4,-k*.4,O+k*.8,O+k*.8);c.restore();
+  c.drawImage(wm,0,0,O,O);c.save();c.globalCompositeOperation='source-atop';c.restore();
+  c.strokeStyle='rgba(200,230,255,.35)';c.lineWidth=Math.max(1,k*.35);for(let y=0;y<S;y+=3)for(let x=0;x<S;x+=4)if(ter[ti(x,y)]===3&&h(x,y)<.35){c.beginPath();c.moveTo(x*k,y*k+k/2);c.quadraticCurveTo(x*k+k,y*k,x*k+k*2,y*k+k/2);c.stroke();}
+  // rocks
+  for(let y=0;y<S;y++)for(let x=0;x<S;x++){if(ter[ti(x,y)]!==4||h(x,y)>.55)continue;const px=(x+.5)*k,py=(y+.5)*k,r=k*(.55+h(y,x)*.5);
+    c.fillStyle='rgba(0,0,0,.25)';c.beginPath();c.ellipse(px+r*.3,py+r*.35,r,r*.6,0,0,PI2);c.fill();c.fillStyle='#8e8a84';c.beginPath();c.moveTo(px-r,py+r*.3);c.lineTo(px-r*.4,py-r*.7);c.lineTo(px+r*.6,py-r*.5);c.lineTo(px+r,py+r*.3);c.closePath();c.fill();
+    c.fillStyle='#b8b4ac';c.beginPath();c.moveTo(px-r*.4,py-r*.7);c.lineTo(px+r*.6,py-r*.5);c.lineTo(px+r*.1,py-r*.1);c.closePath();c.fill();}
+  // forests, tree by tree
+  for(let y=0;y<S;y++)for(let x=0;x<S;x++){if(ter[ti(x,y)]!==5||h(x+3,y)>.8)continue;const px=(x+.2+h(x,y+5)*.6)*k,py=(y+.2+h(y,x+9)*.6)*k,r=k*(.7+h(x+1,y+2)*.45);
+    c.fillStyle='rgba(0,0,0,.28)';c.beginPath();c.arc(px+r*.35,py+r*.4,r,0,PI2);c.fill();c.fillStyle=h(x,y)<.5?'#2c5a26':'#336a2a';c.beginPath();c.arc(px,py,r,0,PI2);c.fill();
+    c.fillStyle='rgba(140,200,90,.35)';c.beginPath();c.arc(px-r*.3,py-r*.35,r*.45,0,PI2);c.fill();}
+  // crystal fields glow
+  c.save();c.globalCompositeOperation='lighter';c.filter='blur('+(k*1.5).toFixed(1)+'px)';c.globalAlpha=.55;c.drawImage(mask(i=>ore[i]>0,[255,200,60]),0,0,O,O);c.restore();
+  for(let y=0;y<S;y++)for(let x=0;x<S;x++){if(!(ore[ti(x,y)]>0)||h(x,y)>.45)continue;const px=(x+.5)*k,py=(y+.5)*k,r=k*.75;
+    c.fillStyle='#c88a18';c.beginPath();c.moveTo(px,py-r*1.4);c.lineTo(px+r*.6,py);c.lineTo(px,py+r*.5);c.lineTo(px-r*.6,py);c.closePath();c.fill();c.fillStyle='#ffe27a';c.beginPath();c.moveTo(px,py-r*1.4);c.lineTo(px+r*.25,py-r*.2);c.lineTo(px-r*.3,py-r*.1);c.closePath();c.fill();}
+  // vignette and frame light
+  const vg=c.createRadialGradient(O/2,O/2,O*.35,O/2,O/2,O*.75);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.45)');c.fillStyle=vg;c.fillRect(0,0,O,O);
+  const lg=c.createLinearGradient(0,0,O,O);lg.addColorStop(0,'rgba(255,240,200,.10)');lg.addColorStop(1,'rgba(0,0,30,.12)');c.fillStyle=lg;c.fillRect(0,0,O,O);
+  return MPREV[key]=cv;}
 function spDraw(cv,map,pos,sids,label,sel,seed){const c=cv.getContext('2d'),W=cv.width,M=MAPS[map],S=M.size,P=mapPts(map),k=(W-20)/S;c.clearRect(0,0,W,W);
   const pv=seed?mapPreview(map,seed):null;c.imageSmoothingEnabled=false;
   if(pv)c.drawImage(pv,10,10,W-20,W-20);else{const g=c.createLinearGradient(0,0,W,W);g.addColorStop(0,'#2f5a2a');g.addColorStop(1,'#3d6b2c');c.fillStyle=g;c.fillRect(10,10,W-20,W-20);}
-  c.strokeStyle='#000a';c.lineWidth=2;c.strokeRect(10,10,W-20,W-20);const C=10+S*k/2;c.fillStyle='rgba(255,210,58,.8)';c.beginPath();c.arc(C,C,5,0,PI2);c.fill();
-  P.forEach((p,i)=>{const x=10+p.x*k,y=10+p.y*k,who=sids.find(s=>pos[s]===i);c.beginPath();c.arc(x,y,18,0,PI2);c.fillStyle=who!=null?spCol(who):'rgba(255,255,255,.18)';c.fill();
+  c.strokeStyle='#0b1017';c.lineWidth=3;c.strokeRect(10,10,W-20,W-20);c.strokeStyle='rgba(255,197,61,.55)';c.lineWidth=1;c.strokeRect(13.5,13.5,W-27,W-27);
+  P.forEach((p,i)=>{const x=10+p.x*k,y=10+p.y*k,who=sids.find(s=>pos[s]===i);c.save();c.shadowColor='rgba(0,0,0,.6)';c.shadowBlur=8;c.beginPath();c.arc(x,y,19,0,PI2);c.fillStyle=who!=null?'#0b1017':'rgba(11,16,23,.55)';c.fill();c.restore();
+    if(who!=null){const gg=c.createRadialGradient(x-5,y-6,2,x,y,17);gg.addColorStop(0,'#ffffffcc');gg.addColorStop(.25,spCol(who));gg.addColorStop(1,spCol(who));c.fillStyle=gg;}else c.fillStyle='rgba(255,255,255,.22)';c.beginPath();c.arc(x,y,16,0,PI2);c.fill();c.beginPath();c.arc(x,y,16,0,PI2);
     c.lineWidth=who!=null&&who===sel?3:1.5;c.strokeStyle=who!=null&&who===sel?'#fff':'#000a';c.stroke();
     c.font='bold 12px Chakra Petch, sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillStyle='#111';const tx=who!=null?label(who):'libre';c.fillText(tx.length>6?(/\d$/.test(tx)?tx[0]+tx.slice(-1):tx.slice(0,6)):tx,x,y);});
   cv.dataset.map=map;}
@@ -183,14 +212,32 @@ function peaceUI(){const b=$('#bpeace');if(!b||!sides[PL])return;const with_=PSI
     if(gtime>=ai.pT&&ai.pT>0){ai.pT=-1;if(ai.pOk){togglePeace(si);ai.brk=gtime+rr(150,320);}else if(hum.includes(PL))feedPush(sideName(si)+' refuse la trêve !','#ff4d5e');}return;}
   if(!hum.length){ai.lone=(ai.lone||0)+dt;if(ai.lone>12){ai.lone=0;togglePeace(si);}return;}ai.lone=0;
   if(ai.brk&&gtime>ai.brk){ai.brk=0;ai.pT=-1;if(hum.includes(PL))feedPush(sideName(si)+' trahit la trêve !','#ff4d5e');togglePeace(si);}};}
-// ===== Desktop app: other PCs on the Wi-Fi running the game (found by the app's local server) =====
+// ===== Desktop app: games of the other PCs on the Wi-Fi, manual connection by IP address, auto-join =====
 {const q=new URLSearchParams(location.search),back=q.get('back');
   if(back&&/^\d{2,5}$/.test(back)){const b=document.createElement('button');b.type='button';b.className='mbtn';b.id='mpback';b.textContent='↩ Revenir sur mon PC';b.style.cssText='position:fixed;left:12px;bottom:12px;z-index:40;width:auto';b.onclick=()=>{location.href='http://localhost:'+back+'/';};
     document.body.appendChild(b);setInterval(()=>{b.hidden=G.state==='play';},500);}
-  let pcT=0;setInterval(async()=>{const mp=$('#mp');if(!NET.lan||!mp||mp.hidden||NET.on)return;if(performance.now()-pcT<1800)return;pcT=performance.now();
-    let L=null;try{const r=await fetch('/lan-hosts',{cache:'no-store'});if(r.ok)L=await r.json();}catch(_){}if(!Array.isArray(L))return;
-    let box=$('#mppcs');if(!box){box=document.createElement('div');box.id='mppcs';const list=$('#mplist');if(!list)return;list.parentNode.after(box);}
-    const here=location.hostname;box.innerHTML='<div class="note" style="margin:4px 0 6px">Ordinateurs trouvés sur ton Wi-Fi (avec le jeu ouvert) :</div>'+(L.length?'':'<div class="empty">Aucun pour l’instant. Ton ami doit avoir lancé Clash of Heroes sur son PC.</div>');
-    for(const h of L){if(h.ip===here)continue;const d=document.createElement('div');d.className='g';const n=document.createElement('b');n.textContent=h.name||h.ip;const t=document.createElement('span');t.className='note';t.textContent=h.ip;
-      const bt=document.createElement('button');bt.type='button';bt.className='mbtn pri';bt.textContent='Se connecter à ce PC';bt.onclick=()=>{const bk=q.get('back')||location.port||'8080';location.href='http://'+h.ip+':'+h.port+'/?back='+bk;};d.append(n,t,bt);box.appendChild(d);}
-    const nt=box.querySelector('.note');if(nt&&location.hostname!=='localhost'&&location.hostname!=='127.0.0.1')nt.textContent='Tu es connecté au PC de ton ami. Rejoins sa partie dans la liste ci-dessus. Autres ordinateurs :';},600);}
+  const bk=()=>q.get('back')||location.port||'8080',go=(ip,port,extra)=>{const nm=($('#mpname')&&$('#mpname').value||'').trim();location.href='http://'+ip+':'+(port||8080)+'/?back='+bk()+'&fac='+menuFac+(nm?'&name='+encodeURIComponent(nm):'')+(extra||'');};
+  {const f=q.get('fac'),nm=q.get('name');if(f&&FAC[f]){const card=document.querySelector('.fac[data-fac="'+f+'"]');if(card)card.click();menuFac=f;}if(nm)setTimeout(()=>{const i=$('#mpname');if(i)i.value=nm.slice(0,18);},300);}
+  const tfetch=async(url,ms)=>{const ac=new AbortController(),t=setTimeout(()=>ac.abort(),ms);try{const r=await fetch(url,{signal:ac.signal,cache:'no-store'});return r.ok?await r.json():null;}catch(_){return null;}finally{clearTimeout(t);}};
+  let myInfo=null,pcT=0;
+  setInterval(async()=>{const mp=$('#mp');if(!NET.lan||!mp||mp.hidden||NET.on)return;if(performance.now()-pcT<1800)return;pcT=performance.now();
+    if(!myInfo)myInfo=await tfetch('/lan-info',1500);const hosts=await tfetch('/lan-hosts',1500);
+    let box=$('#mppcs');if(!box){box=document.createElement('div');box.id='mppcs';const list=$('#mplist');if(!list)return;list.parentNode.after(box);
+      box.innerHTML='<div class="note" style="margin:8px 0 6px">Parties sur les autres PC de ton Wi-Fi :</div><div id="mppcl"></div>'+
+        '<div class="row" style="margin-top:8px;gap:6px;align-items:center"><span class="note">Ou connecte-toi à l’adresse de l’hôte :</span><input id="mpip" placeholder="ex. 192.168.1.23" style="width:150px"><button type="button" class="mbtn" id="mpipgo" style="width:auto">Se connecter</button></div><div class="note" id="mpmyip" style="margin-top:4px"></div>';
+      $('#mpipgo').onclick=()=>{const v=($('#mpip').value||'').trim();const m=v.match(/^(\d{1,3}(?:\.\d{1,3}){3})(?::(\d{2,5}))?$/);if(!m){mpStat('Adresse invalide : tape par exemple 192.168.1.23');return;}go(m[1],m[2]||8080);};}
+    const my=$('#mpmyip');if(my&&myInfo&&myInfo.ips&&myInfo.ips.length)my.innerHTML='Ton adresse (à donner à ton ami si besoin) : <b>'+myInfo.ips.join(' ou ')+'</b>'+(myInfo.port&&myInfo.port!==8080?' (port '+myInfo.port+')':'');
+    const cl=$('#mppcl');if(!cl||!Array.isArray(hosts))return;const here=location.hostname,rows=[];
+    await Promise.all(hosts.filter(h=>h.ip!==here).map(async h=>{const games=await tfetch('http://'+h.ip+':'+h.port+'/lan-games',1500);rows.push({h,games});}));
+    cl.innerHTML='';if(!rows.length){cl.innerHTML='<div class="empty">Aucun autre PC trouvé pour l’instant. Ton ami doit avoir lancé le jeu, et le pare-feu Windows doit autoriser Clash of Heroes.</div>';return;}
+    for(const{h,games}of rows){const d=document.createElement('div');d.className='g';const n=document.createElement('b');n.textContent=h.name||h.ip;const t=document.createElement('span');t.className='note';
+      d.append(n,t);if(!games){t.textContent=h.ip+' · injoignable';}else if(!games.length){t.textContent=h.ip+' · aucune partie créée';}
+      else for(const g of games){t.textContent=h.ip+' · '+(FAC[g.fac]?FAC[g.fac].name:'')+' · '+(g.fmt==='3v3'?'3 contre 3':g.fmt==='2v2'?'2 contre 2':'1 contre 1');
+        const mk=(label,team)=>{const bt=document.createElement('button');bt.type='button';bt.className='mbtn pri';bt.style.width='auto';bt.textContent=label;bt.onclick=()=>go(h.ip,h.port,'&join='+encodeURIComponent(g.code)+'&team='+team);d.appendChild(bt);};
+        if(g.fmt&&g.fmt!=='1v1'){mk('Avec '+(g.name||'lui'),'A');mk('Contre '+(g.name||'lui'),'B');}else mk('Rejoindre '+(g.name||''),'B');}
+      const c2=document.createElement('button');c2.type='button';c2.className='mbtn';c2.style.width='auto';c2.textContent='Ouvrir son salon';c2.onclick=()=>go(h.ip,h.port);d.appendChild(c2);cl.appendChild(d);}},600);
+  // arriving from a "Rejoindre" button: open the multiplayer screen and join that game
+  const jc=q.get('join');if(jc&&/^[a-z0-9]{4,10}$/.test(jc)){const team=q.get('team')==='A'?'A':'B';let tries=0;
+    const tick=setInterval(()=>{tries++;if(tries>60){clearInterval(tick);return;}if(G.state==='play'){clearInterval(tick);return;}
+      if($('#mp')&&$('#mp').hidden){const t=document.querySelector('.playtabs button[data-pt="multi"]');if(t)t.click();openMP();return;}
+      if(NET.room&&NET.lan&&!NET.code){clearInterval(tick);const nm=q.get('name'),i=$('#mpname');if(nm&&i)i.value=nm.slice(0,18);joinMP(jc,team);}},500);}}
