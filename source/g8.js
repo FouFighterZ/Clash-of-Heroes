@@ -39,7 +39,7 @@ function drawFighter(c,x,y,L,dir,t,mv,sc,st){
   const big=L.big?1.32:1,walk=mv?Math.sin(t*13):0,bob=mv?-Math.abs(Math.sin(t*13))*1.3:Math.sin(t*2.4)*.45;
   const atk=st.atk>0,cast=!!st.cast,angry=atk||cast||!!st.ssj||k==='vegeta'||k==='bakugo';
   const top=-20.5*(big>1?1.06:1)+bob,hy=top-5.6,hx=.7,bw=big;
-  const ssjHair=st.ssj&&(k==='goku'||k==='gohan'||k==='vegeta'||k==='trunks'||k==='vegito'||k==='broly');const hc=st.ui?'#dfe6f2':ssjHair?(st.blue?'#4ad8ff':'#ffe14d'):L.hc;
+  const ssjHair=st.ssj&&(k==='goku'||k==='gohan'||k==='vegeta'||k==='trunks'||k==='vegito'||k==='gogeta'||k==='broly');const hc=st.ui?'#dfe6f2':ssjHair?(st.blue?'#4ad8ff':'#ffe14d'):L.hc;
   const suit=L.gi,pants=L.pants||L.gi,sleeve=L.arms==='gi'?L.gi:L.skin;
   // aura
   if(st.aura){c.globalCompositeOperation='lighter';for(let i=0;i<8;i++){const a=-PI/2+(i-3.5)*.3,fl=12+Math.sin(t*20+i*1.7)*4;

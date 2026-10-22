@@ -34,6 +34,8 @@ const LEG={
 for(const f in LEG){FAC[f].legends=Object.keys(LEG[f]);for(const k in LEG[f]){const D=LEG[f][k];D.key=k;D.fac=f;D.hero=true;D.legend=true;D.sight=10;D.sightPx=10*TILE;D.at='temple2';D.req=['temple2'];UDEF[f][k]=D;}}
 UDEF.dbz.vegito={key:'vegito',fac:'dbz',name:'Vegito',hero:true,cost:0,time:1,hp:3400,speed:100,dmg:95,range:150,rof:.7,proj:'ki',fly:true,size:11,look:'vegito',saiyan:true,at:'none',req:[],sight:10,sightPx:320,
   ab:{name:'Final Kamehameha',type:'beam',cd:18,dmg:950,range:320,len:500,w:54,shout:'FINAL KAMÉHAMÉHA !!',col:'#7fd0ff'},desc:'La fusion Potara de Goku et Vegeta. Dure 45 secondes.'};
+UDEF.dbz.gogeta=Object.assign({},UDEF.dbz.vegito,{key:'gogeta',name:'Gogeta',hp:3000,dmg:110,look:'gogeta',
+  ab:{name:'Big Bang Kaméhaméha',type:'beam',cd:18,dmg:1050,range:320,len:500,w:58,shout:'BIG BANG KAMÉHAMÉHA !!',col:'#9fe8ff'},desc:'Goku et Vegeta après la Danse de la Fusion. Moins résistant que Vegito mais frappe plus fort. Dure 45 secondes.'});
 UDEF.neu.jiren={key:'jiren',fac:'neu',name:'Jiren',cost:4000,hp:6800,speed:72,dmg:120,range:26,rof:1,melee:true,splash:40,size:14,sight:11,sightPx:352,look:'jiren',tsc:1.6,regen:25,bounty:4000,at:'none',req:[],desc:'Le guerrier le plus fort de l’univers 11. Rapporte 4000.'};
 EVENTS.push({id:'tournoi',fac:'dbz',name:'Le Tournoi du Pouvoir',col:'#ff5a3a',desc:'Jiren descend dans l’arène et attaque tout le monde. Celui qui l’abat empoche 4000.'});
 Object.assign(FORMS,{giantess:{look:'mtlady',sc:3.3,size:22,speed:62,dmg:92,range:34,rof:1.3,melee:true,splash:50,shield:2000,sightPx:11*TILE},
@@ -72,18 +74,18 @@ function updSpecialB(b,dt){if(b.rise<1)return;const D=b.D,s=sides[b.side];
 // ---- Potara fusion ----
 function fusionPair(list){const g=list.find(e=>e.isU&&!e.dead&&e.key==='goku'&&!e.form),v=list.find(e=>e.isU&&!e.dead&&e.key==='vegeta'&&e.side===(g&&g.side));
   if(!g||!v||hyp(g.x-v.x,g.y-v.y)>160||g.casting||v.casting)return null;return[g,v];}
-function doFusion(g,v){const si=g.side,s=sides[si];if(s.fusion)return;const x=(g.x+v.x)/2,y=(g.y+v.y)/2;
+function doFusion(g,v,kind){kind=kind==='gogeta'?'gogeta':'vegito';const si=g.side,s=sides[si];if(s.fusion)return;const x=(g.x+v.x)/2,y=(g.y+v.y)/2;
   const f=(g.hp/g.max+v.hp/v.max)/2;ents=ents.filter(e=>e!==g&&e!==v);sel=sel.filter(e=>e!==g&&e!==v);
-  const z=mkUnit(si,'vegito',x,y);z.hp=Math.max(z.max*.5,z.max*f);z.ssj=true;z.rank=Math.max(g.rank,v.rank);
+  const z=mkUnit(si,kind,x,y);z.hp=Math.max(z.max*.5,z.max*f);z.ssj=true;z.rank=Math.max(g.rank,v.rank);
   for(const b of dballs)if(b.carrier===g||b.carrier===v)b.carrier=z;s.fusion={g,v,z,t:45};
-  fxRing(x,y,'#ffe14d',120);part('flash',x,y-20,0,0,.6,160,'#ffffff');shake(12);sfx('transform',x,y);if(plSees(z))cutin(z,'FUSION POTARA !!');
-  if(si===PL){msg('Goku et Vegeta fusionnent : VEGITO ! (45 s)','#ffd23a');setSel([z]);}}
+  fxRing(x,y,'#ffe14d',120);part('flash',x,y-20,0,0,.6,160,'#ffffff');shake(12);sfx('transform',x,y);if(plSees(z))cutin(z,kind==='gogeta'?'FU… SION… HA !!':'FUSION POTARA !!');
+  if(si===PL){msg('Goku et Vegeta fusionnent : '+(kind==='gogeta'?'GOGETA':'VEGITO')+' ! (45 s)','#ffd23a');setSel([z]);}}
 function updFusion(dt){for(const si of PSIDES){const s=sides[si],F=s.fusion;if(!F)continue;F.t-=dt;if(F.t>0&&!F.z.dead)continue;
   const z=F.z,x=z.x,y=z.y,f=z.dead?.3:clamp(z.hp/z.max,.3,1);if(!z.dead){ents=ents.filter(e=>e!==z);sel=sel.filter(e=>e!==z);}
   for(const[u,dx]of[[F.g,-14],[F.v,14]]){u.x=x+dx;u.y=y;if(!u.fly&&blockedW(u.x,u.y)){u.x=x;u.y=y;}u.hp=u.max*f;u.order=null;u.target=null;u.path=null;u.casting=null;u.dead=false;ents.push(u);}
   for(const b of dballs)if(b.carrier===z)b.carrier=F.g;s.fusion=null;part('flash',x,y-20,0,0,.5,120,'#ffffff');if(si===PL)msg('La fusion prend fin.','#ffd23a');}}
 function aiFusion(si){const s=sides[si];if(s.fac!=='dbz'||s.fusion)return;const P=fusionPair(ents.filter(e=>e.side===si));if(!P)return;
-  let n=0;for(const e of ents)if(!e.dead&&e.isU&&e.side!==si&&hyp(e.x-P[0].x,e.y-P[0].y)<300)n++;if(n>=4)doFusion(P[0],P[1]);}
+  let n=0;for(const e of ents)if(!e.dead&&e.isU&&e.side!==si&&hyp(e.x-P[0].x,e.y-P[0].y)<300)n++;if(n>=4)doFusion(P[0],P[1],R()<.5?'gogeta':'vegito');}
 // ---- looks ----
 Object.assign(LOOK,{
   beerus:{k:'beerus',skin:'#9a6ab8',hair:'none',gi:'#1a1a22',gi2:'#e3c13b',pants:'#f0e8d0',boots:'#1a1a22',arms:'skin',eye:'#2ad8c8',gold:true},
@@ -91,6 +93,7 @@ Object.assign(LOOK,{
   broly:{k:'broly',skin:'#d8a070',hair:'broly',hc:'#16161e',gi:'#d8a070',gi2:'#e3c13b',pants:'#f0f0e8',boots:'#e3c13b',arms:'skin',eye:'#1b1822',big:true,bare:true},
   c17:{k:'c17',skin:'#f0d2b4',hair:'mikasa',hc:'#16161e',gi:'#4a6a3a',gi2:'#8a6a3a',pants:'#3a4a5a',boots:'#4a3a2a',arms:'gi',eye:'#5a8ad8',scarf:'#ff8a1f'},
   vegito:{k:'vegito',skin:'#f3c9a0',hair:'vegito',hc:'#16161e',gi:'#1d2a6a',gi2:'#ff8a1f',pants:'#1d2a6a',boots:'#f4f4f4',arms:'skin',eye:'#1b1822',vest:'#ff8a1f',potara:true},
+  gogeta:{k:'gogeta',skin:'#f3c9a0',hair:'gogeta',hc:'#16161e',gi:'#1a1a3a',gi2:'#ffb020',pants:'#f4f4f4',boots:'#1a1a22',arms:'skin',eye:'#1b1822',vest:'#1a1a3a'},
   mirio:{k:'mirio',skin:'#f3c9a0',hair:'recruit',hc:'#f2d870',gi:'#e8c040',gi2:'#3a3a44',pants:'#e8c040',boots:'#d8343f',arms:'gi',eye:'#3a6ad6',cape:'#f4f4f4'},
   jeanist:{k:'jeanist',skin:'#f3c9a0',hair:'jeanist',hc:'#f2d870',gi:'#3a5a9a',gi2:'#2a3a6a',pants:'#3a5a9a',boots:'#2a2a30',arms:'gi',eye:'#3a6ad6',collar:true},
   mtlady:{k:'mtlady',skin:'#f6d2b4',hair:'mtlady',hc:'#f2d870',gi:'#8a5ac8',gi2:'#f0e0c0',pants:'#8a5ac8',boots:'#f0e0c0',arms:'gi',eye:'#8a5ac8',mask:true},
@@ -107,6 +110,7 @@ Object.assign(LOOK,{
 Object.assign(HAIR,{
   whis:[[-5,1],[-6,-4],[-4,-8],[-3,-16],[0,-21],[3,-16],[4,-8],[6,-4],[5.6,.5],[3,-3],[0,-2.6],[-3,-3]],
   broly:[[-7,8],[-9,0],[-7.5,-6],[-9.5,-9],[-4,-9],[-3,-13],[0,-9],[3,-13],[4.5,-8.5],[8.5,-9.5],[7,-3],[8.5,3],[6,2],[5,-2],[2,-4],[-1,-3.5],[-3.5,-1.5],[-5,8]],
+  gogeta:[[-6,1],[-7.5,-5],[-6,-11],[-8,-15],[-3,-12],[-1.5,-18],[1.5,-12],[4.5,-17],[5,-10],[8,-11],[6.5,-4],[6,1],[4,-3],[2,-5],[0,-3],[-2,-4.5],[-4,-1]],
   vegito:[[-5.5,0],[-6.5,-6],[-5.5,-14],[-2.5,-10],[-1,-17.5],[1,-11],[3,-16.5],[4,-9],[6.5,-12.5],[6,-4],[5.5,0],[4,-3],[4.5,2.5],[3,-1.5],[2,-6],[0,-3],[-2,-4],[-4,-1]],
   jeanist:[[-6,2],[-6.8,-3],[-4,-7.5],[1,-8],[5.5,-6],[7,-2],[7,3],[5.4,4],[4.6,0],[1.5,-.5],[-1,-2.5],[-4,-1]],
   mtlady:[[-7,9],[-7.5,-2],[-5,-7],[0,-8.4],[4.5,-7],[7,-3],[6.8,1],[4.4,-2.4],[1.6,-1.2],[-.6,-3],[-3.4,-2],[-4.6,4],[-5,9]],

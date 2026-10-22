@@ -63,7 +63,7 @@ function heroFx(c,u,x,y,lift,sc){const k=u.key,t=u.anim,f=u.face,hy=y-lift,atk=u
   case'jiren':if(R()<.1)part('fire',x+rr(-10,10),hy-rr(10,40),0,-20,.4,rr(4,7),'#ff3a2a');break;
   case'android':case'c17':{if(k==='android'){c.globalCompositeOperation='lighter';drawGlow(c,x+f*4*sc,hy-25*sc,3,'#ff3a3a',.8);c.globalCompositeOperation='source-over';}break;}
   case'namekw':if(atk&&u.target&&!u.target.dead){const tx=u.target.x,ty=u.target.y-(u.target.z||0)-14;c.strokeStyle=OUT;c.lineWidth=4;c.lineCap='round';c.beginPath();c.moveTo(x+f*6,hy-16);c.lineTo(tx,ty);c.stroke();c.strokeStyle='#63c04c';c.lineWidth=2.6;c.stroke();}break;
-  case'goku':case'vegeta':case'gohan':case'trunks':case'vegito':if(atk&&!u.D.melee){c.globalCompositeOperation='lighter';drawGlow(c,x+f*12*sc,hy-16*sc,8,u.ssj?'#ffe46a':'#9fe6ff',.9);c.globalCompositeOperation='source-over';}break;
+  case'goku':case'vegeta':case'gohan':case'trunks':case'vegito':case'gogeta':if(atk&&!u.D.melee){c.globalCompositeOperation='lighter';drawGlow(c,x+f*12*sc,hy-16*sc,8,u.ssj?'#ffe46a':'#9fe6ff',.9);c.globalCompositeOperation='source-over';}break;
   case'sasha':if(atk){c.strokeStyle='#e8e2c8';c.lineWidth=.8;c.beginPath();c.moveTo(x+f*4,hy-20);c.lineTo(x+f*12,hy-16);c.stroke();}break;
   }}
 // --- extra projectile looks ---

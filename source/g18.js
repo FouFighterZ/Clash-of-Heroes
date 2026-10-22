@@ -166,7 +166,7 @@ function runCmd(c){if(!c||typeof c!=='object')return;const SI=NET.gs,byId=id=>en
   case'pri':{const b=mine(c.b);if(b&&b.isB&&sides[SI].q[b.key])sides[SI].primary[b.key]=b;break;}
   case'sup':launchSuper(SI,num(c.x),num(c.y));break;
   case'res':if(UPG_BY_ID[c.id]&&UPG[sides[SI].fac].includes(UPG_BY_ID[c.id]))startResearch(SI,c.id);break;
-  case'fuse':{const g=mine(c.g),v=mine(c.v);if(g&&v&&fusionPair([g,v]))doFusion(g,v);break;}
+  case'fuse':{const g=mine(c.g),v=mine(c.v);if(g&&v&&fusionPair([g,v]))doFusion(g,v,c.k);break;}
   case'wish':if(NET.wishFor===SI&&WISHES[c.k]){NET.wishFor=null;grantWish(SI,c.k);}break;}}
 // ---------- guest: applying snapshots ----------
 function applySnap(d){if(!NET.on&&d.ev){for(const[s,e]of d.ev)if(s===NET.lastEv+1&&e.t==='start'){NET.lastEv=s;NET.peer=NET.peer||null;startGuest(e);}if(!NET.on)return;}
@@ -229,7 +229,7 @@ NETW('placeBuilding',(o,si,key,tx,ty)=>{const s=sides[si];if(!s.prodB||!s.prodB.
 NETW('sellBuilding',(o,b)=>{if(b.key==='hq')return;NET.cmd({c:'sell',b:b.id});});
 NETW('launchSuper',(o,si,x,y)=>{const s=sides[si];if(s.sp<SUPER[s.fac].charge||!has(si,'temple+'))return false;NET.cmd({c:'sup',x:NQ(x),y:NQ(y)});return true;});
 NETW('startResearch',(o,si,id)=>{const s=sides[si],u=UPG_BY_ID[id];if(s.res||s.ups.includes(id)||!has(si,'lab')||s.credits<u.cost)return false;NET.cmd({c:'res',id});return true;});
-NETW('doFusion',(o,g,v)=>{NET.cmd({c:'fuse',g:g.id,v:v.id});});
+NETW('doFusion',(o,g,v,k)=>{NET.cmd({c:'fuse',g:g.id,v:v.id,k:k==='gogeta'?'gogeta':'vegito'});});
 function setRally(b,x,y){b.rally={x,y};if(NET.client)NET.cmd({c:'ral',b:b.id,x:NQ(x),y:NQ(y)});}
 function setRepair(b,v){b.repairing=v;if(NET.client)NET.cmd({c:'rep',b:b.id,v:!!v});}
 function harvRet(u){u.order=null;u.hs='ret';if(NET.client)NET.cmd({c:'hr',u:[u.id]},[u.id]);}

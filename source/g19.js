@@ -1,6 +1,6 @@
 // ===== Real soundtrack files per anime (falls back to the generated score when an anime has none) =====
 const TRACKS={dbz:['dbz_battle_01.ogg','dbz_battle_02.ogg','dbz_battle_03.ogg','dbz_battle_04.ogg','dbz_battle_26.ogg'],mha:['you_say_run.ogg'],aot:[],sl:['arise.mp3','beru_theme.mp3','dark_aria.mp3','opening_level.mp3','statue_of_god.mp3'],opm:['the_hero_opening.ogg','seigi_shikkou.ogg'],
-  sds:['sds_demon_meliodas.mp3','sds_escanor.mp3','sds_hendrickson.mp3','sds_dora.mp3'],
+  sds:['sds_demon_meliodas.mp3','sds_escanor.mp3','sds_hendrickson.mp3','sds_dora.mp3','sds_oh.mp3'],
   hxh:['hxh_boys_be_courageous.ogg','hxh_legend_of_martial_artist.ogg','hxh_marionette_life.ogg','hxh_mosa_domo_no_heigei.ogg','hxh_opening.ogg']};
 const FMUS={el:null,fac:null,list:[],i:0,fadeT:null,failed:new Set()};
 const fmVol=()=>muted?0:VOL.master*VOL.music;
