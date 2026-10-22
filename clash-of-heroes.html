@@ -277,7 +277,7 @@ svg.i{width:18px;height:18px;flex:none;fill:currentColor}
       <div class="opt"><span>Vitesse</span><div class="seg" id="speed"><button type="button" data-s="0.75">Lente</button><button type="button" data-s="1" class="on">Normale</button><button type="button" data-s="1.35">Rapide</button></div></div>
     </div>
     <button type="button" class="go" id="bgo">Combattre !</button>
-    <div class="snd">Jeu PC · souris et clavier · <b>version 48</b></div>
+    <div class="snd">Jeu PC · souris et clavier · <b>version 49</b></div>
   </div>
 </div>
 <div class="ovl" id="pausem" hidden><div class="box">
@@ -5187,7 +5187,10 @@ function keepsPassage(key,tx,ty){if(key==='wall')return true;const D=BDEF[key],r
   if(ring.length<2)return true;const now=passLabel(ring,foot);const parts=new Set(now);if(parts.size<2)return true;
   const before=passLabel(ring,null);const m=new Map();for(let k=0;k<ring.length;k++){const b=before[k],n=now[k];if(m.has(b)&&m.get(b)!==n)return false;m.set(b,n);}return true;}
 let passMemo={k:''};
+// one free tile is required between two buildings (walls excepted), so nobody gets stuck behind them
+function touchesBuilding(key,tx,ty){const D=BDEF[key];for(let y=ty-1;y<=ty+D.h;y++)for(let x=tx-1;x<=tx+D.w;x++){if(x<0||y<0||x>=MW||y>=MH)continue;const i=ti(x,y);if(blocked[i]===2&&bAt[i]&&bAt[i].key!=='wall')return true;}return false;}
 {const _cp=canPlace;canPlace=function(si,key,tx,ty,gap){if(!_cp(si,key,tx,ty,gap))return false;if(gap||key==='wall')return true;
+  if(touchesBuilding(key,tx,ty))return false;
   const k=key+','+tx+','+ty+','+ents.length+','+Math.floor(gtime);if(passMemo.k===k)return passMemo.v;const v=keepsPassage(key,tx,ty);passMemo={k,v};return v;};}
 // AI: skip spots that would cut a passage and look again
 {const _fs=findSpot;findSpot=function(si,key){if(key==='wall')return _fs(si,key);const bad=new Set(),_c=canPlace;
@@ -5195,7 +5198,7 @@ let passMemo={k:''};
     for(let n=0;n<8;n++){const sp=_fs(si,key);if(!sp||keepsPassage(key,sp.x,sp.y))return sp;bad.add(sp.x+','+sp.y);}return null;}finally{canPlace=_c;}};}
 // placement preview: tell the player why the spot is refused
 {const _ht=typeof hintText==='function'?hintText:null;if(_ht)hintText=function(){if(mode&&mode.type==='place'&&mode.key!=='wall'){const D=BDEF[mode.key],p=placeTile();
-  if(p&&!keepsPassage(mode.key,p.x,p.y))return'Impossible ici : ce bâtiment bloquerait un passage';}return _ht();};}
+  if(p&&touchesBuilding(mode.key,p.x,p.y))return'Laisse une case libre entre deux bâtiments';if(p&&!keepsPassage(mode.key,p.x,p.y))return'Impossible ici : ce bâtiment bloquerait un passage';}return _ht();};}
 // training room: a button in the unit panel sends the selected units into the nearest room with free places
 function nearestTrainB(L){let best=null,bd=1e9;const c=L[0];for(const b of ents)if(b.isB&&!b.dead&&b.side===PL&&b.key==='training'&&b.rise>=1&&(b.inside||[]).length<trCap(b)){const d=hyp(b.x-c.x,b.y-c.y);if(d<bd){bd=d;best=b;}}return best;}
 {const _ru=refreshUI;refreshUI=function(){_ru();const p=$('#selp');if(!p)return;const L=sel.filter(e=>!e.dead&&e.isU&&e.side===PL&&!e.D.harv&&!e.D.veh);let bx=p.querySelector('#xtrain');
