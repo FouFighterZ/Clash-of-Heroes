@@ -1,0 +1,299 @@
+<title>Clash of Heroes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&family=Chakra+Petch:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: resource bar on top, battlefield in the middle, command HUD at the bottom (minimap | selection | production). */
+:root{
+  --bg:#080b10; --steel:#151c26; --steel2:#1d2633; --steel3:#273243; --line:#2f3b4d; --fg:#eef2f8; --muted:#8e9bb0; --dim:#5d6a7e;
+  --acc:#ff8a1f; --acc2:#ffd23a; --good:#4fd17a; --bad:#ff4d5e; --warn:#ffc53d; --cyan:#6fd8ff;
+  --f-disp:'Bangers','Impact','Arial Black',sans-serif; --f-ui:'Chakra Petch','Segoe UI',system-ui,sans-serif;
+  color-scheme:dark;
+}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0;overflow:hidden;background:var(--bg);color:var(--fg);font-family:var(--f-ui);user-select:none;-webkit-user-select:none}
+button{font-family:var(--f-ui);color:inherit}
+button:focus-visible{outline:2px solid var(--acc2);outline-offset:1px}
+svg.i{width:18px;height:18px;flex:none;fill:currentColor}
+#app{position:fixed;inset:0;display:flex;flex-direction:column}
+/* ---------- top bar ---------- */
+#top{height:50px;flex:none;display:flex;align-items:center;gap:10px;padding:0 10px;background:linear-gradient(180deg,#1e2836,#111720);border-bottom:2px solid #000;box-shadow:inset 0 -1px 0 color-mix(in srgb,var(--acc) 55%,transparent);position:relative;z-index:5}
+.ib{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 11px;background:var(--steel2);border:1px solid var(--line);border-radius:6px;cursor:pointer;font-weight:600;font-size:13px}
+.ib:hover{border-color:var(--acc);background:var(--steel3)}
+.ib.sq{width:34px;padding:0;justify-content:center}
+#top .res{flex:1;display:flex;justify-content:center;gap:10px;min-width:0}
+.chip{display:flex;align-items:center;gap:8px;height:36px;padding:0 12px;background:#0b1017;border:1px solid var(--line);border-radius:6px;position:relative;white-space:nowrap;font-family:var(--f-ui)}
+.chip .lbl{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.chip.money{color:var(--warn)} .chip.money b{font-family:var(--f-disp);font-size:26px;letter-spacing:1px;font-weight:400;font-variant-numeric:tabular-nums;min-width:70px}
+.chip .delta{font-size:11px;color:var(--good);font-weight:700;min-width:44px}
+.chip.power{color:var(--good)} .chip.power b{font-size:13px;color:var(--fg);font-variant-numeric:tabular-nums}
+.pbar{width:90px;height:10px;background:#1a222e;border-radius:5px;overflow:hidden;border:1px solid #000}
+.pbar i{display:block;height:100%;background:linear-gradient(90deg,#3fbf6a,#8af0a8);transition:width .3s}
+.chip.power.low{color:var(--bad);animation:pulse 1s infinite} .chip.power.low .pbar i{background:linear-gradient(90deg,#c22a3a,#ff6a7a)}
+.chip.db{color:#ffb52a}
+.balls{display:flex;gap:4px}
+.balls .b{width:13px;height:13px;border-radius:50%;background:#1e2733;border:1px solid #39465a}
+.balls .b.me{background:radial-gradient(circle at 35% 30%,#fff7c8,#ffb52a 45%,#c85e08);border-color:#7a3a0a;box-shadow:0 0 6px #ffb52a90}
+.balls .b.en{background:radial-gradient(circle at 35% 30%,#ffd6d6,#ff4d5e 50%,#8a0a1a);border-color:#5a0a10}
+.chip.super{cursor:pointer;gap:10px;padding:0 12px 0 6px;color:var(--muted);text-align:left;line-height:1.05}
+.chip.super .ring{width:28px;height:28px}
+.chip.super .ring svg{width:28px;height:28px;transform:rotate(-90deg)}
+.chip.super b{font-family:var(--f-disp);font-weight:400;font-size:18px;letter-spacing:1px;color:var(--fg)}
+.chip.super small{font-size:11px;color:var(--muted)}
+.chip.super.ready{background:linear-gradient(90deg,color-mix(in srgb,var(--acc) 85%,#000),var(--acc2));color:#111;border-color:var(--acc2);animation:glow 1.1s infinite}
+.chip.super.ready b,.chip.super.ready small{color:#111}
+.chip.super.off{opacity:.55;cursor:help}
+#clock{font-variant-numeric:tabular-nums;font-weight:700;color:var(--muted);font-size:14px;min-width:46px;text-align:right}
+@keyframes pulse{50%{opacity:.55}} @keyframes glow{50%{box-shadow:0 0 16px var(--acc2)}}
+/* ---------- battlefield ---------- */
+#view{flex:1;position:relative;min-height:0;overflow:hidden}
+#cv{display:block;width:100%;height:100%}
+.obj{position:absolute;top:10px;left:10px;width:280px;background:#0b1017e6;border:1px solid var(--line);border-left:3px solid var(--acc);border-radius:6px;padding:9px 11px;font-size:12.5px;z-index:3}
+.obj h4{margin:0 0 6px;font-family:var(--f-disp);font-weight:400;font-size:20px;letter-spacing:1px;display:flex;justify-content:space-between;align-items:center}
+.obj h4 button{background:none;border:0;color:var(--muted);cursor:pointer;font-size:12px;font-family:var(--f-ui)}
+.obj ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px}
+.obj li{display:flex;gap:8px;align-items:flex-start;color:var(--muted);line-height:1.3}
+.obj li .ck{width:15px;height:15px;border-radius:4px;border:1.5px solid var(--dim);flex:none;margin-top:1px;display:grid;place-items:center;color:#0b1017}
+.obj li.done{color:var(--dim);text-decoration:line-through}
+.obj li.done .ck{background:var(--good);border-color:var(--good)}
+.obj li.cur{color:var(--fg);font-weight:600}
+.obj li.cur .ck{border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 30%,transparent)}
+.obj .bonus{margin-top:7px;padding-top:7px;border-top:1px solid var(--line);color:#ffb52a;font-size:12px}
+#feed{position:absolute;left:10px;bottom:10px;display:flex;flex-direction:column;gap:5px;z-index:3;width:min(430px,60%);pointer-events:none}
+.fe{display:flex;align-items:center;gap:8px;background:#0b1017e6;border:1px solid var(--line);border-left:3px solid var(--c,var(--muted));border-radius:5px;padding:6px 10px;font-size:13px;font-weight:600;animation:fin .25s ease-out;transition:opacity .6s}
+.fe svg{color:var(--c);width:16px;height:16px;fill:currentColor;flex:none} .fe.click{pointer-events:auto;cursor:pointer} .fe.click:hover{background:#1d2633}
+.fe .go2{margin-left:auto;font-size:11px;color:var(--muted);white-space:nowrap}
+@keyframes fin{from{transform:translateX(-20px);opacity:0}}
+#banner{position:absolute;left:50%;top:16%;transform:translateX(-50%) skewX(-8deg);font-family:var(--f-disp);font-size:clamp(30px,4vw,54px);letter-spacing:2px;color:#fff;
+  text-shadow:3px 3px 0 #000,0 0 18px var(--bc,#ff4d5e);white-space:nowrap;pointer-events:none;z-index:4;opacity:0;transition:opacity .4s}
+#banner.on{opacity:1;animation:bpop .35s ease-out}
+@keyframes bpop{from{transform:translateX(-50%) skewX(-8deg) scale(1.6)}}
+#hint{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);background:#0b1017e8;border:1px solid var(--acc2);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600;color:var(--acc2);z-index:3;white-space:nowrap}
+/* ---------- bottom HUD ---------- */
+#hud{height:222px;flex:none;display:grid;grid-template-columns:minmax(0,1fr) 540px;gap:8px;padding:8px;box-sizing:border-box;
+  background:linear-gradient(180deg,#1b2431,#0f141c);border-top:3px solid var(--acc);box-shadow:0 -6px 18px #0008;position:relative;z-index:5}
+.pane{background:linear-gradient(180deg,var(--steel),#0e131a);border:1px solid var(--line);border-radius:6px;position:relative;min-width:0;min-height:0}
+.mmwrap{position:absolute;top:10px;right:10px;width:224px;height:224px;padding:5px;box-sizing:border-box;background:linear-gradient(180deg,#1b2431,#0f141c);border:1px solid var(--line);border-top:3px solid var(--acc);border-radius:6px;z-index:3;box-shadow:0 6px 18px #0009}
+#mini{width:100%;height:100%;display:block;cursor:pointer;border-radius:3px}
+.selp{padding:10px 12px;display:flex;gap:14px;overflow:hidden}
+.prod{padding:6px;display:flex;flex-direction:column;gap:6px}
+.tabs{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.resg{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.rbtn{position:relative;overflow:hidden;text-align:left;padding:5px 8px;background:#0b1017;border:1px solid var(--line);border-radius:5px;cursor:pointer;line-height:1.2}
+.rbtn b{display:block;font-size:12px}.rbtn small{font-size:10.5px;color:var(--muted)}.rbtn i{position:absolute;left:0;bottom:0;height:3px;background:var(--cyan)}
+.rbtn:hover{border-color:var(--cyan)}.rbtn.done{border-color:var(--good);opacity:.7;cursor:default}.rbtn.done b{color:var(--good)}.rbtn.cur{border-color:var(--cyan)}
+.tab{position:relative;display:flex;align-items:center;justify-content:center;gap:4px;height:32px;background:#0b1017;border:1px solid var(--line);border-radius:5px;cursor:pointer;font-weight:700;font-size:9.5px;letter-spacing:.03em;text-transform:uppercase;color:var(--muted)}
+.tab svg{width:15px;height:15px;fill:currentColor}
+.tab:hover{color:var(--fg);border-color:var(--dim)}
+.tab.on{background:linear-gradient(180deg,color-mix(in srgb,var(--acc) 80%,#fff),var(--acc));color:#111;border-color:var(--acc)}
+.tab .dot{position:absolute;top:-5px;right:-4px;min-width:16px;height:16px;border-radius:8px;background:var(--acc2);color:#111;font-size:10px;display:grid;place-items:center;padding:0 3px;box-shadow:0 0 6px var(--acc2)}
+#grid{flex:1;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:1fr 1fr;gap:5px;min-height:0}
+.card{position:relative;display:flex;flex-direction:column;background:#0a0e14;border:1px solid var(--line);border-radius:5px;cursor:pointer;padding:0;overflow:hidden;min-height:0;text-align:left}
+.card canvas{flex:1;min-height:0;width:100%;display:block;object-fit:cover}
+.card .ft{display:flex;justify-content:space-between;gap:4px;padding:2px 5px 3px;background:#0b1017;border-top:1px solid #222c3a;font-size:11px;line-height:1.2}
+.card .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.card .cs{color:var(--warn);font-weight:700;font-variant-numeric:tabular-nums}
+.card .hk{position:absolute;top:3px;left:3px;width:17px;height:17px;border-radius:4px;background:#000b;border:1px solid #fff4;font-size:10.5px;font-weight:700;display:grid;place-items:center;color:#fff;text-transform:uppercase}
+.card .cnt{position:absolute;top:1px;right:5px;font-family:var(--f-disp);font-size:20px;color:#fff;text-shadow:0 0 3px #000,0 0 3px #000}
+.card .pg{position:absolute;inset:0;pointer-events:none}
+.card .pct{position:absolute;left:0;right:0;top:30%;text-align:center;font-family:var(--f-disp);font-size:22px;color:#fff;text-shadow:0 0 4px #000,0 0 4px #000;pointer-events:none}
+.card .lock{position:absolute;inset:0;background:#05080cd8;display:none;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10.5px;color:var(--muted);text-align:center;padding:4px;line-height:1.2}
+.card .lock svg{width:16px;height:16px;fill:var(--dim)}
+.card.locked .lock{display:flex}
+.card .rdy{position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;background:color-mix(in srgb,var(--acc) 40%,transparent);font-family:var(--f-disp);font-size:24px;color:#fff;text-shadow:2px 2px 0 #000;pointer-events:none;animation:pulse .9s infinite}
+.card .rdy small{font-family:var(--f-ui);font-size:10.5px;font-weight:700;text-shadow:0 0 3px #000}
+.card.ready .rdy{display:flex}
+.card.poor .cs{color:var(--bad)}
+.card:hover:not(.locked){border-color:var(--acc);box-shadow:0 0 0 1px var(--acc) inset}
+.card.hint{border-color:var(--acc2);box-shadow:0 0 12px var(--acc2);animation:glow 1.2s infinite}
+.card.busy{opacity:.5}
+/* selection panel */
+.empty{display:flex;flex-direction:column;gap:7px;color:var(--muted);font-size:13px;line-height:1.45}
+.empty h5{margin:0;font-family:var(--f-disp);font-weight:400;font-size:22px;color:var(--fg);letter-spacing:1px}
+.empty .tp{display:flex;gap:8px;align-items:flex-start}
+.empty .tp svg{width:16px;height:16px;fill:var(--acc2);flex:none;margin-top:2px}
+.empty b{color:var(--fg)}
+.por{width:150px;flex:none;display:flex;flex-direction:column;gap:6px}
+.por canvas{width:150px;height:118px;border-radius:5px;border:1px solid var(--line);background:radial-gradient(circle at 50% 40%,#2a3647,#0b1017)}
+.info{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px}
+.info .nm{font-family:var(--f-disp);font-size:28px;letter-spacing:1px;line-height:1}
+.tags{display:flex;gap:5px;flex-wrap:wrap}
+.tg{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:3px;background:var(--steel3);color:var(--muted)}
+.tg.hero{background:var(--acc2);color:#111} .tg.rank{background:#3a2f0a;color:var(--acc2)} .tg.enemy{background:#4a141c;color:#ffb0b8} .tg.ssj{background:#ffe14d;color:#111} .tg.db{background:#5a3008;color:#ffcf7a}
+.hpbig{position:relative;height:17px;background:#2a1418;border-radius:4px;overflow:hidden;border:1px solid #000}
+.hpbig i{display:block;height:100%;background:linear-gradient(180deg,#7bea9a,#36b15e);transition:width .2s}
+.hpbig span{position:absolute;inset:0;display:grid;place-items:center;font-size:11px;font-weight:700;text-shadow:0 0 3px #000}
+.xpl{display:flex;gap:8px;align-items:center;font-size:10.5px;color:var(--muted)} .xpb{flex:1;height:5px;background:#1a1f28;border-radius:3px;overflow:hidden} .xpb i{display:block;height:100%;background:var(--acc2)}
+.stats{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+.stats span{display:flex;align-items:center;gap:5px} .stats b{color:var(--fg)} .stats svg{width:14px;height:14px;fill:var(--acc)}
+.desc{font-size:12px;color:var(--muted);line-height:1.35}
+.acts{width:196px;flex:none;display:flex;flex-direction:column;gap:6px}
+.abil{--ac:var(--acc);position:relative;display:flex;gap:9px;align-items:center;padding:7px 9px;background:linear-gradient(90deg,color-mix(in srgb,var(--ac) 32%,#0b1017),#0b1017);border:1px solid var(--ac);border-radius:6px;cursor:pointer;text-align:left;overflow:hidden;min-height:50px}
+.abil .ico{width:32px;height:32px;border-radius:50%;flex:none;background:radial-gradient(circle at 35% 35%,#fff,var(--ac) 55%,#000);box-shadow:0 0 10px var(--ac)}
+.abil b{display:block;font-size:13px} .abil small{font-size:10.5px;color:var(--muted);display:block;line-height:1.25}
+.abil .key{position:absolute;top:4px;right:6px;font-size:10.5px;font-weight:700;background:#000a;border:1px solid #fff4;border-radius:3px;padding:0 4px}
+.abil .cdv{position:absolute;inset:0;background:#05080cd0;display:none;place-items:center;font-family:var(--f-disp);font-size:24px}
+.abil.cool .cdv{display:grid}
+.cmd{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.cbtn{display:flex;align-items:center;gap:6px;height:32px;padding:0 8px;background:var(--steel2);border:1px solid var(--line);border-radius:5px;cursor:pointer;font-size:12px;font-weight:600}
+.cbtn svg{width:14px;height:14px;fill:currentColor;flex:none}
+.cbtn:hover{border-color:var(--acc)} .cbtn .k{margin-left:auto;font-size:10px;color:var(--muted)}
+.cbtn.on{border-color:var(--good);color:var(--good)} .cbtn.danger:hover{border-color:var(--bad);color:var(--bad)}
+.multi{flex:1;display:flex;flex-wrap:wrap;gap:5px;align-content:flex-start;overflow:hidden;min-width:0}
+.mu{width:46px;height:54px;background:#0b1017;border:1px solid var(--line);border-radius:4px;cursor:pointer;display:flex;flex-direction:column;overflow:hidden;padding:0}
+.mu canvas{width:46px;height:48px} .mu i{display:block;height:5px;background:var(--good)} .mu.hero{border-color:var(--acc2)}
+.mu:hover{border-color:var(--acc)}
+.queue{display:flex;gap:4px;flex-wrap:wrap}
+.queue span{width:36px;height:36px;border:1px solid var(--line);border-radius:4px;background:#0b1017;position:relative;overflow:hidden;display:block}
+.queue canvas{width:36px;height:36px;display:block}
+.queue i{position:absolute;left:0;bottom:0;height:3px;background:var(--acc2)}
+/* tooltip */
+#tip{position:fixed;z-index:30;pointer-events:none;background:linear-gradient(180deg,#1b2431f8,#0d1219f8);border:1px solid var(--acc);border-radius:7px;padding:10px 12px;font-size:12.5px;width:260px;display:none;line-height:1.4;box-shadow:0 8px 24px #000a}
+#tip .h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:4px}
+#tip .h b{font-family:var(--f-disp);font-weight:400;font-size:21px;letter-spacing:.5px}
+#tip .c{color:var(--warn);font-weight:700;white-space:nowrap} #tip .r{color:var(--bad);font-weight:600;margin-top:5px} #tip .m{color:var(--muted);font-size:11px;margin-top:5px}
+#tip .sb{display:grid;grid-template-columns:64px 1fr;gap:4px 8px;align-items:center;margin-top:7px;font-size:11px;color:var(--muted)}
+#tip .sb i{display:block;height:6px;border-radius:3px;background:var(--acc)}
+#tip .ab{margin-top:7px;padding:5px 7px;border-radius:4px;background:#0006;border-left:3px solid var(--acc2)}
+/* overlays */
+.ovl{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 35%,#1c2738f2,#05070bfa 70%);overflow-y:auto;padding:24px 16px;box-sizing:border-box}
+#menu{background:#05070b}
+#mbg{position:fixed;inset:0;width:100%;height:100%;z-index:0}
+.menu{position:relative;z-index:1;width:min(1320px,100%);display:flex;flex-direction:column;gap:18px;align-items:center;margin:auto}
+.logo{font-family:var(--f-disp);font-size:clamp(56px,8vw,104px);line-height:.88;letter-spacing:2px;text-align:center;color:#fff;text-shadow:4px 4px 0 #d8343f,9px 9px 0 #000;transform:rotate(-2deg);margin:0;font-weight:400}
+.logo small{display:block;font-size:.3em;letter-spacing:.24em;color:var(--warn);text-shadow:2px 2px 0 #000;margin-top:12px}
+.facs{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;width:100%}
+.fac{background:linear-gradient(160deg,#18212deb,#0c1118eb);border:2px solid var(--line);border-radius:10px;padding:10px;cursor:pointer;display:grid;grid-template-columns:1fr;gap:6px;justify-items:center;align-items:start;text-align:left;position:relative;overflow:hidden;transition:transform .15s,border-color .15s}
+.fac:hover{transform:translateY(-3px)}
+.facs>.fac{grid-template-columns:minmax(0,1fr)}.facs>.fac>*{grid-column:1/-1;min-width:0}.fac canvas.big{width:88px;height:88px}.fac>div{width:100%}
+.fac h3{font-family:var(--f-disp);font-size:24px;letter-spacing:1px;margin:0;font-weight:400;line-height:1}
+.fac p{margin:5px 0 7px;font-size:11px;color:var(--muted);line-height:1.45}
+.fac .an{font-size:11px;text-transform:uppercase;letter-spacing:.16em;font-weight:700}
+.fac .ro{display:flex;gap:3px;grid-column:1/-1;flex-wrap:wrap}.fac .ro canvas{width:34px;height:34px;border-radius:5px;background:#0008;border:1px solid var(--line)}
+.fac .pros{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}.fac .pros span{font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:3px;background:#0008;border:1px solid var(--line)}
+.fac.slv .an{color:#a88aff}.fac.on.slv{border-color:#8a5aff;box-shadow:0 0 0 3px #8a5aff40,0 10px 30px #8a5aff25}.fac.slv .sel{background:#8a5aff;color:#111}.fac.opm .an{color:#ffc21a}.fac.on.opm{border-color:#ffc21a;box-shadow:0 0 0 3px #ffc21a40,0 10px 30px #ffc21a25}.fac.opm .sel{background:#ffc21a;color:#111}.fac.hxh .an{color:#5affd8}.fac.sds .an{color:#ff6a6a}.fac.on.sds{border-color:#c8202e;box-shadow:0 0 0 3px #c8202e40,0 10px 30px #c8202e25}.fac.sds .sel{background:#c8202e;color:#fff}.fac.on.hxh{border-color:#2ab8a8;box-shadow:0 0 0 3px #2ab8a840,0 10px 30px #2ab8a825}.fac.hxh .sel{background:#2ab8a8;color:#111}.fac.dbz .an{color:#ff8a1f}.fac.mha .an{color:#2fd27a}.fac.aot .an{color:#6fa4ff}.fac.on.aot{border-color:#4f8be0;box-shadow:0 0 0 3px #4f8be040,0 10px 30px #4f8be025}.fac.aot .sel{background:#4f8be0;color:#111}
+.fac.on.dbz{border-color:#ff8a1f;box-shadow:0 0 0 3px #ff8a1f40,0 10px 30px #ff8a1f25}.fac.on.mha{border-color:#2fd27a;box-shadow:0 0 0 3px #2fd27a40,0 10px 30px #2fd27a25}
+.fac .sel{position:absolute;top:10px;right:12px;font-family:var(--f-disp);font-size:16px;letter-spacing:1px;padding:2px 10px;border-radius:4px;display:none}
+.fac.on .sel{display:block}.fac.dbz .sel{background:#ff8a1f;color:#111}.fac.mha .sel{background:#2fd27a;color:#111}
+.howto{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:100%}
+.step{background:#0b1017d8;border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;gap:10px;align-items:flex-start}
+.step .n{font-family:var(--f-disp);font-size:30px;line-height:1;color:var(--warn)}
+.step b{display:block;font-size:14px;margin-bottom:2px} .step span{font-size:12px;color:var(--muted);line-height:1.35}
+.opts{display:flex;gap:22px;align-items:center;flex-wrap:wrap;justify-content:center}
+.opt{display:flex;gap:10px;align-items:center}.opt>span{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.12em;font-weight:700}
+.seg{display:flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{font-weight:700;background:#0b1017;color:var(--muted);border:0;padding:8px 14px;cursor:pointer}
+.seg button.on{background:var(--warn);color:#111}
+#mapsel button{line-height:1.1;padding:6px 11px}#mapsel button small{display:block;font-size:10px;font-weight:600;opacity:.75}#mapsel button[hidden]{display:none}
+.go{font-family:var(--f-disp);font-size:40px;letter-spacing:2px;background:linear-gradient(180deg,#ff5a68,#c8202e);color:#fff;border:3px solid #000;border-radius:8px;padding:6px 60px;cursor:pointer;box-shadow:6px 6px 0 #000;transform:rotate(-1deg);text-shadow:2px 2px 0 #000}
+.go:hover{filter:brightness(1.1)} .go:active{transform:translate(3px,3px) rotate(-1deg);box-shadow:3px 3px 0 #000}
+.snd{font-size:12px;color:var(--muted)}
+.box{background:linear-gradient(180deg,#1b2431,#0d1219);border:1px solid var(--line);border-top:3px solid var(--acc);border-radius:10px;padding:22px 24px;width:min(600px,100%);display:flex;flex-direction:column;gap:13px}
+.box h2{font-family:var(--f-disp);font-weight:400;font-size:44px;margin:0;letter-spacing:2px}
+.mbtn{font-size:15px;font-weight:700;padding:11px 14px;background:var(--steel2);border:1px solid var(--line);border-radius:6px;cursor:pointer;text-align:left}
+.mbtn:hover{border-color:var(--acc)} .mbtn.pri{background:var(--acc);color:#111;border-color:var(--acc)} .mbtn.danger:hover{border-color:var(--bad);color:var(--bad)}
+.sl{display:grid;grid-template-columns:130px 1fr 44px;gap:10px;align-items:center;font-size:13px}
+.sl input{accent-color:var(--acc)} .sl input[type=checkbox]{justify-self:start;width:18px;height:18px} .sl output{color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+.keys{display:grid;grid-template-columns:1fr 1fr;gap:5px 18px;font-size:12.5px;color:var(--muted)}
+.keys kbd{font-family:var(--f-ui);font-weight:700;color:var(--fg);background:#0b1017;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;font-size:11.5px}
+.endbox{text-align:center;display:flex;flex-direction:column;gap:16px;align-items:center}
+.endbox h2{font-family:var(--f-disp);font-size:clamp(70px,12vw,130px);margin:0;letter-spacing:3px;font-weight:400;transform:rotate(-3deg);text-shadow:5px 5px 0 #000}
+.estats{display:grid;grid-template-columns:auto auto;gap:6px 30px;font-size:16px;text-align:left;font-variant-numeric:tabular-nums;background:#0b1017cc;border:1px solid var(--line);border-radius:8px;padding:14px 20px}
+.estats span:nth-child(odd){color:var(--muted)}
+#wish{background:linear-gradient(180deg,rgba(2,12,6,0) 30%,rgba(2,12,6,.88) 75%);align-items:flex-end;padding-bottom:6vh}
+.wishbox{display:flex;flex-direction:column;gap:10px;align-items:stretch;text-align:center;width:min(580px,100%);margin:0 auto}
+.wishbox h2{font-family:var(--f-disp);font-size:54px;margin:0;color:#7dff9a;letter-spacing:2px;font-weight:400;text-shadow:3px 3px 0 #05140a}
+.wishbox p{margin:0 0 4px;color:#a8c8b0}
+.wishbox .mbtn{text-align:center;border-color:#2f9a3a;background:#0b1a10}
+.wishbox .mbtn:hover{background:#17361f}
+@media (max-width:1180px){#hud{grid-template-columns:minmax(0,1fr) 410px;height:206px}.por{width:118px}.por canvas{width:118px;height:94px}.acts{width:166px}.howto{grid-template-columns:1fr 1fr}.chip .lbl{display:none}.stats{gap:9px}}
+@media (max-width:1400px){.facs{grid-template-columns:repeat(4,1fr)}}@media (max-width:1200px){.facs{grid-template-columns:repeat(3,1fr)}}@media (max-height:1000px){.howto{display:none}.menu{gap:12px}.fac .ro canvas{width:28px;height:28px}}@media (max-width:900px){.facs{grid-template-columns:1fr}#top .res{gap:5px}.chip.db,#bobj{display:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+<div id="app">
+  <header id="top">
+    <button type="button" class="ib" id="bmenu" title="Menu et options (Échap)"></button>
+    <button type="button" class="ib" id="bobj" title="Afficher ou masquer les objectifs">Objectifs</button>
+    <div class="res">
+      <div class="chip money" title="Ton argent. Les camions collecteurs l'augmentent en ramenant des cristaux à la raffinerie."><span id="icoin"></span><b id="cred">0</b><span class="lbl" id="credlbl">Zénis</span><span class="delta" id="income"></span></div>
+      <div class="chip power" id="pow" title="Énergie consommée / produite. Si la consommation dépasse la production, tout ralentit : construis un générateur."><span id="ibolt"></span><div class="pbar"><i id="powfill"></i></div><b id="powtxt">0/0</b></div>
+      <div class="chip db" title="Dragon Balls : orange = les tiennes, rouge = celles de l'ennemi. Réunis-en 7 pour invoquer Shenron."><span class="lbl">Dragon Balls</span><div class="balls" id="dballs"></div></div>
+      <button type="button" class="chip super off" id="superb" title="Super pouvoir : se charge quand tu possèdes le bâtiment des héros."><span class="ring"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#2a3443" stroke-width="5"/><circle id="superring" cx="18" cy="18" r="15" fill="none" stroke="currentColor" stroke-width="5" stroke-dasharray="94.25" stroke-dashoffset="94.25"/></svg></span><span><b id="supern">Super pouvoir</b><br><small id="supers">—</small></span></button>
+    </div>
+    <span id="clock">00:00</span>
+    <button type="button" class="ib sq" id="bsnd" title="Couper / remettre le son"></button>
+    <button type="button" class="ib sq" id="bfull" title="Plein écran (F)"></button>
+    <button type="button" class="ib sq" id="bpause" title="Pause (P)"></button>
+  </header>
+  <div id="view"><canvas id="cv"></canvas>
+    <div class="obj" id="obj"><h4>Objectifs <button type="button" id="objx">masquer</button></h4><ol id="objl"></ol><div class="bonus" id="objb"></div></div>
+    <div class="mmwrap"><canvas id="mini" width="400" height="400"></canvas></div>
+    <div id="feed"></div><div id="banner"></div><div id="hint" hidden></div>
+  </div>
+  <footer id="hud">
+    <div class="pane selp" id="selp"></div>
+    <div class="pane prod"><div class="tabs" id="tabs"></div><div id="grid"></div></div>
+  </footer>
+</div>
+<div id="tip"></div>
+<div class="ovl" id="menu"><canvas id="mbg"></canvas>
+  <div class="menu">
+    <h1 class="logo">Clash of Heroes<small>Sept animés · une seule guerre</small></h1>
+    <div class="facs">
+      <button type="button" class="fac dbz on" data-fac="dbz"><span class="sel">Choisi</span><canvas class="big" width="300" height="300" id="pdbz"></canvas><div><div class="an">Dragon Ball Z · Super</div><h3>Guerriers Z</h3>
+        <p>Peu d’unités, chères et puissantes, souvent volantes. Les Saiyans passent Super Saiyan, et Karin fournit des haricots magiques qui soignent les héros en danger.</p>
+        <div class="pros"><span>Vol</span><span>Fusion</span><span>Ultra Instinct</span><span>Beerus</span></div></div><div class="ro" id="rdbz"></div></button>
+      <button type="button" class="fac mha" data-fac="mha"><span class="sel">Choisi</span><canvas class="big" width="300" height="300" id="pmha"></canvas><div><div class="an">My Hero Academia</div><h3>Héros de Yuei</h3>
+        <p>Contrôle des foules : gel, gravité zéro, ondes de choc. « Plus Ultra » donne un sursaut de puissance aux héros au bord de la défaite, et les élèves progressent plus vite.</p>
+        <div class="pros"><span>Contrôle</span><span>Plus Ultra</span><span>Prominence Burn</span></div></div><div class="ro" id="rmha"></div></button>
+      <button type="button" class="fac aot" data-fac="aot"><span class="sel">Choisi</span><canvas class="big" width="300" height="300" id="paot"></canvas><div><div class="an">L’Attaque des Titans</div><h3>Bataillon</h3>
+        <p>Soldats fragiles mais mobiles : l’équipement tridimensionnel franchit forêts et falaises et double les dégâts contre les grandes cibles. Murailles, artillerie et métamorphoses en titans.</p>
+        <div class="pros"><span>Tridimensionnel</span><span>Titans</span><span>Grondement</span></div></div><div class="ro" id="raot"></div></button>
+      <button type="button" class="fac slv" data-fac="sl"><span class="sel">Choisi</span><canvas class="big" width="300" height="300" id="psl"></canvas><div><div class="an">Solo Leveling</div><h3>Armée des Ombres</h3>
+        <p>Chaque ennemi tué près de Sung Jinwoo peut se relever dans ton camp : « ARISE ». Le Système fait monter Jinwoo de niveau et lui confie des quêtes journalières.</p>
+        <div class="pros"><span>Extraction d’ombres</span><span>Niveaux</span><span>Quêtes</span></div></div><div class="ro" id="rsl"></div></button>
+      <button type="button" class="fac opm" data-fac="opm"><span class="sel">Choisi</span><canvas class="big" width="300" height="300" id="popm"></canvas><div><div class="an">One Punch Man</div><h3>Association des Héros</h3>
+        <p>La Série de coups normaux de Saitama tue d’un seul coup… quand il ne part pas aux soldes. L’Association paie une prime par ennemi abattu, et King paralyse l’ennemi de peur.</p>
+        <div class="pros"><span>Un seul coup</span><span>Primes</span><span>King Engine</span></div></div><div class="ro" id="ropm"></div></button>
+      <button type="button" class="fac hxh" data-fac="hxh"><span class="sel">Choisi</span><canvas class="big" width="300" height="300" id="phxh"></canvas><div><div class="an">Hunter × Hunter</div><h3>Association Hunter</h3>
+        <p>Toute l’armée change de posture de Nen : Ten pour encaisser, Ren pour frapper, Zetsu pour devenir invisible et assassiner. Les héros signent des contrats : puissance démesurée, prix terrible.</p>
+        <div class="pros"><span>Postures de Nen</span><span>Contrats</span><span>Primes ×2</span></div></div><div class="ro" id="rhxh"></div></button>
+      <button type="button" class="fac sds" data-fac="sds"><span class="sel">Choisi</span><canvas class="big" width="300" height="300" id="psds"></canvas><div><div class="an">The Seven Deadly Sins</div><h3>Les Sept Péchés</h3>
+        <p>Les chevaliers de Liones et leur taverne, le Boar Hat. Le soleil règle la force d’Escanor, Meliodas renvoie les coups avec Full Counter et Ban ne meurt jamais vraiment.</p>
+        <div class="pros"><span>Cycle du soleil</span><span>Full Counter</span><span>Immortel</span></div></div><div class="ro" id="rsds"></div></button>
+    </div>
+    <div class="howto">
+      <div class="step"><span class="n">1</span><div><b>Construis</b><span>Un générateur, puis une raffinerie : elle livre un camion collecteur.</span></div></div>
+      <div class="step"><span class="n">2</span><div><b>Récolte</b><span>Les camions ramènent les cristaux dorés et te rapportent de l'argent.</span></div></div>
+      <div class="step"><span class="n">3</span><div><b>Recrute</b><span>Infanterie, blindés, puis héros. Touche Q pour leur attaque spéciale.</span></div></div>
+      <div class="step"><span class="n">4</span><div><b>Écrase</b><span>Détruis tous les bâtiments ennemis. Bonus : les 7 Dragon Balls.</span></div></div>
+    </div>
+    <div class="opts">
+      <div class="opt"><span>Difficulté</span><div class="seg" id="diff"><button type="button" data-d="0">Facile</button><button type="button" data-d="1" class="on">Normal</button><button type="button" data-d="2">Difficile</button></div></div>
+      <div class="opt"><span>Adversaire</span><div class="seg" id="opp"><button type="button" data-o="rand" class="on">Aléatoire</button><button type="button" data-o="dbz">DBZ</button><button type="button" data-o="mha">MHA</button><button type="button" data-o="aot">Titans</button><button type="button" data-o="sl">Solo Lev.</button><button type="button" data-o="opm">OPM</button><button type="button" data-o="hxh">HxH</button><button type="button" data-o="sds">7 Péchés</button></div></div>
+      <div class="opt"><span>Carte</span><div class="seg" id="mapsel"></div></div>
+      <div class="opt"><span>Mode</span><div class="seg" id="modesel"><button type="button" data-g="1v1" class="on">1 contre 1</button><button type="button" data-g="2v2">2 contre 2</button></div></div>
+      <div class="opt"><span>Vitesse</span><div class="seg" id="speed"><button type="button" data-s="0.75">Lente</button><button type="button" data-s="1" class="on">Normale</button><button type="button" data-s="1.35">Rapide</button></div></div>
+    </div>
+    <button type="button" class="go" id="bgo">Combattre !</button>
+    <div class="snd">Jeu PC · souris et clavier · la musique démarre au premier clic · <b>version 22</b></div>
+  </div>
+</div>
+<div class="ovl" id="pausem" hidden><div class="box">
+  <h2>Pause</h2>
+  <button type="button" class="mbtn pri" id="presume">Reprendre la partie</button>
+  <div class="sl"><label for="vmaster">Volume général</label><input type="range" id="vmaster" min="0" max="1" step="0.05"><output id="ovmaster"></output></div>
+  <div class="sl"><label for="vmusic">Musique</label><input type="range" id="vmusic" min="0" max="1" step="0.05"><output id="ovmusic"></output></div>
+  <div class="sl"><label for="vsfx">Effets sonores</label><input type="range" id="vsfx" min="0" max="1" step="0.05"><output id="ovsfx"></output></div>
+  <div class="sl"><label for="vvoice">Annonces vocales</label><input type="checkbox" id="vvoice"><output></output></div>
+  <div class="keys">
+    <div><kbd>Clic gauche</kbd> sélectionner / glisser</div><div><kbd>Clic droit</kbd> déplacer, attaquer, récolter</div>
+    <div><kbd>A</kbd> + clic : attaque en mouvement</div><div><kbd>Q</kbd> attaque spéciale du héros</div>
+    <div><kbd>W</kbd><kbd>X</kbd><kbd>C</kbd><kbd>V</kbd><kbd>B</kbd><kbd>N</kbd><kbd>,</kbd> produire</div><div><kbd>Tab</kbd> changer d'onglet</div>
+    <div><kbd>S</kbd> stop · <kbd>H</kbd> base</div><div><kbd>Ctrl</kbd>+<kbd>1-9</kbd> groupes · <kbd>1-9</kbd> rappel</div>
+    <div><kbd>Ctrl</kbd>+<kbd>A</kbd> toute l'armée</div><div><kbd>Espace</kbd> dernière alerte · <kbd>F</kbd> plein écran</div>
+  </div>
+  <button type="button" class="mbtn danger" id="pquit">Abandonner et revenir au menu</button>
+</div></div>
+<div class="ovl" id="wish" hidden><div class="wishbox"><h2>Fais ton vœu</h2><p>Shenron exaucera un seul vœu, puis les Dragon Balls se disperseront à nouveau.</p>
+  <button type="button" class="mbtn" data-w="gold">Richesse : +5000</button><button type="button" class="mbtn" data-w="revive">Jusqu’à 2 héros absents rejoignent la bataille gratuitement</button><button type="button" class="mbtn" data-w="power">Puissance divine : toutes tes unités sont soignées et montent d’un rang</button></div></div>
+<div class="ovl" id="end" hidden><div class="endbox"><h2 id="endt">Victoire !</h2><div class="estats" id="ends"></div><button type="button" class="go" id="bagain">Rejouer</button></div></div>

@@ -1,0 +1,8 @@
+{
+  "name": "clash-of-heroes",
+  "productName": "Clash of Heroes",
+  "version": "1.19.0",
+  "description": "Clash of Heroes, jeu de stratégie entre amis",
+  "main": "main.js",
+  "author": "Clash of Heroes"
+}

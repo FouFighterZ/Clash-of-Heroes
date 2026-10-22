@@ -1,0 +1,21 @@
+CLASH OF HEROES : JOUER À DEUX EN RÉSEAU LOCAL
+==============================================
+
+Ce dossier contient le jeu complet (avec les musiques) et un petit serveur pour jouer à deux sur le même Wi-Fi.
+Garde le dossier « music » à côté des autres fichiers.
+
+Sur UN SEUL des deux PC (celui qui héberge) :
+  1. Installe Node.js (gratuit) depuis https://nodejs.org (version « LTS »), une seule fois.
+  2. Décompresse ce dossier, puis double-clique sur « Lancer le serveur (Windows).bat »
+     (sur Mac : « Lancer le serveur (Mac-Linux).command »).
+     Si Windows demande l'autorisation du pare-feu, clique sur « Autoriser l'accès » (réseau privé).
+  3. La fenêtre noire affiche deux adresses :
+       - toi, tu ouvres  http://localhost:8080
+       - ton ami ouvre   http://192.168.x.x:8080   (l'adresse affichée dans la fenêtre)
+
+Ensuite, dans le jeu :
+  - chacun choisit son camp dans le menu ;
+  - toi : « Multijoueur » puis « Créer une partie » ;
+  - ton ami : « Multijoueur » puis « Rejoindre » à côté de ton pseudo.
+
+Laisse la fenêtre noire ouverte pendant toute la partie. Vous devez être sur le même Wi-Fi.

@@ -1,0 +1,1 @@
+{"name":"cdh-build","private":true,"devDependencies":{"electron":"44.5.1","@electron/packager":"20.3.0"}}
