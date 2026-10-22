@@ -36,7 +36,7 @@ function queueUnit(si,key){const s=sides[si],D=UDEF[s.fac][key],q=s.q[D.at];
 function unqueueUnit(si,key){const s=sides[si],D=UDEF[s.fac][key],q=s.q[D.at];for(let i=q.length-1;i>=0;i--)if(q[i].key===key){s.credits+=D.cost;q.splice(i,1);return true;}return false;}
 function prodBuilding(si,cat){const p=sides[si].primary[cat];if(p&&!p.dead&&p.rise>=1)return p;return ents.find(e=>e.isB&&!e.dead&&e.side===si&&e.key===cat&&e.rise>=1);}
 function updProd(si,dt){updResearch(si,dt);const s=sides[si],rate=s.use>s.pow?.45:1,SP=SUPER[s.fac];
-  if(s.fac==='dbz'&&has(si,'temple')){s.szT=(s.szT||0)+dt*rate;if(s.szT>=80&&(s.senzu||0)<3){s.szT=0;s.senzu=(s.senzu||0)+1;if(si===PL)msg('Karin t’envoie un haricot magique ('+s.senzu+'/3) : il soignera un héros en danger','#7dff9a');}}
+  if(s.fac==='dbz'&&has(si,'temple')){s.szT=(s.szT||0)+dt*rate;if(s.szT>=80&&(s.senzu||0)<3){s.szT=0;s.senzu=(s.senzu||0)+1;if(si===PL)msg('Karin t’envoie un Senzu ('+s.senzu+'/3) : il soignera un héros en danger','#7dff9a');}}
   if(has(si,'temple+')&&s.sp<SP.charge){s.sp=Math.min(SP.charge,s.sp+dt*rate*(has(si,'relay+')?2:has(si,'relay')?1.6:1));if(s.sp>=SP.charge&&si===PL){msg(SP.name+' est prête ! Clique sur son bouton en haut de l’écran',FAC[s.fac].col);banner(SP.name.toUpperCase()+' PRÊTE !',FAC[s.fac].col);sfx('ready');announce(SP.name+' est prête');}}
   if(s.prodB&&!s.prodB.ready&&(has(si,'hq')||has(si,'hq2'))){s.prodB.prog+=dt*rate*(has(si,'hq+')||has(si,'hq2+')?1.4:1)/BDEF[s.prodB.key].time;
     if(s.prodB.prog>=1){s.prodB.prog=1;s.prodB.ready=true;if(si===PL){msg('Construction terminée : '+BDEF[s.prodB.key].names[s.fac]+'. Clique sa carte puis place-le.','#4fd17a');sfx('ready');announce('Construction achevée');}}}
@@ -223,7 +223,7 @@ function transformFx(u){fxRing(u.x,u.y,'#ffe14d',80);part('flash',u.x,u.y-14,0,0
 // ===== Unit update =====
 function updUnit(u,dt){updMotion(u,dt);updForms(u,dt);updPassives(u,dt);updPassives2(u,dt);const D=u.form?u.FD:u.D;
   if(u.D.odm&&!u.form){u.ancT=(u.ancT||0)-dt;if(u.ancT<=0){u.ancT=.4;u.anchor=odmAnchor(u);}u.z=lerp(u.z||0,(u.anchor&&u.moving)?(blockedW(u.x,u.y)?18:8):0,Math.min(1,dt*5));if(u.anchor&&u.moving&&R()<dt*6)part('smoke',u.x-Math.cos(u.ang)*6,u.y-(u.z||0)-10,0,-6,.6,3);}
-  if(u.D.hero&&u.hp<u.max*.25&&!u.dead){const s=sides[u.side];if(s.fac==='dbz'&&s.senzu>0){s.senzu--;u.hp=u.max;fxRing(u.x,u.y,'#7dff9a',50);part('flash',u.x,u.y-16,0,0,.4,60,'#7dff9a');if(u.side===PL)msg('Haricot magique ! '+u.D.name+' est entièrement soigné','#7dff9a');sfx('heal',u.x,u.y);}
+  if(u.D.hero&&u.hp<u.max*.25&&!u.dead){const s=sides[u.side];if(s.fac==='dbz'&&s.senzu>0){s.senzu--;u.hp=u.max;fxRing(u.x,u.y,'#7dff9a',50);part('flash',u.x,u.y-16,0,0,.4,60,'#7dff9a');if(u.side===PL)msg('Senzu ! '+u.D.name+' est entièrement soigné','#7dff9a');sfx('heal',u.x,u.y);}
     else if(s.fac==='mha'&&!(u.puT>0)){u.puT=45;u.buff=8;fxRing(u.x,u.y,'#ffd23a',70);if(plSees(u))cutin(u,'PLUS ULTRA !!');sfx('transform',u.x,u.y);}}
   if(u.puT>0)u.puT-=dt;u.anim+=dt;if(u.atk>0)u.atk-=dt;if(u.hitFl>0)u.hitFl-=dt;if(u.cd>0)u.cd-=dt;if(u.abCd>0)u.abCd-=dt;if(u.buff>0)u.buff-=dt;
   if(D.regen&&u.hp<u.max)u.hp=Math.min(u.max,u.hp+D.regen*dt);

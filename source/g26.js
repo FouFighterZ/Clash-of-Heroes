@@ -4,7 +4,7 @@ const EV_TIER={kaio:1,drop:1,meteor:1,goldrush:1,spring:1,greed:1,sports:1,saiba
   breach:2,gate:2,jeju:2,kaijin:2,chimera:2,troupe:2,celljr:2,deepsea:2,redgate:2,zeke:2,eclipse:2,bounty:2,
   nomu:3,tournoi:3,garou:3,freezer:3,afo:3,titanarm:3,kamish:3,boros:3,meruem:3};
 const EV_MIN={1:480,2:600,3:900};
-EVENTS.push({id:'senzurain',fac:null,name:'Pluie de haricots magiques',col:'#7dff9a',desc:'Des sacs de haricots magiques tombent sur la carte : ils soignent toutes les unités proches de celui qui les ramasse.'},
+EVENTS.push({id:'senzurain',fac:null,name:'Pluie de Senzus',col:'#7dff9a',desc:'Des sacs de Senzus tombent sur la carte : ils soignent toutes les unités proches de celui qui les ramasse.'},
   {id:'merchant',fac:null,name:'Le marchand ambulant',col:'#ffd23a',desc:'Un marchand généreux traverse la carte : chaque armée reçoit 800.'});
 for(const e of EVENTS){const t=EV_TIER[e.id]||2;e.tier=t;e.minT=Math.max(EV_MIN[t],e.id==='jeju'?600:0);}
 function pickEv(pool){const w=e=>e.tier===1?4:e.tier===2?2.5:gtime>1200?2:1;let tot=0;for(const e of pool)tot+=w(e);let r=R()*tot;for(const e of pool){r-=w(e);if(r<=0)return e;}return pool[pool.length-1];}

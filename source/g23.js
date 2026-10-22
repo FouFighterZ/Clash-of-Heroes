@@ -32,9 +32,9 @@ function annVoiceUI(){const sel=document.getElementById('vvoicesel');if(!sel)ret
 // ---- events ----
 let hzones=[];
 const BOSS={
-  freezer:{name:'Freezer, l’empereur du mal',hp:6500,speed:90,dmg:90,range:170,rof:1,proj:'ki',pcol:'#d070ff',splash:30,fly:true,size:11,sight:11,look:'freezer',tsc:1.2,regen:15,bounty:3200},
-  fsoldier:{name:'Soldat de Freezer',hp:520,speed:70,dmg:24,range:150,rof:1.2,proj:'ki',pcol:'#ff8a6a',size:8,sight:9,look:'fsoldier',tsc:1.1,bounty:250},
-  celljr:{name:'Cell Junior',hp:900,speed:110,dmg:40,range:20,rof:.55,melee:true,size:8,sight:10,look:'celljr',tsc:1,regen:6,bounty:500},
+  freezer:{name:'Frieza, l’empereur du mal',hp:6500,speed:90,dmg:90,range:170,rof:1,proj:'ki',pcol:'#d070ff',splash:30,fly:true,size:11,sight:11,look:'freezer',tsc:1.2,regen:15,bounty:3200},
+  fsoldier:{name:'Soldat de Frieza',hp:520,speed:70,dmg:24,range:150,rof:1.2,proj:'ki',pcol:'#ff8a6a',size:8,sight:9,look:'fsoldier',tsc:1.1,bounty:250},
+  celljr:{name:'Cell Jr.',hp:900,speed:110,dmg:40,range:20,rof:.55,melee:true,size:8,sight:10,look:'celljr',tsc:1,regen:6,bounty:500},
   afo:{name:'All For One',hp:7200,speed:66,dmg:105,range:190,rof:1.6,proj:'explo',pcol:'#c03a3a',splash:46,size:12,sight:12,look:'afo',tsc:1.3,regen:12,bounty:3600},
   titanarm:{name:'Titan Cuirassé',hp:7000,speed:52,dmg:120,range:30,rof:1.3,melee:true,splash:40,size:20,sight:10,look:'titan_armored',tsc:2.6,armor:true,bounty:3200},
   kamish:{name:'Kamish, le dragon',hp:9000,speed:80,dmg:130,range:180,rof:1.8,proj:'fire',pcol:'#ff5a2a',splash:60,fly:true,size:22,sight:13,look:'kamish',dragon:true,regen:15,bounty:4200},
@@ -52,8 +52,8 @@ EVENTS.push(
   {id:'goldrush',fac:null,name:'Ruée vers l’or',col:'#ffd23a',desc:'Les gisements se régénèrent et des coffres apparaissent sur la carte !'},
   {id:'spring',fac:null,name:'La source sacrée',col:'#7dffd8',desc:'Une source jaillit : elle soigne toutes les unités qui s’y trouvent pendant 45 s.'},
   {id:'bounty',fac:null,minT:240,name:'Contrat de chasse',col:'#ff4d5e',desc:'Une prime de 2500 est posée sur le héros le plus puissant de la partie. Abattez-le !'},
-  {id:'freezer',fac:'dbz',minT:360,name:'L’armée de Freezer débarque',col:'#d070ff',desc:'Freezer et ses soldats attaquent tout le monde. Celui qui abat l’empereur empoche 3200.'},
-  {id:'celljr',fac:'dbz',minT:240,name:'Les Cell Junior',col:'#4ab8ff',desc:'Cinq Cell Junior surgissent, rapides et voraces. Chacun rapporte 500.'},
+  {id:'freezer',fac:'dbz',minT:360,name:'L’armée de Frieza débarque',col:'#d070ff',desc:'Frieza et ses soldats attaquent tout le monde. Celui qui abat l’empereur empoche 3200.'},
+  {id:'celljr',fac:'dbz',minT:240,name:'Les Cell Jr.',col:'#4ab8ff',desc:'Cinq Cell Jr. surgissent, rapides et voraces. Chacun rapporte 500.'},
   {id:'afo',fac:'mha',minT:420,name:'All For One se réveille',col:'#c03a3a',desc:'Le symbole du mal en personne. Celui qui l’abat empoche 3600.'},
   {id:'sports',fac:'mha',name:'Le Festival sportif de Yuei',col:'#2fd27a',desc:'Une arène apparaît : tes unités à l’intérieur gagnent de l’expérience. Le camp le plus présent remporte 2000.'},
   {id:'zeke',fac:'aot',minT:240,name:'Pluie de rochers du Titan Bestial',col:'#c8a070',desc:'Zeke bombarde la carte de rochers géants. Écartez-vous des cercles !'},

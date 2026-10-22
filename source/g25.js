@@ -1,7 +1,7 @@
 // ===== New buildings, building levels, troop upgrades (Arsenal) and hero awakenings (Sanctuary) =====
 const NB_NAMES={
  armory:{dbz:'Salle d’armes Capsule Corp',mha:'Labo d’équipement de Hatsume',aot:'Forge tridimensionnelle',sl:'Arsenal de la guilde Ahjin',opm:'Atelier de Child Emperor',hxh:'Armurerie Zoldyck'},
- shrine:{dbz:'Planète de Maître Kaio',mha:'Salle de One For All',aot:'Les Chemins d’Ymir',sl:'Trône du Monarque',opm:'Salle d’entraînement des classes S',hxh:'Salle du Nen avancé'},
+ shrine:{dbz:'Planète de King Kai',mha:'Salle de One For All',aot:'Les Chemins d’Ymir',sl:'Trône du Monarque',opm:'Salle d’entraînement des classes S',hxh:'Salle du Nen avancé'},
  outpost:{dbz:'Avant-poste Capsule',mha:'Poste de patrouille',aot:'Avant-poste du Bataillon',sl:'Balise de Porte',opm:'Poste de l’Association',hxh:'Campement Hunter'},
  drill:{dbz:'Foreuse Capsule',mha:'Foreuse industrielle',aot:'Mine de cristal',sl:'Extracteur de mana',opm:'Foreuse de Metal Knight',hxh:'Mine de Greed Island'},
  shieldgen:{dbz:'Générateur de barrière',mha:'Bouclier de Cementoss',aot:'Palissade renforcée',sl:'Barrière de rang S',opm:'Champ de force de Metal Knight',hxh:'Barrière de Nen'},

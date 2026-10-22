@@ -8,7 +8,7 @@ function giveXP(u,v){if(!u.isU||u.D.harv||u.rank>=3||u.dead)return;u.xp+=v*(u.fa
     if(u.side===PL&&(u.D.hero||r>=2)){msg(u.D.name+' : rang '+RANKN[r]+' !','#ffd23a');sfx('rankup');}}}
 function promote(u){if(u.rank>=3)return;giveXP(u,rankTh(u)[u.rank]-u.xp+1);}
 
-// --- special fx that move (Kienzan disc) and superpowers ---
+// --- special fx that move (Destructo Disc disc) and superpowers ---
 function updSpecial(dt){for(const f of fxs){
   if(f.type==='disc'){const s=640*dt;f.x+=f.dx*s;f.y+=f.dy*s;f.d+=s;
     if(f.d>=f.len||f.x<0||f.y<0||f.x>WW||f.y>WH){f.t=f.dur;continue;}

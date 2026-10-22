@@ -19,7 +19,7 @@ function neuHead(c,L,k,hx,hy){if(k==='saibaman'){c.fillStyle='#5a9a34';for(let i
   return false;}
 // ---------- pickups ----------
 let pickups=[],zones=[];
-const PICK={gold:{name:'Coffre de trésor',col:'#ffd23a'},senzu:{name:'Sac de haricots magiques',col:'#7dff9a'},scroll:{name:'Parchemin d’entraînement',col:'#6fd8ff'},
+const PICK={gold:{name:'Coffre de trésor',col:'#ffd23a'},senzu:{name:'Sac de Senzus',col:'#7dff9a'},scroll:{name:'Parchemin d’entraînement',col:'#6fd8ff'},
   capsule:{name:'Capsule mystère',col:'#ff8a1f'},crate:{name:'Caisse de la support-team',col:'#f2c230'}};
 function randSpot(minBase){for(let k=0;k<400;k++){const x=3+((R()*(MW-6))|0),y=3+((R()*(MH-6))|0);if(!walk(x,y)||ore[ti(x,y)]>0)continue;
   if(nearBase(x,y,minBase))continue;return{x:x*TILE+16,y:y*TILE+16};}return null;}
@@ -47,7 +47,7 @@ function drawPickups(c){for(const p of pickups){if(!expl[ti(tileOf(p.x),tileOf(p
 // ---------- events ----------
 const EVENTS=[
   {id:'saiba',fac:'dbz',name:'Invasion des Saibaman',col:'#7cc04e',desc:'Des Saibaman surgissent et attaquent tout le monde. Chacun rapporte 120 à son tueur.'},
-  {id:'kaio',fac:'dbz',name:'Le halo de Maître Kaio',col:'#ffd23a',desc:'Un halo sacré apparaît : tes unités à l’intérieur gagnent de l’expérience. Le camp le plus présent reçoit 2000.'},
+  {id:'kaio',fac:'dbz',name:'Le halo de King Kai',col:'#ffd23a',desc:'Un halo sacré apparaît : tes unités à l’intérieur gagnent de l’expérience. Le camp le plus présent reçoit 2000.'},
   {id:'nomu',fac:'mha',name:'Attaque de la Ligue des Vilains',col:'#b04aff',desc:'Un Nomu surpuissant débarque. Celui qui l’abat empoche 2500.'},
   {id:'drop',fac:'mha',name:'Largage de la support-team',col:'#f2c230',desc:'Hatsume largue 3 caisses de matériel sur la carte. Premier arrivé, premier servi !'},
   {id:'breach',fac:'aot',name:'Brèche dans le Mur',col:'#e4b89e',desc:'Des titans purs envahissent la carte. Chacun rapporte 450.'},
@@ -74,7 +74,7 @@ function updEvents(dt){
   for(const p of pickups){p.t+=dt;if(p.t>p.life){p.dead=true;continue;}for(const e of ents){if(e.dead||!e.isU||e.side===2||e.D.harv)continue;if(hyp(e.x-p.x,e.y-p.y)<24){p.dead=true;takePickup(p,e);break;}}}
   pickups=pickups.filter(p=>!p.dead);
   for(const z of zones){z.t+=dt;z.tick=(z.tick||0)-dt;if(z.tick<=0){z.tick=.5;for(const e of ents){if(e.dead||!e.isU||e.side===2||e.D.harv)continue;if(hyp(e.x-z.x,e.y-z.y)<z.r){giveXP(e,22);z.score[e.side]=(z.score[e.side]||0)+1;if(R()<.3)part('spark',e.x,e.y-20,0,-50,.6,2,'#ffd23a');}}}
-    if(z.t>=z.dur){z.dead=true;let w=-1,bw=0;for(const k in z.score)if(z.score[k]>bw){bw=z.score[k];w=+k;}if(w>=0){sides[w].credits+=2000;msg(z.label?(ally(w,PL)?z.label+' remporté : +2000 !':'L’adversaire remporte le '+z.label.toLowerCase()+' (+2000)'):(w===PL?'Maître Kaio te bénit : +2000 !':'Maître Kaio a béni l’ennemi (+2000)'),ally(w,PL)?'#ffd23a':'#ff8a6a');}}}
+    if(z.t>=z.dur){z.dead=true;let w=-1,bw=0;for(const k in z.score)if(z.score[k]>bw){bw=z.score[k];w=+k;}if(w>=0){sides[w].credits+=2000;msg(z.label?(ally(w,PL)?z.label+' remporté : +2000 !':'L’adversaire remporte le '+z.label.toLowerCase()+' (+2000)'):(w===PL?'King Kai te bénit : +2000 !':'King Kai a béni l’ennemi (+2000)'),ally(w,PL)?'#ffd23a':'#ff8a6a');}}}
   zones=zones.filter(z=>!z.dead);
   // neutral creatures hunt the nearest target
   G.neuT-=dt;if(G.neuT<=0){G.neuT=1.2;for(const u of ents){if(u.dead||u.side!==2||u.order||u.target)continue;let best=null,bd=1e9;

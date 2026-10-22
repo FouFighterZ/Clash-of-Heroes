@@ -17,7 +17,7 @@ const LEG={
   beerus:{name:'Beerus',cost:3200,time:40,hp:2700,speed:84,dmg:70,range:150,rof:.9,proj:'ki',fly:true,size:11,look:'beerus',ab:{name:'Hakai',type:'hakai',cd:40,range:280,shout:'HAKAI.',col:'#b04aff'},desc:'Dieu de la Destruction (DBS). Hakai : efface une unité d’un geste.'},
   whis:{name:'Whis',cost:2600,time:34,hp:2200,speed:96,dmg:34,range:160,rof:.7,proj:'ki',fly:true,size:10,look:'whis',ab:{name:'Retour temporel',type:'rewind',cd:45,rad:320,shout:'RETOUR EN ARRIÈRE…',col:'#7fd0ff'},desc:'Ange de l’univers 7 (DBS). Remonte le temps : soigne et libère tous les alliés proches.'},
   broly:{name:'Broly',cost:3000,time:38,hp:3600,speed:80,dmg:72,range:22,rof:.9,melee:true,splash:34,size:13,look:'broly',saiyan:true,ab:{name:'Fureur légendaire',type:'rage',cd:35,dur:15,range:0,shout:'KAKAROT !!',col:'#7dff6a'},desc:'Le Super Saiyan légendaire (DBS). Plus il est blessé, plus il frappe fort.'},
-  c17:{name:'C-17',cost:2400,time:32,hp:2000,speed:90,dmg:44,range:165,rof:.8,proj:'ki',fly:true,size:10,look:'c17',ab:{name:'Barrière',type:'barrier',cd:30,rad:230,dur:8,shield:450,shout:'BARRIÈRE !',col:'#7dffa0'},desc:'Androïde garde forestier (DBS). Protège les alliés proches d’une barrière d’énergie.'},
+  c17:{name:'Android 17',cost:2400,time:32,hp:2000,speed:90,dmg:44,range:165,rof:.8,proj:'ki',fly:true,size:10,look:'c17',ab:{name:'Barrière',type:'barrier',cd:30,rad:230,dur:8,shield:450,shout:'BARRIÈRE !',col:'#7dffa0'},desc:'Androïde garde forestier (DBS). Protège les alliés proches d’une barrière d’énergie.'},
  },
  mha:{
   mirio:{name:'Lemillion',cost:2400,time:32,hp:2000,speed:104,dmg:58,range:20,rof:.6,melee:true,size:10,look:'mirio',ab:{name:'Perméation',type:'phase',cd:18,dmg:420,range:300,w:46,shout:'PHANTOM MENACE !',col:'#ffd23a'},desc:'Traverse la matière : devient intouchable et charge à travers les ennemis.'},
@@ -33,9 +33,9 @@ const LEG={
  }};
 for(const f in LEG){FAC[f].legends=Object.keys(LEG[f]);for(const k in LEG[f]){const D=LEG[f][k];D.key=k;D.fac=f;D.hero=true;D.legend=true;D.sight=10;D.sightPx=10*TILE;D.at='temple2';D.req=['temple2'];UDEF[f][k]=D;}}
 UDEF.dbz.vegito={key:'vegito',fac:'dbz',name:'Vegito',hero:true,cost:0,time:1,hp:3400,speed:100,dmg:95,range:150,rof:.7,proj:'ki',fly:true,size:11,look:'vegito',saiyan:true,at:'none',req:[],sight:10,sightPx:320,
-  ab:{name:'Final Kamehameha',type:'beam',cd:18,dmg:950,range:320,len:500,w:54,shout:'FINAL KAMÉHAMÉHA !!',col:'#7fd0ff'},desc:'La fusion Potara de Goku et Vegeta. Dure 45 secondes.'};
+  ab:{name:'Final Kamehameha',type:'beam',cd:18,dmg:950,range:320,len:500,w:54,shout:'FINAL KAMEHAMEHA !!',col:'#7fd0ff'},desc:'La fusion Potara de Goku et Vegeta. Dure 45 secondes.'};
 UDEF.dbz.gogeta=Object.assign({},UDEF.dbz.vegito,{key:'gogeta',name:'Gogeta',hp:3000,dmg:110,look:'gogeta',
-  ab:{name:'Big Bang Kaméhaméha',type:'beam',cd:18,dmg:1050,range:320,len:500,w:58,shout:'BIG BANG KAMÉHAMÉHA !!',col:'#9fe8ff'},desc:'Goku et Vegeta après la Danse de la Fusion. Moins résistant que Vegito mais frappe plus fort. Dure 45 secondes.'});
+  ab:{name:'Big Bang Kamehameha',type:'beam',cd:18,dmg:1050,range:320,len:500,w:58,shout:'BIG BANG KAMEHAMEHA !!',col:'#9fe8ff'},desc:'Goku et Vegeta après la Danse de la Fusion. Moins résistant que Vegito mais frappe plus fort. Dure 45 secondes.'});
 UDEF.neu.jiren={key:'jiren',fac:'neu',name:'Jiren',cost:4000,hp:6800,speed:72,dmg:120,range:26,rof:1,melee:true,splash:40,size:14,sight:11,sightPx:352,look:'jiren',tsc:1.6,regen:25,bounty:4000,at:'none',req:[],desc:'Le guerrier le plus fort de l’univers 11. Rapporte 4000.'};
 EVENTS.push({id:'tournoi',fac:'dbz',name:'Le Tournoi du Pouvoir',col:'#ff5a3a',desc:'Jiren descend dans l’arène et attaque tout le monde. Celui qui l’abat empoche 4000.'});
 Object.assign(FORMS,{giantess:{look:'mtlady',sc:3.3,size:22,speed:62,dmg:92,range:34,rof:1.3,melee:true,splash:50,shield:2000,sightPx:11*TILE},
@@ -76,7 +76,7 @@ function fusionPair(list){const g=list.find(e=>e.isU&&!e.dead&&e.key==='goku'&&!
   if(!g||!v||hyp(g.x-v.x,g.y-v.y)>160||g.casting||v.casting)return null;return[g,v];}
 function doFusion(g,v,kind){kind=kind==='gogeta'?'gogeta':'vegito';const si=g.side,s=sides[si];if(s.fusion)return;const x=(g.x+v.x)/2,y=(g.y+v.y)/2;
   const f=(g.hp/g.max+v.hp/v.max)/2;ents=ents.filter(e=>e!==g&&e!==v);sel=sel.filter(e=>e!==g&&e!==v);
-  const z=mkUnit(si,kind,x,y);z.hp=Math.max(z.max*.5,z.max*f);z.ssj=true;z.rank=Math.max(g.rank,v.rank);
+  const z=mkUnit(si,kind,x,y);z.hp=Math.max(z.max*.5,z.max*f);z.ssj=z.hp<z.max*.6;z.rank=Math.max(g.rank,v.rank);
   for(const b of dballs)if(b.carrier===g||b.carrier===v)b.carrier=z;s.fusion={g,v,z,t:45};
   fxRing(x,y,'#ffe14d',120);part('flash',x,y-20,0,0,.6,160,'#ffffff');shake(12);sfx('transform',x,y);if(plSees(z))cutin(z,kind==='gogeta'?'FU… SION… HA !!':'FUSION POTARA !!');
   if(si===PL){msg('Goku et Vegeta fusionnent : '+(kind==='gogeta'?'GOGETA':'VEGITO')+' ! (45 s)','#ffd23a');setSel([z]);}}

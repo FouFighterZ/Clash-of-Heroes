@@ -29,26 +29,26 @@ const BDEF={
   barracks:{w:2,h:2,hp:900,cost:400,time:10,pow:-20,sight:6,req:['power'],names:{dbz:'Salle de gravité',mha:'Agence de héros'},desc:'Entraîne l’infanterie.'},
   factory:{w:3,h:3,hp:1500,cost:900,time:16,pow:-30,sight:6,req:['refinery'],names:{dbz:'Usine Capsule',mha:'Atelier de support'},desc:'Produit les blindés et les collecteurs.'},
   turret:{w:1,h:1,hp:1000,cost:500,time:10,pow:-25,sight:8,req:['barracks'],wpn:{dmg:30,range:240,rof:1.0},names:{dbz:'Tourelle Ki',mha:'Tourelle de défense'},desc:'Défense automatique contre les unités.'},
-  temple:{w:2,h:2,hp:1400,cost:1200,time:20,pow:-60,sight:7,req:['factory'],names:{dbz:'Palais de Kami',mha:'Bureau des Pros'},desc:'Recrute les héros légendaires (un exemplaire de chaque).'},
+  temple:{w:2,h:2,hp:1400,cost:1200,time:20,pow:-60,sight:7,req:['factory'],names:{dbz:'Kami’s Lookout',mha:'Bureau des Pros'},desc:'Recrute les héros légendaires (un exemplaire de chaque).'},
 };
 const BLIST=['power','refinery','barracks','factory','turret','temple'];
 for(const k in BDEF){BDEF[k].key=k;BDEF[k].req=BDEF[k].req||[];}
 const UDEF={
  dbz:{
-  inf1:{name:'Disciple de Kamé',cost:100,time:5,hp:130,speed:62,dmg:10,range:18,rof:.8,melee:true,size:7,sight:5,look:'disciple',desc:'Combattant au corps à corps, rapide et bon marché.'},
+  inf1:{name:'Disciple de Kame',cost:100,time:5,hp:130,speed:62,dmg:10,range:18,rof:.8,melee:true,size:7,sight:5,look:'disciple',desc:'Combattant au corps à corps, rapide et bon marché.'},
   inf2:{name:'Guerrier Z',cost:300,time:9,hp:230,speed:72,dmg:22,range:150,rof:1.3,proj:'ki',fly:true,size:8,sight:7,look:'zwar',vsB:.7,desc:'Vole au-dessus du terrain et tire des boules de Ki.'},
   harv:{name:'Camion Capsule',cost:700,time:14,hp:900,speed:46,size:14,sight:4,at:'factory',harv:true,veh:true,desc:'Récolte les cristaux de Ki.'},
   tank:{name:'Tank Capsule',cost:750,time:14,hp:800,speed:48,dmg:55,range:210,rof:2.2,proj:'shell',splash:36,size:15,sight:7,at:'factory',veh:true,vsB:1.4,desc:'Blindé lourd à obus explosifs.'},
-  goku:{name:'Son Goku',hero:true,cost:2000,time:28,hp:1700,speed:88,dmg:46,range:140,rof:.9,proj:'ki',fly:true,size:10,look:'goku',saiyan:true,
-    ab:{name:'Kaméhaméha',type:'beam',cd:24,dmg:440,range:300,len:430,w:38,shout:'KA-MÉ-HA-MÉ-HA !!',col:'#6fd8ff'},desc:'Vole. Passe Super Saiyan quand il est blessé.'},
+  goku:{name:'Goku',hero:true,cost:2000,time:28,hp:1700,speed:88,dmg:46,range:140,rof:.9,proj:'ki',fly:true,size:10,look:'goku',saiyan:true,
+    ab:{name:'Kamehameha',type:'beam',cd:24,dmg:440,range:300,len:430,w:38,shout:'KA-ME-HA-ME-HA !!',col:'#6fd8ff'},desc:'Vole. Passe Super Saiyan quand il est blessé.'},
   vegeta:{name:'Vegeta',hero:true,cost:1800,time:26,hp:1550,speed:86,dmg:50,range:140,rof:.95,proj:'ki',fly:true,size:10,look:'vegeta',saiyan:true,
     ab:{name:'Big Bang Attack',type:'blast',cd:22,dmg:380,range:290,rad:95,shout:'BIG BANG ATTACK !!',col:'#8fd0ff'},desc:'Le prince des Saiyans. Vole.'},
   piccolo:{name:'Piccolo',hero:true,cost:1500,time:24,hp:1550,speed:80,dmg:40,range:150,rof:1,proj:'ki',fly:true,size:10,look:'piccolo',regen:9,
-    ab:{name:'Makankōsappō',type:'beam',cd:24,dmg:620,range:340,len:500,w:18,shout:'MAKANKŌSAPPŌ !!',col:'#ffe95a',spiral:true},desc:'Se régénère en permanence. Rayon perforant à longue portée.'},
-  gohan:{name:'Son Gohan',hero:true,cost:1600,time:24,hp:1400,speed:86,dmg:44,range:140,rof:.9,proj:'ki',fly:true,size:10,look:'gohan',saiyan:true,
+    ab:{name:'Special Beam Cannon',type:'beam',cd:24,dmg:620,range:340,len:500,w:18,shout:'SPECIAL BEAM CANNON !!',col:'#ffe95a',spiral:true},desc:'Se régénère en permanence. Rayon perforant à longue portée.'},
+  gohan:{name:'Gohan',hero:true,cost:1600,time:24,hp:1400,speed:86,dmg:44,range:140,rof:.9,proj:'ki',fly:true,size:10,look:'gohan',saiyan:true,
     ab:{name:'Colère de Gohan',type:'rage',cd:35,dur:12,range:0,shout:'COLÈRE DE GOHAN !!',col:'#ffe14d'},desc:'Sa colère double ses dégâts et le soigne.'},
-  krilin:{name:'Krilin',hero:true,cost:1200,time:20,hp:1100,speed:90,dmg:34,range:140,rof:.85,proj:'ki',fly:true,size:9,look:'krilin',
-    ab:{name:'Kienzan',type:'disc',cd:18,dmg:440,range:320,len:540,shout:'KIENZAN !!',col:'#ffe95a'},desc:'Son disque Kienzan tranche tout sur sa trajectoire.'},
+  krilin:{name:'Krillin',hero:true,cost:1200,time:20,hp:1100,speed:90,dmg:34,range:140,rof:.85,proj:'ki',fly:true,size:9,look:'krilin',
+    ab:{name:'Destructo Disc',type:'disc',cd:18,dmg:440,range:320,len:540,shout:'DESTRUCTO DISC !!',col:'#ffe95a'},desc:'Son disque Destructo Disc tranche tout sur sa trajectoire.'},
   healer:{name:'Guérisseur namek',cost:400,time:10,hp:190,speed:60,heal:30,range:125,size:7,sight:6,look:'namek',desc:'Soigne les combattants alliés proches (pas les véhicules).'},
   jet:{name:'Avion Capsule',cost:600,time:11,hp:340,speed:125,dmg:12,range:140,rof:.45,proj:'bullet',fly:true,size:12,sight:9,at:'factory',veh:true,vsB:.5,desc:'Appareil volant rapide. Parfait pour éclairer la carte et chasser les Dragon Balls.'},
  },
@@ -72,7 +72,7 @@ const UDEF={
  }
 };
 const ULIST=['inf1','inf2','healer','harv','tank','jet'];
-const SUPER={dbz:{name:'Genkidama',charge:210,rad:170,dmg:1100,col:'#8fe0ff',shout:'GENKIDAMA !!',look:'goku',who:'Son Goku',delay:3},
+const SUPER={dbz:{name:'Spirit Bomb',charge:210,rad:170,dmg:1100,col:'#8fe0ff',shout:'SPIRIT BOMB !!',look:'goku',who:'Goku',delay:3},
   mha:{name:'Prominence Burn',charge:210,rad:155,dmg:1100,col:'#ff7a2a',shout:'PROMINENCE BURN !!',look:'endeavor',who:'Endeavor',delay:2.4}};
 for(const f in UDEF)for(const k in UDEF[f]){const D=UDEF[f][k];D.key=k;D.fac=f;D.sight=D.sight||(D.hero?9:6);D.sightPx=D.sight*TILE;
   D.size=D.size||8;D.at=D.at||(D.hero?'temple':'barracks');D.rof=D.rof||1;D.req=D.req||[];if(D.hero)D.req=['temple'];}

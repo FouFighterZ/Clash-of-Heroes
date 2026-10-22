@@ -1,7 +1,7 @@
 // ===== Second ability (key E) for the strongest heroes =====
 Object.assign(ABDESC,{blink:'Téléportation instantanée',surge:'Brève montée de puissance',thunder:'Charge foudroyante qui étourdit',slot:'Arme tirée au hasard',summon:'Invoque des alliés temporaires',pull:'Attire les ennemis vers lui',king:'Paralyse de peur les ennemis proches',crush:'Écrase une zone et étourdit',snipe:'Tir unique dévastateur',feathers:'Pluie de projectiles sur une zone',rally:'Galvanise les alliés proches',harden:'Quasi invulnérable, attire les coups',rage:'Fureur : dégâts et vitesse en hausse',lift:'Soulève les ennemis puis les écrase'});
 const AB2={
- dbz:{goku:{name:'Transmission instantanée',type:'blink',cd:24,range:440,shout:'TRANSMISSION INSTANTANÉE !',col:'#ffe14d'},
+ dbz:{goku:{name:'Instant Transmission',type:'blink',cd:24,range:440,shout:'TRANSMISSION INSTANTANÉE !',col:'#ffe14d'},
   vegeta:{name:'Final Flash',type:'beam',cd:38,dmg:340,range:300,len:420,w:34,shout:'FINAL FLASH !!',col:'#ffe95a'},
   beerus:{name:'Sphère de destruction',type:'blast',cd:28,dmg:380,range:290,rad:90,shout:'DÉTRUIS.',col:'#b04aff'}},
  mha:{allmight:{name:'Detroit Smash',type:'cone',cd:26,dmg:300,range:70,len:200,ang:.5,knock:380,shout:'DETROIT SMASH !',col:'#ffd23a'},

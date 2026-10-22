@@ -159,6 +159,7 @@ function render(){const W=cv.width,H=cv.height;ctx.setTransform(1,0,0,1,0,0);ctx
       if(e.rank)chevrons(ctx,e.x-(e.D.hero?(e.D.legend?27:20):14),top+(e.D.hero?(e.D.legend?16:15):3),e.rank);
       if(e.D.harv&&(s||hv)){ctx.fillStyle='#ffc93a';ctx.fillRect(e.x-10,top+5,20*e.load/CAP,2);}
       if(e.freeze>0){ctx.fillStyle='#bff4ff';ctx.font='10px Chakra Petch, sans-serif';ctx.textAlign='center';ctx.fillText('GELÉ',e.x,top-4);}}}
+  for(const e of dl)if(e.isU&&!e.dead&&e.airT>0&&typeof airGauge==='function'&&(e.side===PL||ally(e.side,PL)||sel.includes(e)))airGauge(ctx,e);
   // pings
   for(const p of G.pings){const a=(p.t%1);ctx.strokeStyle='#ff4d5e';ctx.lineWidth=3;ctx.globalAlpha=1-a;ctx.beginPath();ctx.arc(p.x,p.y,20+a*60,0,PI2);ctx.stroke();ctx.globalAlpha=1;}
   // modes
