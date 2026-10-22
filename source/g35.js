@@ -1,6 +1,6 @@
 // ===== Version 43: faster building, fair Dragon Ball hunting, gated top heroes, Dragon Ball transformations, training rooms, event cards, water borders, fusion cinematics =====
 // ---- buildings are ready almost instantly after being paid for ----
-for(const k in BDEF){BDEF[k].time0=BDEF[k].time;BDEF[k].time=k==='wall'?.3:1.2;}
+// (build times unchanged)
 // ---- the best heroes and legends need the upgraded hero / legend building ----
 for(const f in FAC){const F_=FAC[f];if(!F_.heroes||!UDEF[f])continue;
   const top=(L,n,req)=>[...L].filter(k=>UDEF[f][k]).sort((a,b)=>UDEF[f][b].cost-UDEF[f][a].cost).slice(0,n).forEach(k=>{const D=UDEF[f][k];D.req=[...new Set([...(D.req||[]),req])];D.topTier=true;});

@@ -277,7 +277,7 @@ svg.i{width:18px;height:18px;flex:none;fill:currentColor}
       <div class="opt"><span>Vitesse</span><div class="seg" id="speed"><button type="button" data-s="0.75">Lente</button><button type="button" data-s="1" class="on">Normale</button><button type="button" data-s="1.35">Rapide</button></div></div>
     </div>
     <button type="button" class="go" id="bgo">Combattre !</button>
-    <div class="snd">Jeu PC · souris et clavier · <b>version 45</b></div>
+    <div class="snd">Jeu PC · souris et clavier · <b>version 46</b></div>
   </div>
 </div>
 <div class="ovl" id="pausem" hidden><div class="box">
@@ -5037,7 +5037,7 @@ function airGauge(c,e){const f=1-e.airT/AIR_MAX,w=26,x=e.x-w/2+3,y=e.y-(e.z||0)+
   c.fillStyle='#bfefff';c.beginPath();c.moveTo(x-5,y-2.5);c.quadraticCurveTo(x-2,y+1,x-5,y+3);c.quadraticCurveTo(x-8,y+1,x-5,y-2.5);c.fill();}
 // ===== Version 43: faster building, fair Dragon Ball hunting, gated top heroes, Dragon Ball transformations, training rooms, event cards, water borders, fusion cinematics =====
 // ---- buildings are ready almost instantly after being paid for ----
-for(const k in BDEF){BDEF[k].time0=BDEF[k].time;BDEF[k].time=k==='wall'?.3:1.2;}
+// (build times unchanged)
 // ---- the best heroes and legends need the upgraded hero / legend building ----
 for(const f in FAC){const F_=FAC[f];if(!F_.heroes||!UDEF[f])continue;
   const top=(L,n,req)=>[...L].filter(k=>UDEF[f][k]).sort((a,b)=>UDEF[f][b].cost-UDEF[f][a].cost).slice(0,n).forEach(k=>{const D=UDEF[f][k];D.req=[...new Set([...(D.req||[]),req])];D.topTier=true;});
