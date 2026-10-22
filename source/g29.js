@@ -29,3 +29,6 @@ let menuPlay='home';
   tabs.querySelectorAll('button').forEach(b=>b.onclick=()=>{audioInit();set(b.dataset.pt);sfx('click');});set('home');}
 // the lobby takes its format from the menu
 {const _o=openMP;openMP=function(...a){NET.fmt=menuMode;const r=$('#mpfmt');if(r){const row=r.closest('.row');if(row)row.hidden=true;r.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.f===menuMode));}return _o.apply(this,a);};}
+// menu music starts on its own where autoplay is allowed (desktop app); otherwise on the first key press or click anywhere
+{const ev=['pointerdown','keydown','touchstart'],kick=()=>{audioInit();if(AC&&AC.state==='running')for(const e of ev)document.removeEventListener(e,kick,true);};
+  for(const e of ev)document.addEventListener(e,kick,true);setTimeout(kick,200);}

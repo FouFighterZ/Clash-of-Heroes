@@ -277,7 +277,7 @@ svg.i{width:18px;height:18px;flex:none;fill:currentColor}
       <div class="opt"><span>Vitesse</span><div class="seg" id="speed"><button type="button" data-s="0.75">Lente</button><button type="button" data-s="1" class="on">Normale</button><button type="button" data-s="1.35">Rapide</button></div></div>
     </div>
     <button type="button" class="go" id="bgo">Combattre !</button>
-    <div class="snd">Jeu PC · souris et clavier · la musique démarre au premier clic · <b>version 22</b></div>
+    <div class="snd">Jeu PC · souris et clavier · <b>version 23</b></div>
   </div>
 </div>
 <div class="ovl" id="pausem" hidden><div class="box">
@@ -4661,6 +4661,9 @@ let menuPlay='home';
   tabs.querySelectorAll('button').forEach(b=>b.onclick=()=>{audioInit();set(b.dataset.pt);sfx('click');});set('home');}
 // the lobby takes its format from the menu
 {const _o=openMP;openMP=function(...a){NET.fmt=menuMode;const r=$('#mpfmt');if(r){const row=r.closest('.row');if(row)row.hidden=true;r.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.f===menuMode));}return _o.apply(this,a);};}
+// menu music starts on its own where autoplay is allowed (desktop app); otherwise on the first key press or click anywhere
+{const ev=['pointerdown','keydown','touchstart'],kick=()=>{audioInit();if(AC&&AC.state==='running')for(const e of ev)document.removeEventListener(e,kick,true);};
+  for(const e of ev)document.addEventListener(e,kick,true);setTimeout(kick,200);}
 </script>
 
 </body></html>
