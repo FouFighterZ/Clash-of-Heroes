@@ -119,7 +119,7 @@ function refreshUI(){const s=sides[PL];if(!s||!items.length&&G.state!=='play')re
     if(it.isB){if(!has(PL,'hq')&&!has(PL,'hq2')){locked=true;lt='Quartier général détruit';}else if(!reqOk(PL,D.req)){locked=true;lt='Nécessite<br>'+D.req.filter(k=>!has(PL,k)).map(k=>reqName(k,f)).join('<br>');}
       if(s.prodB){if(s.prodB.key===it.key){prog=s.prodB.prog;ready=s.prodB.ready;}else busy=true;}}
     else{const q=s.q[D.at];if(!has(PL,D.at)){locked=true;lt='Nécessite<br>'+BDEF[D.at].names[f];}else if(!reqOk(PL,D.req)){locked=true;lt='Nécessite<br>'+D.req.filter(k=>!has(PL,k)).map(k=>reqName(k,f)).join('<br>');}else if(D.hero&&ents.some(e=>e.isU&&!e.dead&&e.side===PL&&e.key===it.key)){locked=true;lt='Sur le terrain';}
-      const mine=q.filter(x=>x.key===it.key);cnt=mine.length;if(cnt)prog=q[0].key===it.key?q[0].prog:0;}
+      const mine=q.filter(x=>x.key===it.key);cnt=mine.length;if(cnt)prog=Math.max(...mine.map(x=>x.prog));}
     it.el.classList.toggle('locked',locked&&prog<0);if(it._lt!==lt){it.lt.innerHTML=lt;it._lt=lt;}it.el.classList.toggle('ready',ready);it.el.classList.toggle('busy',busy&&!locked);
     it.el.classList.toggle('poor',s.credits<D.cost&&prog<0);it.el.classList.toggle('hint',!!hint&&hint.isB===it.isB&&hint.key===it.key&&!locked);
     it.cnt.textContent=cnt>1?cnt:'';it.pg.style.background=prog>=0&&!ready?`conic-gradient(transparent 0 ${prog*360}deg, rgba(0,0,0,.66) ${prog*360}deg 360deg)`:'none';

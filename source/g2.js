@@ -40,9 +40,13 @@ function updProd(si,dt){updResearch(si,dt);const s=sides[si],rate=s.use>s.pow?.4
   if(has(si,'temple+')&&s.sp<SP.charge){s.sp=Math.min(SP.charge,s.sp+dt*rate*(has(si,'relay+')?2:has(si,'relay')?1.6:1));if(s.sp>=SP.charge&&si===PL){msg(SP.name+' est prête ! Clique sur son bouton en haut de l’écran',FAC[s.fac].col);banner(SP.name.toUpperCase()+' PRÊTE !',FAC[s.fac].col);sfx('ready');announce(SP.name+' est prête');}}
   if(s.prodB&&!s.prodB.ready&&(has(si,'hq')||has(si,'hq2'))){s.prodB.prog+=dt*rate*(has(si,'hq+')||has(si,'hq2+')?1.4:1)/BDEF[s.prodB.key].time;
     if(s.prodB.prog>=1){s.prodB.prog=1;s.prodB.ready=true;if(si===PL){msg('Construction terminée : '+BDEF[s.prodB.key].names[s.fac]+'. Clique sa carte puis place-le.','#4fd17a');sfx('ready');announce('Construction achevée');}}}
-  for(const cat in s.q){const q=s.q[cat];if(!q.length)continue;const b=prodBuilding(si,cat);if(!b)continue;const it=q[0],D=UDEF[s.fac][it.key];
-    it.prog+=dt*rate*(b&&b.key==='temple2'&&(b.lvl||1)>=2?2:1+.25*(((b)&&(b).lvl||1)-1))*(sides[si].hqBoost||1)/D.time;if(it.prog>=1){q.shift();spawnFrom(b,it.key);s.st.built++;
+  for(const cat in s.q){const q=s.q[cat];if(!q.length)continue;const B=prodBuildings(si,cat);if(!B.length)continue;const done=[];
+    for(let k=0;k<Math.min(B.length,q.length);k++){const b=B[k],it=q[k],D=UDEF[s.fac][it.key];
+      it.prog+=dt*rate*(b.key==='temple2'&&(b.lvl||1)>=2?2:1+.25*((b.lvl||1)-1))*(sides[si].hqBoost||1)/D.time;if(it.prog>=1)done.push([it,b,D]);}
+    for(const[it,b,D]of done){q.splice(q.indexOf(it),1);spawnFrom(b,it.key);s.st.built++;
       if(si===PL&&(D.hero||!s.q[cat].length)){msg(D.hero?D.name+' rejoint la bataille !':D.name+' prêt',D.hero?FAC[s.fac].col:null);sfx(D.hero?'rankup':'ready');if(D.hero){banner(D.name.toUpperCase()+' ARRIVE !',FAC[s.fac].col);announce(D.name+' rejoint la bataille');}else if(R()<.3)announce('Unité opérationnelle');}}}}
+// one item at a time per building: every building of the right type works in parallel (primary building first)
+function prodBuildings(si,cat){const p=sides[si].primary[cat];return ents.filter(e=>e.isB&&!e.dead&&e.side===si&&e.key===cat&&e.rise>=1).sort((a,b)=>(b===p)-(a===p));}
 function spawnFrom(b,key){const tx=b.tx+((b.w/2)|0),ty=b.ty+b.h,p=nearestFree(tx,ty,10,tx,ty+2)||[tx,ty];
   const u=mkUnit(b.side,key,p[0]*TILE+16+rr(-4,4),p[1]*TILE+12);
   if(u.D.hero){fxRing(u.x,u.y,FAC[u.fac].col,40);sides[b.side].heroMade=true;}
