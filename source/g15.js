@@ -168,7 +168,7 @@ let kingsT=0,kings=[];
   const wasU=t.isU;_k(t,srcSide,src);if(NET.client)return;if(NET.host)NET.killed(t,srcSide,src);
   if(srcSide!=null&&isPl(srcSide)&&srcSide!==t.side){const S=sides[srcSide];
     if(S.fac==='opm'&&!(t.D.harv)){const v=Math.round((t.D.cost||(t.isB?600:100))*.2*(S.ups.includes('bounty')?2:1));S.credits+=v;if(srcSide===PL&&v>=150)feedPush('Prime de l’Association : +'+v,'#ffc21a');}
-    if(S.fac==='sl'){if(S.quest)S.quest.k++;}}
+    }
   if(wasU)tryExtract(t);};}
 {const _dmm=dmgMult;dmgMult=function(u){let m=_dmm(u);if(u.key==='jinwoo')m*=1+.04*(slLevel(u.side)-1);if(u.D.fighting)m*=1+(1-u.hp/u.max)*.9;if(u.hope>0)m*=1.2;return m;};}
 {const _gx=giveXP;giveXP=function(u,v){const r0=u.rank;_gx(u,v);if(u.rank>r0&&sides[u.side]&&sides[u.side].fac==='opm'&&!NET.client){const g=150*u.rank;sides[u.side].credits+=g;if(u.side===PL&&(u.D.hero||u.rank>=2))feedPush('Montée au classement de l’Association : +'+g,'#ffc21a');}};}

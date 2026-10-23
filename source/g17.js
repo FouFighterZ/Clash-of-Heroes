@@ -134,4 +134,4 @@ const OPB={
   c.fillStyle='rgba(6,18,36,.82)';c.strokeStyle='#4ab8ff';c.lineWidth=1.2;c.beginPath();c.roundRect(x,y,w,h,3);c.fill();c.stroke();c.font='bold 11px Chakra Petch, sans-serif';c.textAlign='left';c.fillStyle='#bfe8ff';
   c.fillText('[ SYSTÈME ]  Sung Jinwoo · Niv. '+lv,x+10,y+16);c.fillStyle='rgba(74,184,255,.25)';c.fillRect(x+10,y+24,w-20,5);c.fillStyle='#4ab8ff';c.fillRect(x+10,y+24,(w-20)*clamp((s.slx||0)/need,0,1),5);
   c.font='10px Chakra Petch, sans-serif';c.fillStyle='#8ab8d8';c.fillText('Ombres : '+shadeCount(PL)+' / '+shadeMax(PL),x+10,y+37);
-  if(q){c.fillStyle='#ffe14d';c.fillText('QUÊTE : éliminer '+q.n+' ennemis  ('+Math.min(q.k,q.n)+'/'+q.n+')  · '+Math.ceil(q.t)+' s',x+10,y+53);}};}
+  if(q){c.fillStyle='#ffe14d';c.fillText('QUÊTE : vaincre '+q.n+' ennemis ('+Math.min(q.k,q.n)+'/'+q.n+') → niveau '+((s.slv||1)+1),x+10,y+53);}};}
