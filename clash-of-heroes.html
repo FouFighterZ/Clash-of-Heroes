@@ -277,7 +277,7 @@ svg.i{width:18px;height:18px;flex:none;fill:currentColor}
       <div class="opt"><span>Vitesse</span><div class="seg" id="speed"><button type="button" data-s="0.75">Lente</button><button type="button" data-s="1" class="on">Normale</button><button type="button" data-s="1.35">Rapide</button></div></div>
     </div>
     <button type="button" class="go" id="bgo">Combattre !</button>
-    <div class="snd">Jeu PC · souris et clavier · <b>version 58</b></div>
+    <div class="snd">Jeu PC · souris et clavier · <b>version 59</b></div>
   </div>
 </div>
 <div class="ovl" id="pausem" hidden><div class="box">
@@ -1989,7 +1989,7 @@ UPG.dbz.push({id:'divine',name:'Ki divin',desc:'Héros +25 % de dégâts, les Sa
 // ---- abilities ----
 function execAbility3(u,c,ab,dx,dy,L){switch(ab.type){
   case'hakai':{let t=null,bd=90;for(const e of ents){if(e.dead||ally(e.side,u.side))continue;const d=hyp(e.x-c.x,e.y-c.y)-(e.isB?e.w*14:e.r);if(d<bd){bd=d;t=e;}}if(!t){u.abCd=2;return true;}
-    fxs.push({type:'hakai',x:t.x,y:t.y-(t.z||0)-14,t:0,dur:1});if(t.isB)damage(t,1600,u.side,u);else if(t.D.hero){if(t.form)endShift(t);damage(t,1100,u.side,u);}else{t.shield=0;damage(t,t.hp+1,u.side,u);}
+    fxs.push({type:'hakai',x:t.x,y:t.y-(t.z||0)-14,t:0,dur:1});if(t.isB)damage(t,2600,u.side,u);else if(t.key==='whis'||t.D.baseKey==='whis'){if(u.side===PL||t.side===PL)msg('Whis esquive le Hakai d’un sourire : les anges y sont immunisés.','#7fd0ff');}else if(t.key==='saitama'){damage(t,2500,u.side,u);if(u.side===PL||t.side===PL)msg('Saitama encaisse le Hakai… et se gratte la tête.','#ffc21a');}else{if(t.form)endShift(t);t.shield=0;t.ui=0;damage(t,t.hp*10+99999,u.side,u);}
     sfx('transform',t.x,t.y);shake(6);return true;}
   case'rewind':{for(const e of ents)if(!e.dead&&e.isU&&ally(e.side,u.side)&&hyp(e.x-u.x,e.y-u.y)<ab.rad){e.hp=e.max;e.freeze=0;e.lift=0;e.erased=0;fxRing(e.x,e.y,ab.col,22);}
     for(let k=0;k<3;k++)fxRing(u.x,u.y,ab.col,ab.rad*(.4+k*.3));sfx('lift',u.x,u.y);return true;}
@@ -5627,6 +5627,30 @@ const ARISE_FILTER='sepia(.55) hue-rotate(225deg) saturate(1.9) brightness(.86)'
   c.fillStyle='rgba(6,18,36,.82)';c.strokeStyle=monarch(PL)?'#b04aff':'#4ab8ff';c.lineWidth=1.2;c.beginPath();c.roundRect(x,y,230,18,3);c.fill();c.stroke();c.font='10px Chakra Petch, sans-serif';c.textAlign='left';
   c.fillStyle=monarch(PL)?'#d8b0ff':'#8ab8d8';c.fillText((monarch(PL)?'♛ SHADOW MONARCH':'')+(nb?(monarch(PL)?' · ':'')+'Niv. '+nb.lv+' : '+nb.name:monarch(PL)?' · tous les bonus':''),x+10,y+12.5);};}
 {const D=UDEF.sl&&UDEF.sl.jinwoo;if(D)D.desc+=' Bonus de niveau : '+SL_BON.map(B=>'niv. '+B.lv+' '+B.name).join(', ')+'.';}
+// ===== Saitama: by far the strongest character, but very slow to come and with real constraints =====
+{const D=UDEF.opm.saitama;Object.assign(D,{cost:4500,time:150,hp:8000,dmg:380,rof:1,vsB:.3,regen:22,speed:92});
+  D.ab.cd=24;D.ab2.dmg=400;
+  D.desc='Le plus puissant de tous : chaque coup de poing tue une troupe, il encaisse un tiers de dégâts en moins et se régénère. Contreparties : il met 2 min 30 à arriver ; quand il s’ennuie (sans combat), il part aux soldes du supermarché pendant 25 s ; et s’il tombe, l’Association ne le rappelle pas avant 5 minutes. Sa Série de coups normaux (Q) pulvérise tout devant lui.';}
+// takes half damage
+{const _dm=damage;damage=function(t,amt,...a){if(t&&t.key==='saitama'&&t.isU&&amt>0)amt*=.65;return _dm(t,amt,...a);};}
+// normal punches one-shot troops (heroes, legends, bosses and buildings take normal damage)
+{const _dm=damage;damage=function(t,amt,srcSide,src,...a){if(src&&src.isU&&src.key==='saitama'&&t&&t.isU&&!t.dead&&!t.D.hero&&!t.D.legend&&!t.D.mech&&!((t.D.bounty||0)>=900)&&amt>=300)amt=Math.max(amt,t.hp+1);return _dm(t,amt,srcSide,src,...a);};}
+// longer supermarket trips
+{const _gs=goShopping;goShopping=function(u){_gs(u);const s=sides[u.side];const a=s.away&&s.away.find(x=>x.u===u);if(a)a.t=25;if(u.side===PL)feedPush('Saitama s’ennuie et part aux soldes du supermarché (25 s)…','#ffc21a');};}
+// after a defeat, 5 minutes before he can be recruited again
+{const _k=kill;kill=function(t,srcSide,src){const was=!t.dead;_k(t,srcSide,src);if(was&&t.dead&&t.isU&&t.key==='saitama'&&sides[t.side]){sides[t.side].saiCd=gtime+300;if(t.side===PL)msg('Saitama est tombé… l’Association ne pourra pas le rappeler avant 5 minutes.','#ffc21a');}};}
+{const _q=queueUnit;queueUnit=function(si,key){const s=sides[si];if(key==='saitama'&&s&&(s.saiCd||0)>gtime){if(si===PL){feedPush('Saitama sera disponible dans '+Math.ceil(s.saiCd-gtime)+' s','#ffc53d');sfx('err');}return false;}return _q(si,key);};}
+{const _gx=giveXP;giveXP=function(u,v){if(u&&u.key==='saitama')return;return _gx(u,v);};}
+// ===== Beerus and Whis: gods of the universe, far stronger (and far pricier) than the other legends =====
+{const B=UDEF.dbz.beerus;Object.assign(B,{cost:6500,time:75,hp:6000,dmg:140,rof:.8});B.ab.cd=55;B.ab.range=300;B.ab2.dmg=900;B.ab2.rad=110;
+  B.desc='Dieu de la Destruction de l’univers 7 (DBS). Hakai : efface n’importe quelle cible d’un geste (seuls les anges y échappent, et Saitama y résiste). Sphère de destruction : explosion massive.';}
+{const W=UDEF.dbz.whis;Object.assign(W,{cost:6000,time:70,hp:4600,dmg:105,rof:.5,range:26,melee:true,dodge:.5,regen:20});W.ab.cd=40;W.ab.rad=360;
+  W.ab2={name:'Bâton de l’ange',type:'bind',cd:22,range:320,rad:170,dur:4,shout:'UN PEU DE PATIENCE…',col:'#bfe8ff'};
+  W.desc='Ange de l’univers 7, maître de Beerus (DBS). Esquive la moitié des attaques et frappe au bâton à une vitesse folle. Aura de l’ange : les alliés proches se battent 20 % mieux. Retour temporel : remonte le temps pour tous les alliés proches (soin complet). Bâton de l’ange : immobilise les ennemis d’une zone. Immunisé au Hakai.';}
+// Whis' aura: nearby allies +20% damage
+{const _dm=dmgMult;let wl=[],wT=-9;dmgMult=function(u){let m=_dm(u);if(!u||!u.isU)return m;if(gtime-wT>.5||gtime<wT){wT=gtime;wl=ents.filter(e=>e.isU&&!e.dead&&e.key==='whis');}
+  for(const w of wl)if(w!==u&&ally(w.side,u.side)&&hyp(w.x-u.x,w.y-u.y)<280){m*=1.2;break;}return m;};}
+{const _du=drawUnitBody;drawUnitBody=function(c,u,x,y,ghost){if(u.key==='whis'&&!ghost){c.save();c.globalAlpha=.12+.05*Math.sin(gtime*2);c.strokeStyle='#bfe8ff';c.lineWidth=2;c.beginPath();c.ellipse(x,y,280,280*.6,0,0,PI2);c.stroke();c.restore();}return _du(c,u,x,y,ghost);};}
 </script>
 
 </body></html>

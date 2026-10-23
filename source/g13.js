@@ -47,7 +47,7 @@ UPG.dbz.push({id:'divine',name:'Ki divin',desc:'Héros +25 % de dégâts, les Sa
 // ---- abilities ----
 function execAbility3(u,c,ab,dx,dy,L){switch(ab.type){
   case'hakai':{let t=null,bd=90;for(const e of ents){if(e.dead||ally(e.side,u.side))continue;const d=hyp(e.x-c.x,e.y-c.y)-(e.isB?e.w*14:e.r);if(d<bd){bd=d;t=e;}}if(!t){u.abCd=2;return true;}
-    fxs.push({type:'hakai',x:t.x,y:t.y-(t.z||0)-14,t:0,dur:1});if(t.isB)damage(t,1600,u.side,u);else if(t.D.hero){if(t.form)endShift(t);damage(t,1100,u.side,u);}else{t.shield=0;damage(t,t.hp+1,u.side,u);}
+    fxs.push({type:'hakai',x:t.x,y:t.y-(t.z||0)-14,t:0,dur:1});if(t.isB)damage(t,2600,u.side,u);else if(t.key==='whis'||t.D.baseKey==='whis'){if(u.side===PL||t.side===PL)msg('Whis esquive le Hakai d’un sourire : les anges y sont immunisés.','#7fd0ff');}else if(t.key==='saitama'){damage(t,2500,u.side,u);if(u.side===PL||t.side===PL)msg('Saitama encaisse le Hakai… et se gratte la tête.','#ffc21a');}else{if(t.form)endShift(t);t.shield=0;t.ui=0;damage(t,t.hp*10+99999,u.side,u);}
     sfx('transform',t.x,t.y);shake(6);return true;}
   case'rewind':{for(const e of ents)if(!e.dead&&e.isU&&ally(e.side,u.side)&&hyp(e.x-u.x,e.y-u.y)<ab.rad){e.hp=e.max;e.freeze=0;e.lift=0;e.erased=0;fxRing(e.x,e.y,ab.col,22);}
     for(let k=0;k<3;k++)fxRing(u.x,u.y,ab.col,ab.rad*(.4+k*.3));sfx('lift',u.x,u.y);return true;}
