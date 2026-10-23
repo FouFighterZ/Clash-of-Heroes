@@ -150,7 +150,7 @@ function tryExtract(t){if(!t.isU||t.D.veh||t.D.harv||t.form&&false)return;for(co
 function ariseFx(u){for(let k=0;k<26;k++)part('smoke',u.x+rr(-14,14),u.y-rr(0,30),rr(-20,20),rr(-60,-20),rr(.8,1.6),rr(8,14),'#2a2040');fxRing(u.x,u.y,'#8a5aff',40);part('flash',u.x,u.y-16,0,0,.4,60,'#8a5aff');sfx('transform',u.x,u.y);}
 function slXP(si,v){const s=sides[si];if(!s||s.fac!=='sl')return;s.slv=s.slv||1;s.slx=(s.slx||0)+v;let up=0;while(s.slx>=60+s.slv*30&&s.slv<99){s.slx-=60+s.slv*30;s.slv++;up++;}
   if(!up)return;const jw=ents.find(e=>e.isU&&!e.dead&&e.side===si&&e.key==='jinwoo');
-  if(jw){const nm=Math.round(jw.max*Math.pow(1.04,up));jw.hp+=nm-jw.max;jw.max=nm;fxs.push({type:'lvlup',x:jw.x,y:jw.y-50,t:0,dur:1.6,u:jw});fxRing(jw.x,jw.y,'#6fd8ff',40);}
+  if(jw){const nm=Math.round(jw.max*Math.pow(1.06,up));jw.hp+=nm-jw.max;jw.max=nm;fxs.push({type:'lvlup',x:jw.x,y:jw.y-50,t:0,dur:1.6,u:jw});fxRing(jw.x,jw.y,'#6fd8ff',40);}
   if(si===PL){msg('LEVEL UP ! Sung Jinwoo passe au niveau '+s.slv+(jw?'':' (il en profitera à son retour)'),'#6fd8ff');sfx('rankup');}}
 // ---- damage / kill hooks shared by both factions ----
 let kingsT=0,kings=[];
