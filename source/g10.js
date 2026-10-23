@@ -139,7 +139,7 @@ function drawB3(c,b,ghost){if(b.key==='lab'||b.key==='radar'||b.key==='def2'){dr
     box3(c,x0+16,y0+22,32,24,108,3,'#3a4458');const h=P3(cx,y0+34,111);c.strokeStyle='#e8b830';c.lineWidth=1.2;c.beginPath();c.ellipse(h[0],h[1],8,8,0,0,PI2);c.stroke();text3(c,'H',h[0],h[1],9,'#e8b830');
     box3(c,x0+14,y0+44,36,3,110,14,'#e8b830',{side:'#9a7a10'});onFront(c,x0+14,y0+44,3,110,x=>text3(x,'No.1',18,-7,11,'#3a2a10'));beacon(c,x0+46,y0+20,112,a);}
  }else{
-  if(k==='wall'){box3(c,x0,y0+4,W,W-6,0,26,'#a89e8e');stoneLines(c,x0,y0+4,W,W-6,0,26);crenel(c,x0,y0+4,W,W-6,26,'#b8ae9e',5);return;}
+  if(k==='wall'){box3(c,x0-1,y0+2,W+2,W-2,0,10,'#7e7464');box3(c,x0,y0+3,W,W-4,10,44,'#9a907e');stoneLines(c,x0,y0+3,W,W-4,10,44);box3(c,x0-2,y0+1,W+4,W,54,5,'#b8ae9e');crenel(c,x0-2,y0+1,W+4,W,59,'#c8beae',5);return;}
   if(k!=='turret')plinth(c,x0,y0,W,H,fc);
   if(k==='hq'){box3(c,x0+4,y0+10,W-8,22,4,60,'#b0a696');stoneLines(c,x0+4,y0+10,W-8,22,4,60);crenel(c,x0+4,y0+10,W-8,22,64,'#c0b6a6',11);
     for(const tx of[x0+8,x0+W-20]){cyl3(c,tx+6,y0+44,9,4,52,'#a39a8a');cone3(c,tx+6,y0+44,11,56,22,'#3a5a8a');}
