@@ -14,3 +14,4 @@ if(FAC.sl)FAC.sl.desc2='Pas de raffinerie ni de récolte : l’argent ne vient q
   if(idle.length<2)return;const base=myB(si,'hq')[0]||myB(si)[0];if(!base)return;
   const p=prey.filter(e=>!(e.D.bounty>=1800&&idle.length<6)).sort((a,b)=>hyp(a.x-base.x,a.y-base.y)-hyp(b.x-base.x,b.y-base.y))[0];if(!p)return;
   const grp=idle.sort((a,b)=>hyp(a.x-p.x,a.y-p.y)-hyp(b.x-p.x,b.y-p.y)).slice(0,Math.min(idle.length,8));for(const u of grp){orderMove(u,p.x+rr(-20,20),p.y+rr(-20,20),true);if(u.order)u.order.hunt=true;}};}
+BDEF.shrine.descs=Object.assign(BDEF.shrine.descs||{},{sl:BDEF.shrine.desc+' Tant qu’il existe, Sung Jinwoo ne repart plus du niveau 1 à sa mort, mais du palier de 5 niveaux précédent (niveau 23 → 20, niveau 15 → 10).'});

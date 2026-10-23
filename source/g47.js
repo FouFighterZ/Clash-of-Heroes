@@ -22,7 +22,9 @@ if(window.__game)window.__game.newGame=(...a)=>newGame(...a);
 {const _k=kill;kill=function(t,srcSide,src){const was=!t.dead;_k(t,srcSide,src);if(!was||!t.dead||NET.client)return;
   if(srcSide!=null&&isPl(srcSide)&&sides[srcSide]&&sides[srcSide].fac==='sl'&&!ally(srcSide,t.side)&&!(t.D&&t.D.harv&&t.side===srcSide)){const S=sides[srcSide],v=SL_KILL(t);if(v>0){S.credits+=v;if(srcSide===PL&&v>=150)feedPush('Le Système : +'+v+' pour '+(t.D.name||'la cible'),'#6fd8ff');}
     if(src&&src.key==='jinwoo')slXP(srcSide,Math.max(6,(t.D.cost||(t.isB?600:100))/8));}
-  if(t.isU&&t.key==='jinwoo'&&sides[t.side]&&sides[t.side].fac==='sl'){const s=sides[t.side];s.slv=1;s.slx=0;slSpawnJinwoo(t.side,true);}};}
+  if(t.isU&&t.key==='jinwoo'&&sides[t.side]&&sides[t.side].fac==='sl'){const s=sides[t.side],old=s.slv||1,keep=has(t.side,'shrine')?Math.max(1,Math.floor((old-1)/5)*5):1;s.slv=keep;s.slx=0;slSpawnJinwoo(t.side,keep===1);
+    if(keep>1){const jw=ents.find(e=>e.isU&&!e.dead&&e.side===t.side&&e.key==='jinwoo');if(jw){const nm=Math.round(jw.max*Math.pow(1.04,keep-1));jw.max=nm;jw.hp=nm;}
+      if(t.side===PL)msg('Le '+BDEF.shrine.names.sl+' préserve sa puissance : Sung Jinwoo se relève au niveau '+keep+' (au lieu de '+old+').','#b04aff');}}};}
 {const _dm=dmgMult;dmgMult=function(u){let m=_dm(u);if(u&&u.key==='jinwoo'&&sides[u.side])m*=1+.04*((sides[u.side].slv||1)-1);return m;};}
 for(const f of['sl'])if(UDEF[f]&&UDEF[f].jinwoo)UDEF[f].jinwoo.desc=(UDEF[f].jinwoo.desc||'')+' Présent dès le début de la partie. Chaque ennemi qu’il tue lui rapporte de l’expérience : plus de vie et de dégâts. S’il meurt, il réapparaît aussitôt au quartier général, mais niveau 1.';
 FAC.sl&&(FAC.sl.econ='Pas de récolte : l’Armée des Ombres ne gagne de l’argent qu’en tuant des ennemis (adversaires, événements, monstres sauvages).');
