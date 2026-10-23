@@ -132,6 +132,6 @@ const OPB={
 // ---- the System window (quest tracker) for the Solo Leveling player ----
 {const _dvg=drawVignette;drawVignette=function(c,sw,sh){_dvg(c,sw,sh);const s=sides[PL];if(!s||s.fac!=='sl'||G.state!=='play')return;const lv=s.slv||1,need=60+lv*30,q=s.quest,w=230,h=q?62:40,x=sw/2-w/2,y=NET.on?34:8;
   c.fillStyle='rgba(6,18,36,.82)';c.strokeStyle='#4ab8ff';c.lineWidth=1.2;c.beginPath();c.roundRect(x,y,w,h,3);c.fill();c.stroke();c.font='bold 11px Chakra Petch, sans-serif';c.textAlign='left';c.fillStyle='#bfe8ff';
-  c.fillText('[ SYSTÈME ]  Sung Jinwoo · Niv. '+lv,x+10,y+16);c.fillStyle='rgba(74,184,255,.25)';c.fillRect(x+10,y+24,w-20,5);c.fillStyle='#4ab8ff';c.fillRect(x+10,y+24,(w-20)*clamp((s.slx||0)/need,0,1),5);
-  c.font='10px Chakra Petch, sans-serif';c.fillStyle='#8ab8d8';c.fillText(monarch(PL)?'Ombres relevées (ARISE) : '+ents.filter(e=>e.isU&&!e.dead&&e.side===PL&&e.D.arisen).length+' / '+ARISE_MAX:'Ombres : ARISE se débloque au niveau 15 (Shadow Monarch)',x+10,y+37);
+  c.fillText('[ SYSTÈME ]  Sung Jinwoo · Niv. '+lv,x+10,y+16);c.fillStyle='rgba(74,184,255,.25)';c.fillRect(x+10,y+24,w-20,5);c.fillStyle='#4ab8ff';c.fillRect(x+10,y+24,(w-20)*clamp(q?q.k/q.n:0,0,1),5);
+  c.font='10px Chakra Petch, sans-serif';c.fillStyle='#8ab8d8';c.fillText('Prochain niveau : '+(q?Math.min(q.k,q.n)+' / '+q.n+' ennemis vaincus':'—'),x+10,y+37);
   if(q){c.fillStyle='#ffe14d';c.fillText('QUÊTE : vaincre '+q.n+' ennemis ('+Math.min(q.k,q.n)+'/'+q.n+') → niveau '+((s.slv||1)+1),x+10,y+53);}};}
