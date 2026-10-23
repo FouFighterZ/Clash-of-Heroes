@@ -277,7 +277,7 @@ svg.i{width:18px;height:18px;flex:none;fill:currentColor}
       <div class="opt"><span>Vitesse</span><div class="seg" id="speed"><button type="button" data-s="0.75">Lente</button><button type="button" data-s="1" class="on">Normale</button><button type="button" data-s="1.35">Rapide</button></div></div>
     </div>
     <button type="button" class="go" id="bgo">Combattre !</button>
-    <div class="snd">Jeu PC · souris et clavier · <b>version 56</b></div>
+    <div class="snd">Jeu PC · souris et clavier · <b>version 57</b></div>
   </div>
 </div>
 <div class="ovl" id="pausem" hidden><div class="box">
@@ -826,7 +826,7 @@ function updUnit(u,dt){updMotion(u,dt);updForms(u,dt);updPassives(u,dt);updPassi
     else if(s.fac==='mha'&&!(u.puT>0)){u.puT=45;u.buff=8;fxRing(u.x,u.y,'#ffd23a',70);if(plSees(u))cutin(u,'PLUS ULTRA !!');sfx('transform',u.x,u.y);}}
   if(u.puT>0)u.puT-=dt;u.anim+=dt;if(u.atk>0)u.atk-=dt;if(u.hitFl>0)u.hitFl-=dt;if(u.cd>0)u.cd-=dt;if(u.abCd>0)u.abCd-=dt;if(u.buff>0)u.buff-=dt;
   if(D.regen&&u.hp<u.max)u.hp=Math.min(u.max,u.hp+D.regen*dt);
-  if(D.saiyan&&u.key==='broly'&&!u.ssj&&u.hp<u.max*.6){u.ssj=true;transformFx(u);}
+  
   if(u.kx||u.ky){moveSafe(u,u.kx*dt,u.ky*dt);const f=Math.pow(.015,dt);u.kx*=f;u.ky*=f;if(Math.abs(u.kx)+Math.abs(u.ky)<8){u.kx=u.ky=0;}
     if(R()<.5&&!u.fly)part('dust',u.x,u.y,rr(-10,10),rr(-10,10),.6,rr(5,9));}
   if(u.lift>0){u.lift-=dt;const base=u.fly?16:0;u.z=lerp(u.z,base+38,Math.min(1,dt*3));u.moving=false;
@@ -878,7 +878,7 @@ function updHarv(u,dt){const o=u.order;
   case'retgo':{if(!u.ref||u.ref.dead){u.hs='ret';break;}const p=dock(u.ref);const arrived=followPath(u,dt);
     if(hyp(p.x-u.x,p.y-u.y)<34){u.hs='unload';u.ht=.15;u.path=null;}else if(arrived){u.hs='wait';u.ht=1;}break;}
   case'unload':{u.moving=false;if(!u.ref||u.ref.dead){u.hs='ret';break;}u.ang=turn(u.ang,-PI/2,dt*4);
-    if(u.ht<=0){u.ht=.15;const t=Math.min(50,u.load);u.load-=t;const s=sides[u.side],g=Math.round(t*s.mult*(1+.25*(((u.ref)&&(u.ref).lvl||1)-1)));s.credits+=g;s.st.harv+=g;
+    if(u.ht<=0){u.ht=.15;const t=Math.min(50,u.load);u.load-=t;const s=sides[u.side],g=s.fac==='sl'?0:Math.round(t*s.mult*(1+.25*(((u.ref)&&(u.ref).lvl||1)-1)));s.credits+=g;s.st.harv+=g;
       if(u.load<=0){u.load=0;u.hs='seek';u.ht=0;u.hx=u.mx;u.hy=u.my;if(u.side===PL)sfx('coin');}}break;}
   }}
 
@@ -2003,7 +2003,7 @@ function execAbility3(u,c,ab,dx,dy,L){switch(ab.type){
 // ---- per-unit DBS passives: Ultra Instinct, barrier bubble, erased ----
 function updPassives2(u,dt){if(u.bubble>0){u.bubble-=dt;if(u.bubble<=0&&!u.form)u.shield=0;}
   if(u.erased>0)u.erased-=dt;if(u.ui>0)u.ui-=dt;if(u.uiCd>0)u.uiCd-=dt;
-  if(u.key==='goku'&&!u.ui&&!(u.uiCd>0)&&uiReady(u)&&!u.dead){u.ui=15;u.uiCd=90;u.hp=Math.min(u.max,u.hp+u.max*.25);if(plSees(u))cutin(u,'ULTRA INSTINCT !!');fxRing(u.x,u.y,'#dfe8ff',80);sfx('transform',u.x,u.y);}}
+  if(u.key==='goku'&&!u.ui&&!(u.uiCd>0)&&uiReady(u)&&!u.dead){u.ui=1e9;u.uiCd=1e9;u._uicd=90;u.hp=Math.min(u.max,u.hp+u.max*.25);if(plSees(u))cutin(u,'ULTRA INSTINCT !!');fxRing(u.x,u.y,'#dfe8ff',80);sfx('transform',u.x,u.y);}}
 // ---- special buildings ----
 function updSpecialB(b,dt){if(b.rise<1)return;const D=b.D,s=sides[b.side];
   if(D.income)s.credits+=D.income*(1+.6*(((b)&&(b).lvl||1)-1))*dt*(s.use>s.pow?.5:1);
@@ -2365,7 +2365,7 @@ let kingsT=0,kings=[];
   const wasU=t.isU;_k(t,srcSide,src);if(NET.client)return;if(NET.host)NET.killed(t,srcSide,src);
   if(srcSide!=null&&isPl(srcSide)&&srcSide!==t.side){const S=sides[srcSide];
     if(S.fac==='opm'&&!(t.D.harv)){const v=Math.round((t.D.cost||(t.isB?600:100))*.2*(S.ups.includes('bounty')?2:1));S.credits+=v;if(srcSide===PL&&v>=150)feedPush('Prime de l’Association : +'+v,'#ffc21a');}
-    if(S.fac==='sl'){slXP(srcSide,Math.max(6,(t.D.cost||(t.isB?600:100))/8));if(S.quest)S.quest.k++;}}
+    if(S.fac==='sl'){if(S.quest)S.quest.k++;}}
   if(wasU)tryExtract(t);};}
 {const _dmm=dmgMult;dmgMult=function(u){let m=_dmm(u);if(u.key==='jinwoo')m*=1+.04*(slLevel(u.side)-1);if(u.D.fighting)m*=1+(1-u.hp/u.max)*.9;if(u.hope>0)m*=1.2;return m;};}
 {const _gx=giveXP;giveXP=function(u,v){const r0=u.rank;_gx(u,v);if(u.rank>r0&&sides[u.side]&&sides[u.side].fac==='opm'&&!NET.client){const g=150*u.rank;sides[u.side].credits+=g;if(u.side===PL&&(u.D.hero||u.rank>=2))feedPush('Montée au classement de l’Association : +'+g,'#ffc21a');}};}
@@ -3268,7 +3268,7 @@ function updUpgrades(dt){shieldT-=dt;if(shieldT<=0){shieldT=.5;shieldList=ents.f
       if(b.side===PL){msg(b.D.names[b.fac]+' amélioré : '+featText(b),'#ffd23a');sfx('rankup');if(b.key==='temple')announce(SUPER[b.fac].name+' débloquée');}}}
     if(b.key==='drill'&&b.rise>=1){b.drT=(b.drT||0)-dt;if(b.drT<=0){b.drT=2;let got=0;const tx=b.tx+1,ty=b.ty+1;
       for(let y=ty-4;y<=ty+4&&got<16;y++)for(let x=tx-4;x<=tx+4&&got<16;x++){if(x<0||y<0||x>=MW||y>=MH)continue;const i=ti(x,y);if(ore[i]>0){const t=Math.min(ore[i],16-got);ore[i]-=t;got+=t;}}
-      if(got){const s=sides[b.side],g=Math.round(got*1.6*s.mult*(1+.3*(lvlOf(b)-1)));s.credits+=g;s.st.harv+=g;if(plSees(b))part('spark',b.x,b.y-30,rr(-20,20),-50,.6,2,'#ffd34a');}}}}
+      if(got){const s=sides[b.side],g=s.fac==='sl'?0:Math.round(got*1.6*s.mult*(1+.3*(lvlOf(b)-1)));s.credits+=g;s.st.harv+=g;if(plSees(b))part('spark',b.x,b.y-30,rr(-20,20),-50,.6,2,'#ffd34a');}}}}
   for(const si of PSIDES){const s=sides[si];if(!s)continue;
     if(s.tres){s.tres.prog+=dt/24*(has(si,'armory+')?2:1);if(s.tres.prog>=1){const k=s.tres.key;s.ulv=s.ulv||{};s.ulv[k]=(s.ulv[k]||0)+1;s.tres=null;for(const e of ents)if(!e.dead&&e.isU&&e.side===si&&e.key===k){const nm=Math.round(e.max*1.2);e.hp+=nm-e.max;e.max=nm;fxRing(e.x,e.y,'#ffd23a',18);}
       if(si===PL){msg(UDEF[s.fac][k].name+' : niveau '+(s.ulv[k]+1)+' !','#ffd23a');sfx('rankup');announce('Troupes améliorées');}}}
@@ -3850,10 +3850,10 @@ function endGame(win){G.state='end';const s=sides[PL],t=Math.floor(gtime);$('#en
   $('#ends').innerHTML=`<span>Durée</span><span>${Math.floor(t/60)} min ${String(t%60).padStart(2,'0')} s</span><span>Unités et bâtiments produits</span><span>${s.st.built}</span><span>Ennemis détruits</span><span>${s.st.kills}</span><span>Pertes</span><span>${s.st.lost}</span><span>${FAC[s.fac].money} récoltés</span><span>${Math.round(s.st.harv)}</span><span>Vœux exaucés par Shenron</span><span>${s.wishes}</span>`;
   $('#end').hidden=false;stopMusic();sfx(win?'win':'lose');announce(win?'Victoire !':'Défaite...');}
 let last=performance.now(),uiT=0,miniT=0;
-function frame(ts){const rdt=Math.min(.05,(ts-last)/1000);last=ts;
+function frame(ts){requestAnimationFrame(frame);const rdt=Math.min(.05,Math.max(0,(ts-last)/1000)||0);last=ts;
   if(G.state==='play'){
     if(G.shenron){G.shenron.t+=rdt;if(G.shenron.t>G.shenron.dur)G.shenron=null;}
-    if(!G.paused){let dt=rdt*(G.speed||1);if(G.slow>0){G.slow-=rdt;dt*=.35;}update(dt);}
+    if(!G.paused){let dt=rdt*(G.speed||1);if(G.slow>0){G.slow-=rdt;dt*=.35;}safeRun('update',()=>update(dt));}
     const sp=720/cam.z*rdt;let mx=0,my=0;if(keys.ArrowLeft)mx-=1;if(keys.ArrowRight)mx+=1;if(keys.ArrowUp)my-=1;if(keys.ArrowDown)my+=1;
     if(mouse.in&&!mouse.touch&&!mouse.down&&!miniDrag&&document.hasFocus()){const ew=14;if(mouse.x<ew)mx-=1;if(mouse.x>cv.clientWidth-ew)mx+=1;if(mouse.y<ew)my-=1;if(mouse.y>cv.clientHeight-ew)my+=1;}
     if(mx||my){cam.x+=mx*sp;cam.y+=my*sp;clampCam();}toWorld();
@@ -3862,8 +3862,9 @@ function frame(ts){const rdt=Math.min(.05,(ts-last)/1000);last=ts;
     if(G.cut){G.cut.t+=rdt;if(G.cut.t>G.cut.dur)G.cut=null;}
     hoverEnt=mouse.in?pickAt(mouse.wx,mouse.wy):null;
     let cur='default';if(mode)cur='crosshair';else if(hoverEnt&&foe(hoverEnt.side,PL)&&mySel().some(u=>u.isU&&u.D.dmg))cur='crosshair';else if(hoverEnt)cur='pointer';cv.style.cursor=cur;
-    render();uiT-=rdt;if(uiT<=0){uiT=.15;refreshUI();}miniT-=rdt;if(miniT<=0){miniT=.2;drawMini();}}
-  requestAnimationFrame(frame);}
+    safeRun('render',()=>{ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';render();});uiT-=rdt;if(uiT<=0){uiT=.15;safeRun('ui',refreshUI);}miniT-=rdt;if(miniT<=0){miniT=.2;safeRun('mini',drawMini);}}}
+// a failing frame must never stop the game loop: errors are logged (F9 shows them) and the next frame runs normally
+const ERRLOG=[];function safeRun(tag,f){try{f();}catch(e){const m=tag+': '+(e&&e.message)+' @ '+((e&&e.stack||'').split('\n')[1]||'').trim();if(!ERRLOG.length||ERRLOG[ERRLOG.length-1].m!==m){ERRLOG.push({m,t:Math.round(gtime),n:1});if(ERRLOG.length>30)ERRLOG.shift();console.error(m);try{localStorage.setItem('coh_errs',JSON.stringify(ERRLOG));}catch(_){}}else ERRLOG[ERRLOG.length-1].n++;}}
 
 resize();requestAnimationFrame(frame);
 window.__game={newGame,update,G,get ents(){return ents;},get sides(){return sides;},render,cam};
@@ -5526,6 +5527,60 @@ function updTports(dt){if(NET.client||G.state!=='play')return;tpT-=dt;if(tpT<=0)
   if(t.pair){const o=tports.find(x=>x.id===t.pair);if(o&&t.id<o.id)txt(c,'⇄',t.x,t.y-26,14,t.col,true);else txt(c,'⇄',t.x,t.y-26,14,t.col,true);}else txt(c,'?',t.x,t.y-26,14,t.col,true);}};}
 // minimap marks
 {const _dm=drawMini;drawMini=function(){_dm();const m=mctx,s=mini.width/WW;for(const t of tports){if(!expl[ti(tileOf(t.x),tileOf(t.y))])continue;m.fillStyle=t.col;m.beginPath();m.arc(t.x*s,t.y*s,2.6,0,PI2);m.fill();}};}
+// ===== F9: show the internal error log (to report problems) =====
+window.addEventListener('keydown',e=>{if(e.key!=='F9')return;let d=document.getElementById('errlog');if(d){d.remove();return;}d=document.createElement('div');d.id='errlog';
+  d.style.cssText='position:fixed;left:12px;bottom:240px;max-width:70vw;max-height:40vh;overflow:auto;background:rgba(8,12,20,.95);border:1px solid #ff4d5e;color:#e8eef8;font:12px monospace;padding:8px 10px;z-index:99;white-space:pre-wrap';
+  d.textContent=ERRLOG.length?'Erreurs internes (version '+(document.title.match(/\d+/)||[''])[0]+') — copie ce texte pour le signaler :\n\n'+ERRLOG.map(x=>'['+x.t+'s ×'+x.n+'] '+x.m).join('\n'):'Aucune erreur interne enregistrée.';document.body.appendChild(d);});
+window.addEventListener('error',ev=>{try{ERRLOG.push({m:'global: '+ev.message+' @ '+(ev.filename||'').split('/').pop()+':'+ev.lineno,t:Math.round(gtime),n:1});if(ERRLOG.length>30)ERRLOG.shift();}catch(_){}});
+// per-entity isolation: one broken unit / building / AI never blocks the rest of the frame
+{const _uu=updUnit;updUnit=function(u,dt){try{_uu(u,dt);}catch(e){safeRun('unit '+(u&&u.key),()=>{throw e;});}};}
+{const _ub=updBuilding;updBuilding=function(b,dt){try{_ub(b,dt);}catch(e){safeRun('building '+(b&&b.key),()=>{throw e;});}};}
+{const _au=aiUpdate;aiUpdate=function(ai,dt){try{_au(ai,dt);}catch(e){safeRun('ai',()=>{throw e;});}};}
+{const _up=updProd;updProd=function(si,dt){try{_up(si,dt);}catch(e){safeRun('prod',()=>{throw e;});}};}
+if(window.__game)window.__game.update=dt=>update(dt);
+// ===== Wild monsters everywhere: weak camps that respawn, stronger as the game goes on =====
+const WILD_T=[[0,[['saiba',3],['ant',2]]],[240,[['ant',3],['fsoldier',2],['orc',2],['fishman',2]]],[540,[['orc',3],['iceelf',3],['kaijin',2],['celljr',2]]],[900,[['kaijin',3],['spider',2],['chimant',3],['kargalgan',1]]],[1320,[['spider',3],['kargalgan',1],['baruka',1],['celljr',3]]]];
+let wild=[],wildT=0;
+{const _ie=initEvents;initEvents=function(){_ie();wild=[];wildT=4;};}
+function wildTier(){let k=0;for(let i=0;i<WILD_T.length;i++)if(gtime>=WILD_T[i][0])k=i;return WILD_T[k][1];}
+function wildSpot(){for(let k=0;k<200;k++){const x=(3+R()*(MW-6))|0,y=(3+R()*(MH-6))|0,X=x*TILE+16,Y=y*TILE+16;if(!walk(x,y)||ore[ti(x,y)]>0||(bridgeT&&bridgeT[ti(x,y)]))continue;
+  if(BASES.some(b=>b&&hyp(b.x-x,b.y-y)<16))continue;if(ents.some(b=>b.isB&&!b.dead&&hyp(b.x-X,b.y-Y)<11*TILE))continue;if(wild.some(c=>hyp(c.x-X,c.y-Y)<9*TILE))continue;
+  if(typeof tports!=='undefined'&&tports.some(t=>hyp(t.x-X,t.y-Y)<4*TILE))continue;return{x:X,y:Y};}return null;}
+function wildCamp(c){const pool=wildTier(),[key,n]=pick(pool),f0=sides[2].fac;sides[2].fac='neu';c.ids=[];
+  for(let i=0;i<n;i++){const a=i/n*PI2+R(),d=n===1?0:rr(22,46);let x=c.x+Math.cos(a)*d,y=c.y+Math.sin(a)*d*.7;if(blockedW(x,y)){x=c.x;y=c.y;}const u=mkUnit(2,key,x,y);u.guard={x,y};u.wild=true;u.gx=x;u.gy=y;c.ids.push(u.id);}
+  sides[2].fac=f0;c.t=0;}
+function updWild(dt){if(NET.client||G.state!=='play')return;wildT-=dt;if(wildT>0)return;wildT=3;const want=Math.max(5,Math.round(MW/13));
+  if(wild.length<want){const p=wildSpot();if(p){const c={x:p.x,y:p.y,ids:[],t:0,cd:0};wild.push(c);wildCamp(c);}}
+  for(const c of wild){if(c.ids.some(id=>ents.some(e=>e.id===id&&!e.dead))){c.cd=0;continue;}c.cd+=3;if(c.cd>=rr(60,90)){if(ents.some(e=>e.isU&&!e.dead&&isPl(e.side)&&hyp(e.x-c.x,e.y-c.y)<8*TILE))continue;wildCamp(c);c.cd=0;}}}
+{const _uf=updFusion;updFusion=function(dt){_uf(dt);updWild(dt);};}
+// ===== Solo Leveling: Jinwoo starts on the field, money only from kills, respawn at level 1 =====
+const SL_KILL=t=>Math.round(t.D.bounty?0:(t.D.cost||(t.isB?600:100))*.45);
+function slSpawnJinwoo(si,msgIt){const hq=myB(si,'hq')[0]||myB(si,'hq2')[0]||myB(si)[0];if(!hq||ents.some(e=>e.isU&&!e.dead&&e.side===si&&e.key==='jinwoo'))return;
+  const tx=hq.tx+((hq.w/2)|0),ty=hq.ty+hq.h,p=nearestFree(tx,ty,10,tx,ty+2)||[tx,ty],u=mkUnit(si,'jinwoo',p[0]*TILE+16,p[1]*TILE+12);u.gx=u.x;u.gy=u.y;if(u&&typeof ariseFx==='function')ariseFx(u);if(msgIt&&si===PL)msg('Sung Jinwoo se relève au quartier général… de retour au niveau 1.','#6fd8ff');}
+{const _ng=newGame;newGame=function(...a){const r=_ng(...a);for(const si of PSIDES)if(sides[si]&&sides[si].fac==='sl')slSpawnJinwoo(si,false);return r;};}
+if(window.__game)window.__game.newGame=(...a)=>newGame(...a);
+{const _k=kill;kill=function(t,srcSide,src){const was=!t.dead;_k(t,srcSide,src);if(!was||!t.dead||NET.client)return;
+  if(srcSide!=null&&isPl(srcSide)&&sides[srcSide]&&sides[srcSide].fac==='sl'&&!ally(srcSide,t.side)&&!(t.D&&t.D.harv&&t.side===srcSide)){const S=sides[srcSide],v=SL_KILL(t);if(v>0){S.credits+=v;if(srcSide===PL&&v>=150)feedPush('Le Système : +'+v+' pour '+(t.D.name||'la cible'),'#6fd8ff');}
+    if(src&&src.key==='jinwoo')slXP(srcSide,Math.max(6,(t.D.cost||(t.isB?600:100))/8));}
+  if(t.isU&&t.key==='jinwoo'&&sides[t.side]&&sides[t.side].fac==='sl'){const s=sides[t.side];s.slv=1;s.slx=0;slSpawnJinwoo(t.side,true);}};}
+{const _dm=dmgMult;dmgMult=function(u){let m=_dm(u);if(u&&u.key==='jinwoo'&&sides[u.side])m*=1+.04*((sides[u.side].slv||1)-1);return m;};}
+for(const f of['sl'])if(UDEF[f]&&UDEF[f].jinwoo)UDEF[f].jinwoo.desc=(UDEF[f].jinwoo.desc||'')+' Présent dès le début de la partie. Chaque ennemi qu’il tue lui rapporte de l’expérience : plus de vie et de dégâts. S’il meurt, il réapparaît aussitôt au quartier général, mais niveau 1.';
+FAC.sl&&(FAC.sl.econ='Pas de récolte : l’Armée des Ombres ne gagne de l’argent qu’en tuant des ennemis (adversaires, événements, monstres sauvages).');
+// ===== Dragon Ball: transformations are earned by kills and kept =====
+const TF_K={ssj:5,blue:15,ui:25,rose:6};
+{const _k=kill;kill=function(t,srcSide,src){const was=!t.dead;_k(t,srcSide,src);if(was&&t.dead&&src&&src.isU&&!src.dead&&foe(src.side,t.side)&&!(t.D&&t.D.harv)){src.kills=(src.kills||0)+1;
+  if(src.fac==='dbz'&&SAIYANS.has(src.key)&&src.side===PL){const k=src.kills,nx=!src.ssj?TF_K[src.key==='black'?'rose':'ssj']:!src.sblue&&src.key!=='black'?TF_K.blue:src.key==='goku'&&!(src.ui>0)?TF_K.ui:0;if(nx&&nx-k<=2&&nx>k)feedPush(src.D.name+' : encore '+(nx-k)+' ennemi'+(nx-k>1?'s':'')+' avant la prochaine transformation','#ffd23a');}}};}
+SAIYANS.add('broly');
+{const _g=goSSJ;goSSJ=function(u,why){if((u.kills||0)<TF_K[u.key==='black'?'rose':'ssj'])return;return _g(u,why);};}
+{const _g=goBlue;goBlue=function(u,why){if((u.kills||0)<TF_K.blue)return;return _g(u,why);};}
+uiReady=function(u){return !!u.sblue&&(u.kills||0)>=TF_K.ui;};
+updTransform=function(u){if(!SAIYANS.has(u.key)||u.dead||u.fusing)return;const k=u.kills||0,s=sides[u.side];
+  if(!u.ssj){if(k>=TF_K[u.key==='black'?'rose':'ssj'])goSSJ(u,k+' ennemis vaincus !');return;}
+  if(!u.sblue&&u.key!=='black'&&u.key!=='broly'&&s&&s.ups.includes('divine')&&k>=TF_K.blue)goBlue(u,k+' ennemis vaincus !');};
+// fusions keep the forms and add up the kills of Goku and Vegeta
+{const _df=doFusion;doFusion=function(g,v,kind){const k=(g.kills||0)+(v.kills||0);_df(g,v,kind);const F=sides[g.side]&&sides[g.side].fusion;if(F&&F.z)F.z.kills=k;};}
+for(const k of SAIYANS){const D=UDEF.dbz[k];if(!D||!D.desc)continue;D.desc=D.desc.replace(/ Super Saiyan : .*$/,'').replace(/ Super Saiyan Rosé : .*$/,'');
+  D.desc+=k==='black'?' Super Saiyan Rosé après '+TF_K.rose+' ennemis vaincus.':' Transformations gagnées au combat et gardées : Super Saiyan après '+TF_K.ssj+' ennemis vaincus'+(k==='broly'?'':', Super Saiyan Blue après '+TF_K.blue+' (avec l’amélioration divine)')+(k==='goku'?', Ultra Instinct après '+TF_K.ui:'')+'.';}
 </script>
 
 </body></html>

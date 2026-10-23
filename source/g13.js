@@ -61,7 +61,7 @@ function execAbility3(u,c,ab,dx,dy,L){switch(ab.type){
 // ---- per-unit DBS passives: Ultra Instinct, barrier bubble, erased ----
 function updPassives2(u,dt){if(u.bubble>0){u.bubble-=dt;if(u.bubble<=0&&!u.form)u.shield=0;}
   if(u.erased>0)u.erased-=dt;if(u.ui>0)u.ui-=dt;if(u.uiCd>0)u.uiCd-=dt;
-  if(u.key==='goku'&&!u.ui&&!(u.uiCd>0)&&uiReady(u)&&!u.dead){u.ui=15;u.uiCd=90;u.hp=Math.min(u.max,u.hp+u.max*.25);if(plSees(u))cutin(u,'ULTRA INSTINCT !!');fxRing(u.x,u.y,'#dfe8ff',80);sfx('transform',u.x,u.y);}}
+  if(u.key==='goku'&&!u.ui&&!(u.uiCd>0)&&uiReady(u)&&!u.dead){u.ui=1e9;u.uiCd=1e9;u._uicd=90;u.hp=Math.min(u.max,u.hp+u.max*.25);if(plSees(u))cutin(u,'ULTRA INSTINCT !!');fxRing(u.x,u.y,'#dfe8ff',80);sfx('transform',u.x,u.y);}}
 // ---- special buildings ----
 function updSpecialB(b,dt){if(b.rise<1)return;const D=b.D,s=sides[b.side];
   if(D.income)s.credits+=D.income*(1+.6*(((b)&&(b).lvl||1)-1))*dt*(s.use>s.pow?.5:1);

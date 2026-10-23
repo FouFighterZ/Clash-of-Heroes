@@ -48,7 +48,7 @@ function updUpgrades(dt){shieldT-=dt;if(shieldT<=0){shieldT=.5;shieldList=ents.f
       if(b.side===PL){msg(b.D.names[b.fac]+' amélioré : '+featText(b),'#ffd23a');sfx('rankup');if(b.key==='temple')announce(SUPER[b.fac].name+' débloquée');}}}
     if(b.key==='drill'&&b.rise>=1){b.drT=(b.drT||0)-dt;if(b.drT<=0){b.drT=2;let got=0;const tx=b.tx+1,ty=b.ty+1;
       for(let y=ty-4;y<=ty+4&&got<16;y++)for(let x=tx-4;x<=tx+4&&got<16;x++){if(x<0||y<0||x>=MW||y>=MH)continue;const i=ti(x,y);if(ore[i]>0){const t=Math.min(ore[i],16-got);ore[i]-=t;got+=t;}}
-      if(got){const s=sides[b.side],g=Math.round(got*1.6*s.mult*(1+.3*(lvlOf(b)-1)));s.credits+=g;s.st.harv+=g;if(plSees(b))part('spark',b.x,b.y-30,rr(-20,20),-50,.6,2,'#ffd34a');}}}}
+      if(got){const s=sides[b.side],g=s.fac==='sl'?0:Math.round(got*1.6*s.mult*(1+.3*(lvlOf(b)-1)));s.credits+=g;s.st.harv+=g;if(plSees(b))part('spark',b.x,b.y-30,rr(-20,20),-50,.6,2,'#ffd34a');}}}}
   for(const si of PSIDES){const s=sides[si];if(!s)continue;
     if(s.tres){s.tres.prog+=dt/24*(has(si,'armory+')?2:1);if(s.tres.prog>=1){const k=s.tres.key;s.ulv=s.ulv||{};s.ulv[k]=(s.ulv[k]||0)+1;s.tres=null;for(const e of ents)if(!e.dead&&e.isU&&e.side===si&&e.key===k){const nm=Math.round(e.max*1.2);e.hp+=nm-e.max;e.max=nm;fxRing(e.x,e.y,'#ffd23a',18);}
       if(si===PL){msg(UDEF[s.fac][k].name+' : niveau '+(s.ulv[k]+1)+' !','#ffd23a');sfx('rankup');announce('Troupes améliorées');}}}

@@ -233,10 +233,10 @@ function endGame(win){G.state='end';const s=sides[PL],t=Math.floor(gtime);$('#en
   $('#ends').innerHTML=`<span>Durée</span><span>${Math.floor(t/60)} min ${String(t%60).padStart(2,'0')} s</span><span>Unités et bâtiments produits</span><span>${s.st.built}</span><span>Ennemis détruits</span><span>${s.st.kills}</span><span>Pertes</span><span>${s.st.lost}</span><span>${FAC[s.fac].money} récoltés</span><span>${Math.round(s.st.harv)}</span><span>Vœux exaucés par Shenron</span><span>${s.wishes}</span>`;
   $('#end').hidden=false;stopMusic();sfx(win?'win':'lose');announce(win?'Victoire !':'Défaite...');}
 let last=performance.now(),uiT=0,miniT=0;
-function frame(ts){const rdt=Math.min(.05,(ts-last)/1000);last=ts;
+function frame(ts){requestAnimationFrame(frame);const rdt=Math.min(.05,Math.max(0,(ts-last)/1000)||0);last=ts;
   if(G.state==='play'){
     if(G.shenron){G.shenron.t+=rdt;if(G.shenron.t>G.shenron.dur)G.shenron=null;}
-    if(!G.paused){let dt=rdt*(G.speed||1);if(G.slow>0){G.slow-=rdt;dt*=.35;}update(dt);}
+    if(!G.paused){let dt=rdt*(G.speed||1);if(G.slow>0){G.slow-=rdt;dt*=.35;}safeRun('update',()=>update(dt));}
     const sp=720/cam.z*rdt;let mx=0,my=0;if(keys.ArrowLeft)mx-=1;if(keys.ArrowRight)mx+=1;if(keys.ArrowUp)my-=1;if(keys.ArrowDown)my+=1;
     if(mouse.in&&!mouse.touch&&!mouse.down&&!miniDrag&&document.hasFocus()){const ew=14;if(mouse.x<ew)mx-=1;if(mouse.x>cv.clientWidth-ew)mx+=1;if(mouse.y<ew)my-=1;if(mouse.y>cv.clientHeight-ew)my+=1;}
     if(mx||my){cam.x+=mx*sp;cam.y+=my*sp;clampCam();}toWorld();
@@ -245,8 +245,9 @@ function frame(ts){const rdt=Math.min(.05,(ts-last)/1000);last=ts;
     if(G.cut){G.cut.t+=rdt;if(G.cut.t>G.cut.dur)G.cut=null;}
     hoverEnt=mouse.in?pickAt(mouse.wx,mouse.wy):null;
     let cur='default';if(mode)cur='crosshair';else if(hoverEnt&&foe(hoverEnt.side,PL)&&mySel().some(u=>u.isU&&u.D.dmg))cur='crosshair';else if(hoverEnt)cur='pointer';cv.style.cursor=cur;
-    render();uiT-=rdt;if(uiT<=0){uiT=.15;refreshUI();}miniT-=rdt;if(miniT<=0){miniT=.2;drawMini();}}
-  requestAnimationFrame(frame);}
+    safeRun('render',()=>{ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';render();});uiT-=rdt;if(uiT<=0){uiT=.15;safeRun('ui',refreshUI);}miniT-=rdt;if(miniT<=0){miniT=.2;safeRun('mini',drawMini);}}}
+// a failing frame must never stop the game loop: errors are logged (F9 shows them) and the next frame runs normally
+const ERRLOG=[];function safeRun(tag,f){try{f();}catch(e){const m=tag+': '+(e&&e.message)+' @ '+((e&&e.stack||'').split('\n')[1]||'').trim();if(!ERRLOG.length||ERRLOG[ERRLOG.length-1].m!==m){ERRLOG.push({m,t:Math.round(gtime),n:1});if(ERRLOG.length>30)ERRLOG.shift();console.error(m);try{localStorage.setItem('coh_errs',JSON.stringify(ERRLOG));}catch(_){}}else ERRLOG[ERRLOG.length-1].n++;}}
 
 resize();requestAnimationFrame(frame);
 window.__game={newGame,update,G,get ents(){return ents;},get sides(){return sides;},render,cam};

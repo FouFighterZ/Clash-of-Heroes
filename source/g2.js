@@ -231,7 +231,7 @@ function updUnit(u,dt){updMotion(u,dt);updForms(u,dt);updPassives(u,dt);updPassi
     else if(s.fac==='mha'&&!(u.puT>0)){u.puT=45;u.buff=8;fxRing(u.x,u.y,'#ffd23a',70);if(plSees(u))cutin(u,'PLUS ULTRA !!');sfx('transform',u.x,u.y);}}
   if(u.puT>0)u.puT-=dt;u.anim+=dt;if(u.atk>0)u.atk-=dt;if(u.hitFl>0)u.hitFl-=dt;if(u.cd>0)u.cd-=dt;if(u.abCd>0)u.abCd-=dt;if(u.buff>0)u.buff-=dt;
   if(D.regen&&u.hp<u.max)u.hp=Math.min(u.max,u.hp+D.regen*dt);
-  if(D.saiyan&&u.key==='broly'&&!u.ssj&&u.hp<u.max*.6){u.ssj=true;transformFx(u);}
+  
   if(u.kx||u.ky){moveSafe(u,u.kx*dt,u.ky*dt);const f=Math.pow(.015,dt);u.kx*=f;u.ky*=f;if(Math.abs(u.kx)+Math.abs(u.ky)<8){u.kx=u.ky=0;}
     if(R()<.5&&!u.fly)part('dust',u.x,u.y,rr(-10,10),rr(-10,10),.6,rr(5,9));}
   if(u.lift>0){u.lift-=dt;const base=u.fly?16:0;u.z=lerp(u.z,base+38,Math.min(1,dt*3));u.moving=false;
@@ -283,7 +283,7 @@ function updHarv(u,dt){const o=u.order;
   case'retgo':{if(!u.ref||u.ref.dead){u.hs='ret';break;}const p=dock(u.ref);const arrived=followPath(u,dt);
     if(hyp(p.x-u.x,p.y-u.y)<34){u.hs='unload';u.ht=.15;u.path=null;}else if(arrived){u.hs='wait';u.ht=1;}break;}
   case'unload':{u.moving=false;if(!u.ref||u.ref.dead){u.hs='ret';break;}u.ang=turn(u.ang,-PI/2,dt*4);
-    if(u.ht<=0){u.ht=.15;const t=Math.min(50,u.load);u.load-=t;const s=sides[u.side],g=Math.round(t*s.mult*(1+.25*(((u.ref)&&(u.ref).lvl||1)-1)));s.credits+=g;s.st.harv+=g;
+    if(u.ht<=0){u.ht=.15;const t=Math.min(50,u.load);u.load-=t;const s=sides[u.side],g=s.fac==='sl'?0:Math.round(t*s.mult*(1+.25*(((u.ref)&&(u.ref).lvl||1)-1)));s.credits+=g;s.st.harv+=g;
       if(u.load<=0){u.load=0;u.hs='seek';u.ht=0;u.hx=u.mx;u.hy=u.my;if(u.side===PL)sfx('coin');}}break;}
   }}
 
