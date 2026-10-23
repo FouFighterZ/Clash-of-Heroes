@@ -26,3 +26,5 @@ window.addEventListener('keydown',e=>{if(G.state!=='play'||e.ctrlKey||e.metaKey|
 // hover/selection: clicking where the rider is selects the mount
 {const _pa=pickAt;pickAt=function(wx,wy,any){const e=_pa(wx,wy,any);return e&&e.mount?e.mount:e;};}
 for(const k of['tank','jet']){const D=UDEF.sl[k];if(D)D.desc=(D.desc||'')+' Sung Jinwoo peut monter dessus : sélectionne-le puis clic droit sur '+(k==='tank'?'Tank':'Kaisel')+' (touche G pour descendre).';}
+// the rider is not pushed apart from his own mount (that pushed Tank across the map)
+{const _s=separate;separate=function(){if(!ents.some(e=>e.mount))return _s();const save=ents;ents=ents.filter(e=>!e.mount);try{return _s();}finally{ents=save;}};}

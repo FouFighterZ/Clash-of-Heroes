@@ -277,7 +277,7 @@ svg.i{width:18px;height:18px;flex:none;fill:currentColor}
       <div class="opt"><span>Vitesse</span><div class="seg" id="speed"><button type="button" data-s="0.75">Lente</button><button type="button" data-s="1" class="on">Normale</button><button type="button" data-s="1.35">Rapide</button></div></div>
     </div>
     <button type="button" class="go" id="bgo">Combattre !</button>
-    <div class="snd">Jeu PC · souris et clavier · <b>version 63</b></div>
+    <div class="snd">Jeu PC · souris et clavier · <b>version 64</b></div>
   </div>
 </div>
 <div class="ovl" id="pausem" hidden><div class="box">
@@ -5706,6 +5706,8 @@ window.addEventListener('keydown',e=>{if(G.state!=='play'||e.ctrlKey||e.metaKey|
 // hover/selection: clicking where the rider is selects the mount
 {const _pa=pickAt;pickAt=function(wx,wy,any){const e=_pa(wx,wy,any);return e&&e.mount?e.mount:e;};}
 for(const k of['tank','jet']){const D=UDEF.sl[k];if(D)D.desc=(D.desc||'')+' Sung Jinwoo peut monter dessus : sélectionne-le puis clic droit sur '+(k==='tank'?'Tank':'Kaisel')+' (touche G pour descendre).';}
+// the rider is not pushed apart from his own mount (that pushed Tank across the map)
+{const _s=separate;separate=function(){if(!ents.some(e=>e.mount))return _s();const save=ents;ents=ents.filter(e=>!e.mount);try{return _s();}finally{ents=save;}};}
 // ===== Solo Leveling never uses mana crystals: no refinery, drill or harvester (money comes only from kills) =====
 const SL_NOECO=new Set(['refinery','drill']);
 {const _ti=tabItems;tabItems=function(t){const L=_ti(t);if(sides[PL]&&sides[PL].fac==='sl')return L.filter(it=>!(it.isB&&SL_NOECO.has(it.key))&&!(!it.isB&&it.key==='harv'));return L;};}
