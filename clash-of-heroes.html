@@ -277,7 +277,7 @@ svg.i{width:18px;height:18px;flex:none;fill:currentColor}
       <div class="opt"><span>Vitesse</span><div class="seg" id="speed"><button type="button" data-s="0.75">Lente</button><button type="button" data-s="1" class="on">Normale</button><button type="button" data-s="1.35">Rapide</button></div></div>
     </div>
     <button type="button" class="go" id="bgo">Combattre !</button>
-    <div class="snd">Jeu PC · souris et clavier · <b>version 62</b></div>
+    <div class="snd">Jeu PC · souris et clavier · <b>version 63</b></div>
   </div>
 </div>
 <div class="ovl" id="pausem" hidden><div class="box">
@@ -615,7 +615,7 @@ function recalcPower(s){let p=0,u=0;for(const e of ents)if(e.isB&&!e.dead&&e.sid
 const myB=(si,key)=>ents.filter(e=>e.isB&&!e.dead&&e.side===si&&(!key||e.key===key));
 const has=(si,key)=>{const up=!!key&&key.charCodeAt(key.length-1)===43,k=up?key.slice(0,-1):key;return ents.some(e=>e.isB&&!e.dead&&e.side===si&&e.key===k&&e.rise>=1&&(!up||(e.lvl||1)>=2));};// 'key+' = upgraded building
 const reqName=(k,f)=>{const up=k.endsWith('+'),D=BDEF[up?k.slice(0,-1):k];return(D?D.names[f]||D.names.dbz:k)+(up?' ★ (amélioration)':'');};
-const reqOk=(si,req)=>req.every(k=>has(si,k));
+const reqOk=(si,req)=>req.every(k=>has(si,k)||(k==='refinery'&&sides[si]&&sides[si].fac==='sl'&&has(si,'power')));
 function edgeDist(a,t){if(t.isB){const x0=t.tx*TILE,y0=t.ty*TILE,x1=x0+t.w*TILE,y1=y0+t.h*TILE;
   const dx=Math.max(x0-a.x,0,a.x-x1),dy=Math.max(y0-a.y,0,a.y-y1);return hyp(dx,dy)-(a.isB?a.r:a.r);}return hyp(t.x-a.x,t.y-a.y)-t.r-a.r;}
 function visibleTo(side,e){if(e.hid&&foe(e.side,side))return false;if(side!==PL||ally(e.side,side))return true;if(e.isB)return e.seen;return vis[ti(tileOf(e.x),tileOf(e.y))]===1;}
@@ -3961,7 +3961,7 @@ function objectives(){const s=sides[PL],f=s.fac,N=k=>BDEF[k].names[f];s.od=s.od|
   const L=[{id:'p',t:`Construis : ${N('power')}`,ok:()=>has(PL,'power'),k:'power'},{id:'r',t:`Construis : ${N('refinery')} (livre un camion collecteur)`,ok:()=>has(PL,'refinery'),k:'refinery'},
     {id:'b',t:`Construis : ${N('barracks')}, puis entraîne des soldats`,ok:()=>has(PL,'barracks'),k:'barracks'},{id:'f',t:`Construis : ${N('factory')}`,ok:()=>has(PL,'factory'),k:'factory'},
     {id:'t',t:`Construis : ${N('temple')}`,ok:()=>has(PL,'temple'),k:'temple'},{id:'h',t:'Recrute un héros (onglet Héros)',ok:()=>!!s.heroMade,hero:true},
-    {id:'w',t:`Détruis la base ennemie (${ents.filter(e=>e.isB&&isPl(e.side)&&foe(e.side,PL)).length} bâtiments restants)`,ok:()=>false}];
+    {id:'w',t:`Détruis la base ennemie (${ents.filter(e=>e.isB&&isPl(e.side)&&foe(e.side,PL)).length} bâtiments restants)`,ok:()=>false}].filter(o=>!(o.id==='r'&&s.fac==='sl'));
   for(const o of L)if(!s.od[o.id]&&o.ok())s.od[o.id]=true;const cur=L.find(o=>!s.od[o.id]);return{L,cur,s};}
 let objSig='';
 function renderObjectives(){const{L,cur,s}=objectives();const html=L.map(o=>`<li class="${s.od[o.id]?'done':o===cur?'cur':''}"><span class="ck">${s.od[o.id]?svg('check'):''}</span><span>${o.t}</span></li>`).join('');
@@ -5706,6 +5706,22 @@ window.addEventListener('keydown',e=>{if(G.state!=='play'||e.ctrlKey||e.metaKey|
 // hover/selection: clicking where the rider is selects the mount
 {const _pa=pickAt;pickAt=function(wx,wy,any){const e=_pa(wx,wy,any);return e&&e.mount?e.mount:e;};}
 for(const k of['tank','jet']){const D=UDEF.sl[k];if(D)D.desc=(D.desc||'')+' Sung Jinwoo peut monter dessus : sélectionne-le puis clic droit sur '+(k==='tank'?'Tank':'Kaisel')+' (touche G pour descendre).';}
+// ===== Solo Leveling never uses mana crystals: no refinery, drill or harvester (money comes only from kills) =====
+const SL_NOECO=new Set(['refinery','drill']);
+{const _ti=tabItems;tabItems=function(t){const L=_ti(t);if(sides[PL]&&sides[PL].fac==='sl')return L.filter(it=>!(it.isB&&SL_NOECO.has(it.key))&&!(!it.isB&&it.key==='harv'));return L;};}
+{const _sb=startBuild;startBuild=function(si,key){if(sides[si]&&sides[si].fac==='sl'&&SL_NOECO.has(key))return false;return _sb(si,key);};}
+{const _q=queueUnit;queueUnit=function(si,key){if(sides[si]&&sides[si].fac==='sl'&&key==='harv')return false;return _q(si,key);};}
+// the AI build order skips them for this faction
+{const _au=aiUpdate;aiUpdate=function(ai,dt){const s=sides[ai.si];if(!s||s.fac!=='sl')return _au(ai,dt);const save=AI_ORDER.slice();for(let i=AI_ORDER.length-1;i>=0;i--)if(SL_NOECO.has(AI_ORDER[i]))AI_ORDER.splice(i,1);
+  try{return _au(ai,dt);}finally{AI_ORDER.length=0;AI_ORDER.push(...save);}};}
+if(FAC.sl)FAC.sl.desc2='Pas de raffinerie ni de récolte : l’argent ne vient que des ennemis vaincus.';
+// the Solo Leveling AI hunts wild monsters and portal guards for money
+{const _au=aiUpdate;aiUpdate=function(ai,dt){_au(ai,dt);const si=ai.si,s=sides[si];if(!s||s.fac!=='sl'||NET.client)return;ai.huntT=(ai.huntT||0)-dt;if(ai.huntT>0)return;ai.huntT=6;
+  const prey=ents.filter(e=>e.isU&&!e.dead&&(e.wild||e.guard)&&!ally(e.side,si));if(!prey.length)return;
+  const idle=ents.filter(u=>u.isU&&!u.dead&&u.side===si&&!u.D.harv&&!u.D.veh&&u.D.dmg&&!u.target&&!(u.order&&(u.order.wave||u.order.type==='amove'&&u.order.hunt))&&!u.mount);
+  if(idle.length<2)return;const base=myB(si,'hq')[0]||myB(si)[0];if(!base)return;
+  const p=prey.filter(e=>!(e.D.bounty>=1800&&idle.length<6)).sort((a,b)=>hyp(a.x-base.x,a.y-base.y)-hyp(b.x-base.x,b.y-base.y))[0];if(!p)return;
+  const grp=idle.sort((a,b)=>hyp(a.x-p.x,a.y-p.y)-hyp(b.x-p.x,b.y-p.y)).slice(0,Math.min(idle.length,8));for(const u of grp){orderMove(u,p.x+rr(-20,20),p.y+rr(-20,20),true);if(u.order)u.order.hunt=true;}};}
 </script>
 
 </body></html>

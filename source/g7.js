@@ -91,7 +91,7 @@ function objectives(){const s=sides[PL],f=s.fac,N=k=>BDEF[k].names[f];s.od=s.od|
   const L=[{id:'p',t:`Construis : ${N('power')}`,ok:()=>has(PL,'power'),k:'power'},{id:'r',t:`Construis : ${N('refinery')} (livre un camion collecteur)`,ok:()=>has(PL,'refinery'),k:'refinery'},
     {id:'b',t:`Construis : ${N('barracks')}, puis entraîne des soldats`,ok:()=>has(PL,'barracks'),k:'barracks'},{id:'f',t:`Construis : ${N('factory')}`,ok:()=>has(PL,'factory'),k:'factory'},
     {id:'t',t:`Construis : ${N('temple')}`,ok:()=>has(PL,'temple'),k:'temple'},{id:'h',t:'Recrute un héros (onglet Héros)',ok:()=>!!s.heroMade,hero:true},
-    {id:'w',t:`Détruis la base ennemie (${ents.filter(e=>e.isB&&isPl(e.side)&&foe(e.side,PL)).length} bâtiments restants)`,ok:()=>false}];
+    {id:'w',t:`Détruis la base ennemie (${ents.filter(e=>e.isB&&isPl(e.side)&&foe(e.side,PL)).length} bâtiments restants)`,ok:()=>false}].filter(o=>!(o.id==='r'&&s.fac==='sl'));
   for(const o of L)if(!s.od[o.id]&&o.ok())s.od[o.id]=true;const cur=L.find(o=>!s.od[o.id]);return{L,cur,s};}
 let objSig='';
 function renderObjectives(){const{L,cur,s}=objectives();const html=L.map(o=>`<li class="${s.od[o.id]?'done':o===cur?'cur':''}"><span class="ck">${s.od[o.id]?svg('check'):''}</span><span>${o.t}</span></li>`).join('');

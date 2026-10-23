@@ -20,7 +20,7 @@ function recalcPower(s){let p=0,u=0;for(const e of ents)if(e.isB&&!e.dead&&e.sid
 const myB=(si,key)=>ents.filter(e=>e.isB&&!e.dead&&e.side===si&&(!key||e.key===key));
 const has=(si,key)=>{const up=!!key&&key.charCodeAt(key.length-1)===43,k=up?key.slice(0,-1):key;return ents.some(e=>e.isB&&!e.dead&&e.side===si&&e.key===k&&e.rise>=1&&(!up||(e.lvl||1)>=2));};// 'key+' = upgraded building
 const reqName=(k,f)=>{const up=k.endsWith('+'),D=BDEF[up?k.slice(0,-1):k];return(D?D.names[f]||D.names.dbz:k)+(up?' ★ (amélioration)':'');};
-const reqOk=(si,req)=>req.every(k=>has(si,k));
+const reqOk=(si,req)=>req.every(k=>has(si,k)||(k==='refinery'&&sides[si]&&sides[si].fac==='sl'&&has(si,'power')));
 function edgeDist(a,t){if(t.isB){const x0=t.tx*TILE,y0=t.ty*TILE,x1=x0+t.w*TILE,y1=y0+t.h*TILE;
   const dx=Math.max(x0-a.x,0,a.x-x1),dy=Math.max(y0-a.y,0,a.y-y1);return hyp(dx,dy)-(a.isB?a.r:a.r);}return hyp(t.x-a.x,t.y-a.y)-t.r-a.r;}
 function visibleTo(side,e){if(e.hid&&foe(e.side,side))return false;if(side!==PL||ally(e.side,side))return true;if(e.isB)return e.seen;return vis[ti(tileOf(e.x),tileOf(e.y))]===1;}
